@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>ترحيل أعضاء IAAS إلى الخادم</title>
+  <style>body{font-family:Arial,Helvetica,sans-serif;background:#0b0f14;color:#e6eef8;padding:24px} .card{max-width:820px;margin:28px auto;padding:18px;border-radius:12px;background:#0f1722;border:1px solid #22303f} button{padding:10px 12px;border-radius:8px;border:none;background:#2f8cff;color:#fff;cursor:pointer} pre{white-space:pre-wrap;background:#07101a;padding:12px;border-radius:8px;overflow:auto}</style>
+</head>
+<body>
+  <main class="card">
+    <h2>ترحيل أعضاء IAAS المحليين إلى الخادم</h2>
+    <p class="muted">هذه الأداة تقرأ مفتاح <strong>iaas-admin-members</strong> من <em>localStorage</em> وتبعثه إلى الخادم المحلي على <code>http://localhost:5001</code>.</p>
+    <p>لا حاجة لنسخ/لصق يدوي. اضغط "ابدأ الترحيل" واترك الصفحة تعمل.</p>
+    <div style="display:flex;gap:8px;margin-bottom:12px">
+      <button id="startBtn">ابدأ الترحيل الآن</button>
+      <button id="loginBtn">فتح صفحة الدخول</button>
+    </div>
+    <div id="status">حالة: جاهز</div>
+    <h4>سجل التنفيذ</h4>
+    <pre id="log">---</pre>
+  </main>
+
+<script>
+  const startBtn = document.getElementById('startBtn');
+  const loginBtn = document.getElementById('loginBtn');
+  const statusEl = document.getElementById('status');
+  const logEl = document.getElementById('log');
+
+  function log(msg){
+    console.log(msg);
+    logEl.textContent = (logEl.textContent === '---' ? '' : logEl.textContent + '\n') + msg;
+  }
+
+  loginBtn.addEventListener('click', ()=>{
+    // open the main page where you can login
+    try{ window.open('iass-main.html', '_blank'); }catch(e){ alert('افتح الصفحة الرئيسية وسجّل الدخول يدوياً'); }
+  });
+
+  startBtn.addEventListener('click', async ()=>{
+    statusEl.textContent = 'حالة: جاري قراءة البيانات من localStorage...';
+    try{
+      const raw = localStorage.getItem('iaas-admin-members') || '[]';
+      const members = JSON.parse(raw);
+      if(!Array.isArray(members) || !members.length){
+        statusEl.textContent = 'حالة: لا توجد سجلات محلية في iaas-admin-members';
+        log('لا توجد سجلات للترحيل. المفتاح فارغ أو غير موجود.');
+        return;
+      }
+      log('العثور على ' + members.length + ' سجل(سجلات) محلياً.');
+      statusEl.textContent = 'حالة: إرسال بيانات إلى الخادم...';
+      const base = 'http://localhost:5001';
+      const token = localStorage.getItem('iaas-auth-token') || '';
+      const headers = { 'Content-Type': 'application/json' };
+      if(token) headers['Authorization'] = 'Bearer ' + token;
+      const res = await fetch(base + '/api/members/migrate', {
+        method: 'POST', headers, body: JSON.stringify({ members })
+      });
+      const data = await res.json().catch(()=>({}));
+      if(res.ok){
+        statusEl.textContent = 'حالة: الترحيل اكتمل';
+        const n = Array.isArray(data.inserted) ? data.inserted.length : (members.length || 0);
+        log('ترحيل ناجح — ' + n + ' سجل/سجلات مُدرجة.');
+        log(JSON.stringify(data, null, 2));
+      }else{
+        statusEl.textContent = 'حالة: فشل الترحيل';
+        log('فشل الترحيل: ' + (data.error || res.status));
+        log(JSON.stringify(data, null, 2));
+      }
+    }catch(e){
+      statusEl.textContent = 'حالة: خطأ أثناء الترحيل';
+      log('خطأ: ' + (e && e.message ? e.message : String(e)) );
+    }
+  });
+</script>
+</body>
+</html>

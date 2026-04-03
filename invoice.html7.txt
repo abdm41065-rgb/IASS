@@ -1,0 +1,45 @@
+require('dotenv').config();
+const express = require('express');
+const cors = require('cors');
+const { init } = require('./db');
+const authRoutes = require('./routes/auth');
+const membersRoutes = require('./routes/members');
+const { authMiddleware } = require('./middleware/auth');
+
+const app = express();
+app.use(cors());
+app.use(express.json({ limit:'200kb' }));
+
+const PORT = process.env.PORT || 5001;
+
+async function start(){
+  await init();
+
+  // create admin user if not exists
+  const adminEmail = process.env.ADMIN_EMAIL || '';
+  const adminPassword = process.env.ADMIN_PASSWORD || '';
+  if(adminEmail && adminPassword){
+    const { get, run } = require('./db');
+    const bcrypt = require('bcrypt');
+    (async ()=>{
+      try{
+        const exists = await get('SELECT id FROM users WHERE email = ?', [adminEmail.toLowerCase()]);
+        if(!exists){
+          const hash = await bcrypt.hash(adminPassword, 10);
+          await run('INSERT INTO users (name,email,passwordHash,role) VALUES (?,?,?,?)', ['Admin', adminEmail.toLowerCase(), hash, 'admin']);
+          console.log('Created initial admin user:', adminEmail);
+        }
+      }catch(e){ console.error('admin create failed', e); }
+    })();
+  }
+
+  app.use(authMiddleware);
+  app.use('/api/auth', authRoutes);
+  app.use('/api/members', membersRoutes);
+
+  app.get('/api/health', (req,res)=> res.json({ ok:true, message:'IAAS API (sqlite) running' }));
+
+  app.listen(PORT, ()=> console.log('IAAS API sqlite listening on', PORT));
+}
+
+start().catch(e=>{ console.error(e); process.exit(1); });

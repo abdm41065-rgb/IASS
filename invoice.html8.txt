@@ -1,0 +1,77 @@
+const express = require('express');
+const { run, get, all } = require('../db');
+const fetch = require('node-fetch');
+const router = express.Router();
+
+const NOTIFY_SERVER_URL = process.env.NOTIFY_SERVER_URL || '';
+const NOTIFY_API_KEY = process.env.NOTIFY_API_KEY || '';
+
+// helper to notify external notify-server
+async function notifyAdmin(member){
+  if(!NOTIFY_SERVER_URL) return;
+  try{
+    await fetch(NOTIFY_SERVER_URL, {
+      method: 'POST',
+      headers: { 'Content-Type':'application/json', ...(NOTIFY_API_KEY?{'x-api-key':NOTIFY_API_KEY}:{}) },
+      body: JSON.stringify({ member })
+    });
+  }catch(e){ console.warn('notifyAdmin failed', e); }
+}
+
+// create member (public or authenticated)
+router.post('/', async (req, res)=>{
+  try{
+    const payload = req.body || {};
+    const { name, email, avatar, subscriptionType, serviceType, remainingDays, active, pendingActivation, requestChannel } = payload;
+    if(!email) return res.status(400).json({ ok:false, error:'email required' });
+    const info = await run(`INSERT INTO members (user_id,name,email,avatar,subscriptionType,serviceType,remainingDays,active,pendingActivation,requestChannel,requestedAt) VALUES (?,?,?,?,?,?,?,?,?,?,datetime('now'))`, [payload.user_id||null, name||'', email.toLowerCase(), avatar||'', subscriptionType||'غير مسجل', serviceType||'نظام المحاسبة', Number(remainingDays)||0, active?1:0, pendingActivation?1:0, requestChannel||'site']);
+    const id = info.lastID;
+    const member = await get('SELECT * FROM members WHERE id = ?', [id]);
+    // notify
+    notifyAdmin(member).catch(()=>{});
+    return res.json({ ok:true, member });
+  }catch(e){ console.error(e); return res.status(500).json({ ok:false, error:String(e) }); }
+});
+
+// get current member by email (query param email or authenticated user email)
+router.get('/me', async (req, res)=>{
+  try{
+    const qemail = (req.query.email || '').trim().toLowerCase();
+    if(qemail){
+      const m = await get('SELECT * FROM members WHERE lower(email)=?', [qemail]);
+      return res.json({ ok:true, member: m||null });
+    }
+    // if authenticated, middleware should inject req.user
+    const authEmail = req.user?.email;
+    if(authEmail){
+      const m = await get('SELECT * FROM members WHERE lower(email)=?', [authEmail.toLowerCase()]);
+      return res.json({ ok:true, member: m||null });
+    }
+    return res.status(400).json({ ok:false, error:'email or auth required' });
+  }catch(e){ console.error(e); return res.status(500).json({ ok:false, error:String(e) }); }
+});
+
+// admin: list members (protected via role check via middleware)
+router.get('/', async (req, res)=>{
+  try{
+    const list = await all('SELECT * FROM members ORDER BY createdAt DESC', []);
+    return res.json({ ok:true, members: list });
+  }catch(e){ console.error(e); return res.status(500).json({ ok:false, error:String(e) }); }
+});
+
+// migration endpoint: accept array of members (admin-protected)
+router.post('/migrate', async (req, res)=>{
+  try{
+    const items = Array.isArray(req.body.members) ? req.body.members : [];
+    const inserted = [];
+    for(const m of items){
+      const info = await run(`INSERT INTO members (name,email,avatar,subscriptionType,serviceType,remainingDays,active,pendingActivation,requestChannel,requestedAt) VALUES (?,?,?,?,?,?,?,?,?,?)`, [m.name||'', (m.email||'').toLowerCase(), m.avatar||'', m.subscriptionType||'غير مسجل', m.serviceType||'نظام المحاسبة', Number(m.remainingDays)||0, m.active?1:0, m.pendingActivation?1:0, m.requestChannel||'import', m.requestedAt||new Date().toISOString()]);
+      const id = info.lastID;
+      const member = await get('SELECT * FROM members WHERE id = ?', [id]);
+      inserted.push(member);
+    }
+    return res.json({ ok:true, inserted });
+  }catch(e){ console.error(e); return res.status(500).json({ ok:false, error:String(e) }); }
+});
+
+module.exports = router;

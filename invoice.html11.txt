@@ -1,0 +1,48 @@
+IAAS Notify Server
+==================
+
+Simple Express server to accept subscription notifications from the frontend and forward them by email (SMTP) and/or WhatsApp (Twilio).
+
+Setup
+-----
+1. Copy `.env.example` to `.env` and fill your credentials.
+2. Install dependencies:
+
+```bash
+cd backend/notify-server
+npm install
+```
+
+3. Run server:
+
+```bash
+npm start
+# or for dev with nodemon
+npm run dev
+```
+
+Environment variables (see `.env.example`)
+- `PORT` - server port (default 4001)
+- `NOTIFY_API_KEY` - optional API key; frontend must send header `x-api-key` with this value
+- SMTP: `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `FROM_EMAIL`
+- Twilio: `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_WHATSAPP_FROM`
+- `ADMIN_PHONE`, `ADMIN_EMAIL` - default admin contacts if frontend doesn't provide them
+
+Frontend usage
+--------------
+Send POST JSON to `/notify-subscription` with body like:
+
+```json
+{
+  "member": { "name":"User","email":"u@example.com","phone":"+964771...","serviceType":"نظام المحاسبة","requestedAt":"..." },
+  "adminPhone": "07724447343",
+  "adminEmail": "abdm41065@gmail.com"
+}
+```
+
+If `NOTIFY_API_KEY` is set on the server, include header `x-api-key: <value>`.
+
+Notes
+-----
+- This server runs the notification logic server-side (no popups). You still need valid SMTP or Twilio credentials to actually deliver messages.
+- Keep credentials secure and do not commit `.env` to source control.

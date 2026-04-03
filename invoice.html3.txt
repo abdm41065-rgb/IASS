@@ -1,0 +1,695 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>IAAS | شرح المشروع</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Noto+Kufi+Arabic:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --void:#020304;--deep:#060810;--surface:#0a0d14;--surface2:#0f1320;--surface3:#141a28;
+  --card:#0c1019;--line:rgba(255,255,255,.055);--line2:rgba(255,255,255,.1);--line3:rgba(255,255,255,.16);
+  --text:#edf0f5;--text2:#b8bfcc;--muted:#6e7a8e;--dim:#2e3649;
+  --gold:#c9aa6f;--gold2:#e8cb8a;--gold3:#f5dfa0;
+  --gold-glow:rgba(201,170,111,.15);--gold-glow2:rgba(201,170,111,.08);
+  --ice:#a2c4dc;--blue:#3a7fff;--blue-glow:rgba(58,127,255,.2);
+  --red:#f04060;--green:#20c878;
+  --r:12px;--r2:18px;--r3:24px;
+  --font-en:'Syne',sans-serif;--font-ar:'Noto Kufi Arabic',sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;font-size:15px}
+body{font-family:var(--font-ar);background:var(--void);color:var(--text);overflow-x:hidden;-webkit-font-smoothing:antialiased}
+a{text-decoration:none;color:inherit}
+button{font-family:var(--font-ar)}
+::-webkit-scrollbar{width:3px}
+::-webkit-scrollbar-track{background:var(--void)}
+::-webkit-scrollbar-thumb{background:var(--dim);border-radius:99px}
+::-webkit-scrollbar-thumb:hover{background:var(--gold)}
+
+/* BG */
+.bg-grid{position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:linear-gradient(rgba(255,255,255,.018) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.018) 1px,transparent 1px);
+  background-size:64px 64px;mask-image:radial-gradient(ellipse 80% 70% at 50% 30%,black 30%,transparent 100%)}
+.bg-glow-top{position:fixed;top:-20vh;right:-10vw;width:70vw;height:60vh;border-radius:50%;
+  background:radial-gradient(circle,rgba(201,170,111,.05) 0%,transparent 60%);pointer-events:none;z-index:0}
+.bg-glow-bot{position:fixed;bottom:-10vh;left:-5vw;width:50vw;height:50vh;border-radius:50%;
+  background:radial-gradient(circle,rgba(58,127,255,.04) 0%,transparent 60%);pointer-events:none;z-index:0}
+
+/* NAV */
+.top-bar{position:sticky;top:0;z-index:100;background:rgba(2,3,4,.88);backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--line);padding:0 24px;height:60px;display:flex;align-items:center;justify-content:space-between}
+.top-logo{font-family:var(--font-en);font-size:22px;font-weight:800;letter-spacing:4px;color:var(--text)}
+.back-btn{display:inline-flex;align-items:center;gap:8px;padding:8px 18px;border-radius:var(--r);
+  background:rgba(255,255,255,.04);border:1px solid var(--line2);color:var(--text2);font-size:13px;font-weight:600;
+  cursor:pointer;transition:all .25s}
+.back-btn:hover{background:rgba(255,255,255,.08);border-color:var(--gold);color:var(--gold)}
+
+/* HERO */
+.showcase-hero{position:relative;padding:80px 24px 60px;text-align:center;overflow:hidden}
+.showcase-hero::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);
+  width:600px;height:600px;border-radius:50%;
+  background:radial-gradient(circle,rgba(201,170,111,.07) 0%,transparent 60%);pointer-events:none}
+.sh-badge{display:inline-flex;align-items:center;gap:8px;padding:6px 16px;border-radius:99px;
+  background:rgba(201,170,111,.08);border:1px solid rgba(201,170,111,.2);
+  font-size:11px;font-weight:700;color:var(--gold);letter-spacing:1px;margin-bottom:20px}
+.sh-badge::before{content:'✦';font-size:13px}
+.sh-title{font-family:var(--font-en);font-size:clamp(36px,6vw,64px);font-weight:800;letter-spacing:-1px;
+  line-height:1.15;margin-bottom:16px}
+.sh-title em{font-style:normal;background:linear-gradient(135deg,var(--gold),var(--gold2));
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.sh-desc{max-width:680px;margin:0 auto 32px;color:var(--muted);font-size:16px;line-height:2}
+.sh-stats{display:flex;justify-content:center;gap:40px;flex-wrap:wrap}
+.sh-stat{text-align:center}
+.sh-stat-n{font-family:var(--font-en);font-size:32px;font-weight:800;
+  background:linear-gradient(135deg,var(--gold),var(--gold2));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.sh-stat-l{font-size:12px;color:var(--muted);margin-top:4px}
+
+/* CONTAINER */
+.container{max-width:1100px;margin:0 auto;padding:0 24px}
+
+/* SECTION HEAD */
+.sec-head{margin-bottom:36px}
+.sec-label{display:inline-flex;align-items:center;gap:8px;font-family:var(--font-en);
+  font-size:10px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--gold);margin-bottom:12px}
+.sec-label::before{content:'';display:block;width:18px;height:1px;background:var(--gold)}
+.sec-title{font-size:clamp(26px,3.5vw,38px);font-weight:700;letter-spacing:-.5px;margin-bottom:10px}
+.sec-sub{color:var(--muted);line-height:1.9;max-width:720px;font-size:15px}
+
+/* FEATURE SECTIONS */
+.feature-section{padding:64px 0}
+.feature-section:nth-child(even){background:rgba(255,255,255,.008)}
+
+/* FEATURES GRID */
+.feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.feat-card{background:var(--card);border:1px solid var(--line);border-radius:var(--r2);padding:28px 24px;
+  position:relative;overflow:hidden;transition:all .35s cubic-bezier(.4,0,.2,1)}
+.feat-card::after{content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,var(--gold-glow2) 0%,transparent 55%);opacity:0;transition:opacity .3s}
+.feat-card:hover{transform:translateY(-6px);border-color:var(--line2);box-shadow:0 22px 55px rgba(0,0,0,.45)}
+.feat-card:hover::after{opacity:1}
+.feat-icon{width:50px;height:50px;border-radius:14px;display:grid;place-items:center;font-size:22px;
+  margin-bottom:16px;position:relative;z-index:1}
+.feat-icon.gold{background:linear-gradient(135deg,rgba(201,170,111,.15),rgba(201,170,111,.05));
+  border:1px solid rgba(201,170,111,.2);color:var(--gold)}
+.feat-icon.blue{background:linear-gradient(135deg,rgba(58,127,255,.15),rgba(58,127,255,.05));
+  border:1px solid rgba(58,127,255,.2);color:var(--blue)}
+.feat-icon.green{background:linear-gradient(135deg,rgba(32,200,120,.15),rgba(32,200,120,.05));
+  border:1px solid rgba(32,200,120,.2);color:var(--green)}
+.feat-icon.purple{background:linear-gradient(135deg,rgba(204,107,224,.15),rgba(204,107,224,.05));
+  border:1px solid rgba(204,107,224,.2);color:#cc6be0}
+.feat-card h3{font-size:16px;font-weight:700;margin-bottom:8px;position:relative;z-index:1}
+.feat-card p{color:var(--muted);font-size:13px;line-height:1.9;position:relative;z-index:1}
+
+/* SHOWCASE BLOCK — alternating image + text */
+.showcase-block{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:center;padding:48px 0}
+.showcase-block.reverse{direction:ltr}
+.showcase-block.reverse .sb-content{direction:rtl}
+.sb-visual{position:relative;border-radius:var(--r2);overflow:hidden;aspect-ratio:16/10;
+  background:var(--surface2);border:1px solid var(--line2)}
+.sb-visual img{width:100%;height:100%;object-fit:cover;display:block}
+.sb-mockup{position:relative;border-radius:var(--r2);overflow:hidden;
+  background:linear-gradient(135deg,var(--surface2),var(--surface3));
+  border:1px solid var(--line2);padding:20px;min-height:280px;
+  display:flex;flex-direction:column;gap:12px}
+.sb-mockup-bar{display:flex;gap:6px;padding-bottom:12px;border-bottom:1px solid var(--line)}
+.sb-mockup-dot{width:8px;height:8px;border-radius:50%}
+.sb-mockup-dot:nth-child(1){background:#f04060}
+.sb-mockup-dot:nth-child(2){background:#e8cb8a}
+.sb-mockup-dot:nth-child(3){background:#20c878}
+.sb-mockup-rows{flex:1;display:flex;flex-direction:column;gap:8px}
+.sb-mockup-row{height:10px;border-radius:4px;background:rgba(255,255,255,.04)}
+.sb-mockup-row.gold{background:linear-gradient(90deg,rgba(201,170,111,.15),rgba(201,170,111,.05));width:70%}
+.sb-mockup-row.short{width:45%}
+.sb-mockup-row.mid{width:85%}
+.sb-mockup-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px}
+.sb-mockup-mini{height:50px;border-radius:8px;background:rgba(255,255,255,.03);border:1px solid var(--line)}
+.sb-content h3{font-size:22px;font-weight:700;margin-bottom:12px;line-height:1.5}
+.sb-content h3 em{font-style:normal;color:var(--gold)}
+.sb-content p{color:var(--muted);font-size:14px;line-height:2;margin-bottom:16px}
+.sb-tag{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:8px;
+  font-size:11px;font-weight:700;margin:0 0 6px 8px}
+.sb-tag.gold{background:rgba(201,170,111,.1);border:1px solid rgba(201,170,111,.2);color:var(--gold)}
+.sb-tag.blue{background:rgba(58,127,255,.1);border:1px solid rgba(58,127,255,.2);color:#7ab5ff}
+.sb-tag.green{background:rgba(32,200,120,.1);border:1px solid rgba(32,200,120,.2);color:#7de8b8}
+
+/* TIMELINE */
+.timeline{position:relative;padding-right:32px}
+.timeline::before{content:'';position:absolute;right:10px;top:0;bottom:0;width:2px;
+  background:linear-gradient(to bottom,var(--gold),var(--blue),var(--green))}
+.tl-item{position:relative;padding:0 0 40px 0}
+.tl-item:last-child{padding-bottom:0}
+.tl-dot{position:absolute;right:-27px;top:4px;width:14px;height:14px;border-radius:50%;
+  border:2px solid var(--gold);background:var(--void)}
+.tl-item:nth-child(2) .tl-dot{border-color:var(--blue)}
+.tl-item:nth-child(3) .tl-dot{border-color:var(--green)}
+.tl-item:nth-child(4) .tl-dot{border-color:#cc6be0}
+.tl-title{font-size:16px;font-weight:700;margin-bottom:6px}
+.tl-desc{color:var(--muted);font-size:13px;line-height:1.9}
+
+/* TECH STACK */
+.tech-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px}
+.tech-item{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:18px 16px;
+  text-align:center;transition:all .25s;cursor:default}
+.tech-item:hover{border-color:var(--line2);transform:translateY(-3px)}
+.tech-item-icon{font-size:28px;margin-bottom:8px}
+.tech-item-name{font-size:13px;font-weight:600}
+.tech-item-sub{font-size:11px;color:var(--muted);margin-top:2px}
+
+/* PRICING PREVIEW */
+.pricing-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.pr-card{background:var(--card);border:1px solid var(--line);border-radius:var(--r2);padding:22px;
+  position:relative;overflow:hidden;transition:all .3s;text-align:center}
+.pr-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;opacity:0;transition:opacity .3s}
+.pr-card:hover{transform:translateY(-4px);border-color:var(--line2)}
+.pr-card:hover::before{opacity:1}
+.pr-card:nth-child(1)::before{background:linear-gradient(90deg,var(--gold),var(--gold2))}
+.pr-card:nth-child(2)::before{background:linear-gradient(90deg,#4a8fff,#9dc8ff)}
+.pr-card:nth-child(3)::before{background:linear-gradient(90deg,#20c878,#7de8b8)}
+.pr-card:nth-child(4)::before{background:linear-gradient(90deg,#cc6be0,#e8a8d8)}
+.pr-name{font-size:14px;font-weight:700;margin-bottom:8px}
+.pr-price{font-family:var(--font-en);font-size:28px;font-weight:800;margin-bottom:4px}
+.pr-sub{font-size:12px;color:var(--muted)}
+
+/* CTA */
+.cta-section{text-align:center;padding:80px 24px;position:relative}
+.cta-section::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);
+  width:500px;height:500px;border-radius:50%;
+  background:radial-gradient(circle,rgba(201,170,111,.06) 0%,transparent 60%);pointer-events:none}
+.cta-title{font-size:clamp(28px,4vw,42px);font-weight:800;margin-bottom:12px}
+.cta-desc{color:var(--muted);font-size:15px;line-height:1.9;max-width:560px;margin:0 auto 28px}
+.cta-btns{display:flex;justify-content:center;gap:12px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:12px 24px;border-radius:var(--r);
+  font-size:14px;font-weight:700;cursor:pointer;transition:all .25s;border:none}
+.btn-gold{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#0a0e1a;
+  box-shadow:0 4px 16px rgba(201,170,111,.25)}
+.btn-gold:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(201,170,111,.35)}
+.btn-outline{background:transparent;border:1px solid var(--line2);color:var(--text);padding:11px 24px}
+.btn-outline:hover{background:rgba(255,255,255,.06);transform:translateY(-2px)}
+
+/* FOOTER */
+.site-footer{border-top:1px solid var(--line);padding:24px;color:var(--muted);font-size:13px;
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;
+  max-width:1100px;margin:0 auto}
+.footer-logo{font-family:var(--font-en);font-size:17px;font-weight:800;letter-spacing:3px;color:var(--text)}
+
+/* REVEAL */
+.reveal{opacity:0;transform:translateY(24px);transition:opacity .65s ease,transform .65s ease}
+.reveal.show{opacity:1;transform:none}
+.stagger>*{opacity:0;transform:translateY(14px);transition:opacity .5s ease,transform .5s ease}
+.stagger.show>*:nth-child(1){opacity:1;transform:none;transition-delay:.05s}
+.stagger.show>*:nth-child(2){opacity:1;transform:none;transition-delay:.12s}
+.stagger.show>*:nth-child(3){opacity:1;transform:none;transition-delay:.19s}
+.stagger.show>*:nth-child(4){opacity:1;transform:none;transition-delay:.26s}
+.stagger.show>*:nth-child(5){opacity:1;transform:none;transition-delay:.33s}
+.stagger.show>*:nth-child(6){opacity:1;transform:none;transition-delay:.4s}
+
+/* RESPONSIVE */
+@media(max-width:900px){
+  .showcase-block{grid-template-columns:1fr;gap:24px}
+  .showcase-block.reverse{direction:rtl}
+  .feat-grid{grid-template-columns:1fr 1fr}
+  .pricing-row{grid-template-columns:1fr 1fr}
+}
+@media(max-width:620px){
+  .feat-grid{grid-template-columns:1fr}
+  .pricing-row{grid-template-columns:1fr}
+  .sh-stats{gap:24px}
+  .tech-grid{grid-template-columns:repeat(2,1fr)}
+}
+
+/* SCREEN MOCKUP */
+.screen-mock{background:var(--surface);border:1px solid var(--line2);border-radius:var(--r2);
+  overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+.screen-mock-bar{display:flex;align-items:center;gap:6px;padding:10px 14px;background:var(--surface2);
+  border-bottom:1px solid var(--line)}
+.screen-mock-dot{width:8px;height:8px;border-radius:50%}
+.screen-mock-dot.r{background:#f04060}.screen-mock-dot.y{background:#e8cb8a}.screen-mock-dot.g{background:#20c878}
+.screen-mock-url{flex:1;margin-right:12px;padding:4px 10px;border-radius:6px;background:rgba(255,255,255,.03);
+  font-family:var(--font-en);font-size:10px;color:var(--dim);letter-spacing:.5px;direction:ltr;text-align:left}
+.screen-mock-body{padding:20px;min-height:200px;display:flex;flex-direction:column;gap:10px}
+.mock-nav{display:flex;gap:20px;padding-bottom:12px;border-bottom:1px solid var(--line)}
+.mock-nav-item{width:50px;height:6px;border-radius:3px;background:rgba(255,255,255,.06)}
+.mock-nav-item.active{background:linear-gradient(90deg,var(--gold),var(--gold2));width:60px}
+.mock-hero-block{display:flex;gap:16px;padding:12px 0}
+.mock-text-lines{flex:1;display:flex;flex-direction:column;gap:6px}
+.mock-line{height:8px;border-radius:4px;background:rgba(255,255,255,.04)}
+.mock-line.w80{width:80%}.mock-line.w60{width:60%}.mock-line.w90{width:90%}.mock-line.w40{width:40%}
+.mock-line.gold{background:linear-gradient(90deg,rgba(201,170,111,.12),rgba(201,170,111,.04))}
+.mock-card-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.mock-card{height:60px;border-radius:8px;background:rgba(255,255,255,.02);border:1px solid var(--line)}
+.mock-card.highlight{border-color:rgba(201,170,111,.2);background:rgba(201,170,111,.03)}
+
+/* Floating particles */
+.particles{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.particle{position:absolute;width:2px;height:2px;background:var(--gold);border-radius:50%;opacity:.3;
+  animation:particleFloat linear infinite}
+@keyframes particleFloat{
+  0%{transform:translateY(100vh) translateX(0);opacity:0}
+  10%{opacity:.3}
+  90%{opacity:.3}
+  100%{transform:translateY(-10vh) translateX(40px);opacity:0}
+}
+</style>
+</head>
+<body>
+<div class="bg-grid"></div>
+<div class="bg-glow-top"></div>
+<div class="bg-glow-bot"></div>
+<div class="particles" id="particles"></div>
+
+<!-- NAV -->
+<header class="top-bar">
+  <div class="top-logo">IAAS</div>
+  <a href="iass-main.html" class="back-btn">→ العودة للرئيسية</a>
+</header>
+
+<!-- HERO -->
+<section class="showcase-hero reveal">
+  <div class="sh-badge">شرح المشروع</div>
+  <h1 class="sh-title">مشروع <em>IAAS</em><br>من الفكرة إلى التنفيذ</h1>
+  <p class="sh-desc">
+    منصة عراقية متكاملة تجمع بين الخدمات البرمجية والأنظمة المالية في مكان واحد.
+    صُممت لتكون بسيطة للمستخدم، قوية من الداخل، وجاهزة للنمو مع عملك.
+  </p>
+  <div class="sh-stats">
+    <div class="sh-stat">
+      <div class="sh-stat-n" data-count="3">0</div>
+      <div class="sh-stat-l">خدمات رئيسية</div>
+    </div>
+    <div class="sh-stat">
+      <div class="sh-stat-n" data-count="4">0</div>
+      <div class="sh-stat-l">مستويات عضوية</div>
+    </div>
+    <div class="sh-stat">
+      <div class="sh-stat-n" data-count="100">0</div>
+      <div class="sh-stat-l">% بدون سيرفر خارجي</div>
+    </div>
+    <div class="sh-stat">
+      <div class="sh-stat-n" data-count="24">0</div>
+      <div class="sh-stat-l">ساعة تجربة مجانية</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ ABOUT ═══ -->
+<section class="feature-section">
+  <div class="container">
+    <div class="sec-head reveal">
+      <div class="sec-label">نظرة عامة</div>
+      <h2 class="sec-title">ما هو مشروع IAAS؟</h2>
+      <p class="sec-sub">IAAS اختصار لـ "خدمات برمجية ومالية رقمية" — نظام إلكتروني شامل يوفر أدوات محاسبية، تتبع المصاريف، وخدمات تصميم المواقع.</p>
+    </div>
+    <div class="feat-grid stagger">
+      <div class="feat-card">
+        <div class="feat-icon gold">📊</div>
+        <h3>نظام محاسبة متكامل</h3>
+        <p>إدارة المنتجات، الديون، المصاريف الشخصية، والتقارير المالية. كل شيء في صفحة واحدة سريعة وذكية.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon blue">💰</div>
+        <h3>جدولة المصاريف</h3>
+        <p>تتبع إنفاقك اليومي والشهري مع ميزانية محددة، تصنيفات ذكية، وتقارير بصرية واضحة.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon green">🌐</div>
+        <h3>تصميم وبرمجة مواقع</h3>
+        <p>واجهات مخصصة وبرمجة كاملة حسب طبيعة عملك — من الفكرة إلى الإطلاق.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon purple">🔐</div>
+        <h3>نظام عضوية ذكي</h3>
+        <p>أربع مستويات عضوية بخصومات تصاعدية وأولويات مختلفة في التنفيذ والدعم.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon gold">⚡</div>
+        <h3>يعمل بلا إنترنت</h3>
+        <p>جميع البيانات تُحفظ محلياً على جهازك — لا حاجة لسيرفر خارجي أو اتصال دائم.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon blue">🔑</div>
+        <h3>أكواد تفعيل</h3>
+        <p>نظام أكواد تفعيل ذكي يسمح بتنشيط الخدمات فوراً بدون انتظار — يديره المسؤول مباشرة.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ SERVICE 1: ACCOUNTING ═══ -->
+<section class="feature-section">
+  <div class="container">
+    <div class="sec-head reveal">
+      <div class="sec-label">الخدمة الأولى</div>
+      <h2 class="sec-title">نظام المحاسب</h2>
+      <p class="sec-sub">نظام محاسبي احترافي يعمل بالكامل من المتصفح — بدون تحميل أو تثبيت.</p>
+    </div>
+    <div class="showcase-block reveal">
+      <div class="screen-mock">
+        <div class="screen-mock-bar">
+          <div class="screen-mock-dot r"></div>
+          <div class="screen-mock-dot y"></div>
+          <div class="screen-mock-dot g"></div>
+          <div class="screen-mock-url">iaas / accounting</div>
+        </div>
+        <div class="screen-mock-body">
+          <div class="mock-nav">
+            <div class="mock-nav-item active"></div>
+            <div class="mock-nav-item"></div>
+            <div class="mock-nav-item"></div>
+            <div class="mock-nav-item"></div>
+            <div class="mock-nav-item"></div>
+          </div>
+          <div class="mock-hero-block">
+            <div class="mock-text-lines">
+              <div class="mock-line gold w80"></div>
+              <div class="mock-line w60"></div>
+              <div class="mock-line w90"></div>
+              <div class="mock-line w40"></div>
+            </div>
+          </div>
+          <div class="mock-card-grid">
+            <div class="mock-card highlight"></div>
+            <div class="mock-card"></div>
+            <div class="mock-card"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sb-content">
+        <h3>إدارة أعمالك المالية <em>بذكاء</em></h3>
+        <p>يتضمن النظام لوحة تحكم رئيسية، إدارة المنتجات والمخزون، تتبع الديون، حاسبة مدمجة، مصاريف شخصية، وتقارير تفصيلية — كل شيء في مكان واحد.</p>
+        <div>
+          <span class="sb-tag gold">✦ لوحة التحكم</span>
+          <span class="sb-tag gold">✦ المنتجات</span>
+          <span class="sb-tag gold">✦ المخزون</span>
+          <span class="sb-tag blue">✦ الديون</span>
+          <span class="sb-tag blue">✦ التقارير</span>
+          <span class="sb-tag green">✦ الحاسبة</span>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Accounting sub-features -->
+    <div class="feat-grid stagger" style="margin-top:24px">
+      <div class="feat-card">
+        <div class="feat-icon gold">📦</div>
+        <h3>إدارة المنتجات</h3>
+        <p>أضف منتجاتك، حدد الأسعار والكميات، وتابع حركة المخزون بسهولة مع تنبيهات ذكية.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon blue">📋</div>
+        <h3>متابعة الديون</h3>
+        <p>سجّل الديون المستحقة لك وعليك، مع تواريخ وتذكيرات لضمان عدم نسيان أي مبلغ.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon green">📈</div>
+        <h3>تقارير تفصيلية</h3>
+        <p>تقارير بصرية واضحة توضح الإيرادات والمصروفات والأرباح خلال فترات زمنية مختلفة.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ SERVICE 2: EXPENSES ═══ -->
+<section class="feature-section">
+  <div class="container">
+    <div class="sec-head reveal">
+      <div class="sec-label">الخدمة الثانية</div>
+      <h2 class="sec-title">جدولة المصاريف</h2>
+      <p class="sec-sub">أداة بسيطة وعملية لتتبع إنفاقك اليومي وتحديد ميزانيتك الشهرية.</p>
+    </div>
+    <div class="showcase-block reverse reveal">
+      <div class="sb-content">
+        <h3>تحكّم بمصاريفك <em>بوضوح</em></h3>
+        <p>أضف مصاريفك اليومية مع التصنيف والمبلغ، حدد ميزانية شهرية، وراقب إنفاقك من خلال تقارير بصرية سهلة الفهم. يعمل بالكامل بدون إنترنت.</p>
+        <div>
+          <span class="sb-tag gold">✦ تصنيفات ذكية</span>
+          <span class="sb-tag blue">✦ ميزانية شهرية</span>
+          <span class="sb-tag green">✦ تقارير بصرية</span>
+        </div>
+      </div>
+      <div class="screen-mock">
+        <div class="screen-mock-bar">
+          <div class="screen-mock-dot r"></div>
+          <div class="screen-mock-dot y"></div>
+          <div class="screen-mock-dot g"></div>
+          <div class="screen-mock-url">iaas / expenses</div>
+        </div>
+        <div class="screen-mock-body">
+          <div class="mock-nav">
+            <div class="mock-nav-item"></div>
+            <div class="mock-nav-item active"></div>
+            <div class="mock-nav-item"></div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px">
+            <div style="background:rgba(201,170,111,.06);border:1px solid rgba(201,170,111,.15);border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:6px">
+              <div class="mock-line gold w60"></div>
+              <div class="mock-line w40"></div>
+            </div>
+            <div style="background:rgba(58,127,255,.04);border:1px solid rgba(58,127,255,.12);border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:6px">
+              <div class="mock-line w60" style="background:rgba(58,127,255,.12)"></div>
+              <div class="mock-line w40"></div>
+            </div>
+          </div>
+          <div class="mock-card-grid" style="grid-template-columns:1fr;gap:6px;margin-top:8px">
+            <div class="mock-card" style="height:32px"></div>
+            <div class="mock-card" style="height:32px"></div>
+            <div class="mock-card highlight" style="height:32px"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ SERVICE 3: WEB DESIGN ═══ -->
+<section class="feature-section">
+  <div class="container">
+    <div class="sec-head reveal">
+      <div class="sec-label">الخدمة الثالثة</div>
+      <h2 class="sec-title">تصميم وبرمجة المواقع</h2>
+      <p class="sec-sub">نصمم لك موقعاً مخصصاً يناسب هوية عملك — بتصميم حديث وبرمجة نظيفة.</p>
+    </div>
+    <div class="showcase-block reveal">
+      <div class="sb-mockup">
+        <div class="sb-mockup-bar">
+          <div class="sb-mockup-dot"></div>
+          <div class="sb-mockup-dot"></div>
+          <div class="sb-mockup-dot"></div>
+        </div>
+        <div class="sb-mockup-rows">
+          <div class="sb-mockup-row gold"></div>
+          <div class="sb-mockup-row mid"></div>
+          <div class="sb-mockup-row short"></div>
+          <div class="sb-mockup-row"></div>
+        </div>
+        <div class="sb-mockup-cards">
+          <div class="sb-mockup-mini"></div>
+          <div class="sb-mockup-mini"></div>
+          <div class="sb-mockup-mini"></div>
+        </div>
+      </div>
+      <div class="sb-content">
+        <h3>موقعك الخاص <em>من الصفر</em></h3>
+        <p>نبدأ من فهم طبيعة عملك، نصمم واجهة مناسبة، ثم نبرمج الموقع بالكامل مع جميع الصفحات والميزات المطلوبة. التسليم يشمل ملفات كاملة جاهزة للنشر.</p>
+        <div>
+          <span class="sb-tag gold">✦ تصميم مخصص</span>
+          <span class="sb-tag blue">✦ صفحات متعددة</span>
+          <span class="sb-tag green">✦ متوافق مع الجوال</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ HOW IT WORKS ═══ -->
+<section class="feature-section">
+  <div class="container">
+    <div class="sec-head reveal">
+      <div class="sec-label">كيف يعمل</div>
+      <h2 class="sec-title">رحلة المستخدم</h2>
+      <p class="sec-sub">من أول زيارة إلى استخدام الخدمات — المسار واضح وسهل.</p>
+    </div>
+    <div class="timeline reveal">
+      <div class="tl-item">
+        <div class="tl-dot"></div>
+        <div class="tl-title">① تسجيل الدخول</div>
+        <div class="tl-desc">أنشئ حساباً جديداً أو سجّل دخولك — البيانات تُحفظ محلياً على جهازك بأمان. لا نحتاج بريدك الحقيقي، فقط اسم وكلمة مرور.</div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot"></div>
+        <div class="tl-title">② اختيار الخدمة</div>
+        <div class="tl-desc">تصفح الخدمات المتاحة: نظام المحاسب، جدولة المصاريف، أو طلب تصميم موقع. كل خدمة لها صفحتها المستقلة.</div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot"></div>
+        <div class="tl-title">③ التجربة المجانية</div>
+        <div class="tl-desc">جدولة المصاريف تمنحك تجربة مجانية لمدة 24 ساعة. نظام المحاسب يتيح الوصول عبر أكواد التفعيل أو الاشتراك الشهري.</div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot"></div>
+        <div class="tl-title">④ الاشتراك والتفعيل</div>
+        <div class="tl-desc">اختر باقة العضوية المناسبة، أدخل كود التفعيل إن وُجد، وتواصل معنا عبر واتساب أو انستغرام لإتمام الاشتراك.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ TECH STACK ═══ -->
+<section class="feature-section">
+  <div class="container">
+    <div class="sec-head reveal">
+      <div class="sec-label">التقنيات</div>
+      <h2 class="sec-title">مبني بتقنيات حديثة</h2>
+      <p class="sec-sub">المشروع مبني بتقنيات الويب الأحدث مع تركيز على الأداء وتجربة المستخدم.</p>
+    </div>
+    <div class="tech-grid stagger">
+      <div class="tech-item">
+        <div class="tech-item-icon">⚡</div>
+        <div class="tech-item-name">HTML5</div>
+        <div class="tech-item-sub">الهيكل الأساسي</div>
+      </div>
+      <div class="tech-item">
+        <div class="tech-item-icon">🎨</div>
+        <div class="tech-item-name">CSS3</div>
+        <div class="tech-item-sub">تصميم متقدم</div>
+      </div>
+      <div class="tech-item">
+        <div class="tech-item-icon">⚙️</div>
+        <div class="tech-item-name">JavaScript</div>
+        <div class="tech-item-sub">المنطق البرمجي</div>
+      </div>
+      <div class="tech-item">
+        <div class="tech-item-icon">💾</div>
+        <div class="tech-item-name">LocalStorage</div>
+        <div class="tech-item-sub">تخزين محلي</div>
+      </div>
+      <div class="tech-item">
+        <div class="tech-item-icon">📱</div>
+        <div class="tech-item-name">Responsive</div>
+        <div class="tech-item-sub">متوافق مع الجوال</div>
+      </div>
+      <div class="tech-item">
+        <div class="tech-item-icon">🔤</div>
+        <div class="tech-item-name">Google Fonts</div>
+        <div class="tech-item-sub">خطوط احترافية</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ PRICING PREVIEW ═══ -->
+<section class="feature-section">
+  <div class="container">
+    <div class="sec-head reveal">
+      <div class="sec-label">الأسعار</div>
+      <h2 class="sec-title">باقات مرنة تناسب الجميع</h2>
+      <p class="sec-sub">أسعار تبدأ من $5 شهرياً — مع خصومات تصل إلى 40% حسب مستوى العضوية.</p>
+    </div>
+    <div class="pricing-row stagger">
+      <div class="pr-card">
+        <div class="pr-name">أساسية</div>
+        <div class="pr-price" style="color:var(--gold)">$5</div>
+        <div class="pr-sub">خصم 10% · دعم أساسي</div>
+      </div>
+      <div class="pr-card">
+        <div class="pr-name">متقدمة</div>
+        <div class="pr-price" style="color:#7ab5ff">$10</div>
+        <div class="pr-sub">خصم 25% · أولوية أعلى</div>
+      </div>
+      <div class="pr-card">
+        <div class="pr-name">أعمال</div>
+        <div class="pr-price" style="color:#7de8b8">$15</div>
+        <div class="pr-sub">خصم 30% · تخصيصات</div>
+      </div>
+      <div class="pr-card">
+        <div class="pr-name">احترافية</div>
+        <div class="pr-price" style="color:#cc6be0">$20</div>
+        <div class="pr-sub">خصم 40% · أعلى أولوية</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ CTA ═══ -->
+<section class="cta-section reveal">
+  <h2 class="cta-title">جاهز تبدأ؟</h2>
+  <p class="cta-desc">ارجع للصفحة الرئيسية واختر الخدمة المناسبة لك — أو تواصل معنا مباشرة عبر واتساب.</p>
+  <div class="cta-btns">
+    <a href="iass-main.html" class="btn btn-gold">← الصفحة الرئيسية</a>
+    <a href="https://api.whatsapp.com/send?phone=9647724447343&text=%D9%85%D8%B1%D8%AD%D8%A8%D8%A7%D8%8C%20%D8%A3%D8%B1%D9%8A%D8%AF%20%D8%A7%D9%84%D8%A7%D8%B3%D8%AA%D9%81%D8%B3%D8%A7%D8%B1%20%D8%B9%D9%86%20%D8%AE%D8%AF%D9%85%D8%A7%D8%AA%20IAAS" target="_blank" rel="noopener" class="btn btn-outline">واتساب ←</a>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="footer-logo">IAAS</div>
+  <div>© 2026 IAAS — جميع الحقوق محفوظة</div>
+</footer>
+
+<script>
+// Floating particles
+(function(){
+  const c=document.getElementById('particles');
+  for(let i=0;i<20;i++){
+    const p=document.createElement('div');
+    p.className='particle';
+    p.style.left=Math.random()*100+'%';
+    p.style.animationDuration=(8+Math.random()*12)+'s';
+    p.style.animationDelay=Math.random()*8+'s';
+    p.style.width=p.style.height=(1+Math.random()*2)+'px';
+    c.appendChild(p);
+  }
+})();
+
+// Count-up animation
+function animateCounters(){
+  document.querySelectorAll('[data-count]').forEach(el=>{
+    const target=+el.dataset.count;
+    const duration=1400;
+    const start=performance.now();
+    function update(now){
+      const elapsed=now-start;
+      const progress=Math.min(elapsed/duration,1);
+      const ease=1-Math.pow(1-progress,3);
+      el.textContent=Math.round(target*ease);
+      if(progress<1) requestAnimationFrame(update);
+    }
+    requestAnimationFrame(update);
+  });
+}
+
+// Scroll reveals
+const ro=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      e.target.classList.add('show');
+      ro.unobserve(e.target);
+    }
+  });
+},{threshold:0.1});
+document.querySelectorAll('.reveal,.stagger').forEach(el=>ro.observe(el));
+
+// Trigger counters when hero is visible
+const heroObs=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){animateCounters();heroObs.unobserve(e.target);}
+  });
+},{threshold:0.3});
+const heroEl=document.querySelector('.showcase-hero');
+if(heroEl) heroObs.observe(heroEl);
+
+// Smooth parallax on screen mockups
+window.addEventListener('scroll',()=>{
+  const mocks=document.querySelectorAll('.screen-mock,.sb-mockup');
+  mocks.forEach(m=>{
+    const rect=m.getBoundingClientRect();
+    const center=rect.top+rect.height/2;
+    const viewCenter=window.innerHeight/2;
+    const diff=(center-viewCenter)/window.innerHeight;
+    m.style.transform=`translateY(${diff*-15}px)`;
+  });
+},{passive:true});
+</script>
+</body>
+</html>
