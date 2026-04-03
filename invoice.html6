@@ -1,0 +1,29 @@
+IAAS API (SQLite)
+==================
+
+Simple API for IAAS using SQLite, JWT auth, and members endpoints.
+
+Setup
+-----
+1. Copy `.env.example` to `.env` and edit values.
+2. Install deps and start:
+
+```bash
+cd backend/api-sqlite
+npm install
+npm start
+```
+
+Endpoints
+---------
+- `POST /api/auth/register` {name,email,password}
+- `POST /api/auth/login` {email,password} => returns token and user
+- `POST /api/members` create a member (body includes email etc.)
+- `GET /api/members/me?email=` get member by email or authenticated user
+- `GET /api/members` list all members (no admin protection by default)
+- `POST /api/members/migrate` import array of members (body.members)
+
+Notes
+-----
+- Configure `NOTIFY_SERVER_URL` in `.env` to forward created members to your notify server.
+- This is a minimal scaffold; for production secure the endpoints, add rate-limits, input validation, and use HTTPS.

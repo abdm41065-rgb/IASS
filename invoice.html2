@@ -1,0 +1,115 @@
+/*  ═══════════════════════════════════════════════
+    IAAS — Firebase + Firestore Helper
+    Shared across all pages
+    ═══════════════════════════════════════════════ */
+
+// ── Firebase Config ──
+const firebaseConfig = {
+  apiKey: "AIzaSyAB49lanFvd3Tjiv_5sev7gRg1VBqpiLmM",
+  authDomain: "iassproject-42998.firebaseapp.com",
+  projectId: "iassproject-42998",
+  storageBucket: "iassproject-42998.firebasestorage.app",
+  messagingSenderId: "544561341257",
+  appId: "1:544561341257:web:96dd7b3da1695905cb3098",
+  measurementId: "G-9XPXQW9P03"
+};
+
+// ── Init Firebase ──
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+// ── Collection names (localStorage key → Firestore collection) ──
+const FB_COLLECTIONS = {
+  'iaas-activation-codes': 'activationCodes',
+  'iaas-sub-requests':     'subRequests',
+  'iass-admin-members':    'members',
+  'iaas-discount-codes':   'discountCodes'
+};
+
+/*  ────────────────────────────────────────────
+    dbSave(localKey, dataArray)
+    Saves array items to Firestore collection.
+    Also keeps localStorage in sync as fallback.
+    ──────────────────────────────────────────── */
+async function dbSave(localKey, dataArray) {
+  // Always save to localStorage as fallback
+  localStorage.setItem(localKey, JSON.stringify(dataArray));
+
+  const col = FB_COLLECTIONS[localKey];
+  if (!col) return;
+
+  try {
+    const colRef = db.collection(col);
+    // Clean data — remove undefined values that Firestore rejects
+    const cleanData = JSON.parse(JSON.stringify(dataArray || []));
+    await colRef.doc('_all').set({
+      items: cleanData,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    console.log('✅ Firestore saved:', col, '→', cleanData.length, 'items');
+  } catch (err) {
+    console.error('❌ Firestore save FAILED:', col, err.message, err);
+  }
+}
+
+/*  ────────────────────────────────────────────
+    dbLoad(localKey)
+    Loads data from Firestore. Falls back to
+    localStorage if offline/error.
+    Returns: array
+    ──────────────────────────────────────────── */
+async function dbLoad(localKey) {
+  const col = FB_COLLECTIONS[localKey];
+  if (!col) {
+    // Not a synced key, use localStorage
+    try { return JSON.parse(localStorage.getItem(localKey) || '[]'); }
+    catch { return []; }
+  }
+
+  try {
+    const doc = await db.collection(col).doc('_all').get();
+    if (doc.exists && doc.data().items) {
+      const items = doc.data().items;
+      // Sync to localStorage
+      localStorage.setItem(localKey, JSON.stringify(items));
+      return items;
+    }
+    // No Firestore data yet — check localStorage and migrate up
+    const local = JSON.parse(localStorage.getItem(localKey) || '[]');
+    if (local.length > 0) {
+      await dbSave(localKey, local); // migrate existing localStorage data to Firestore
+    }
+    return local;
+  } catch (err) {
+    console.warn('Firestore load failed, using localStorage:', err.message);
+    try { return JSON.parse(localStorage.getItem(localKey) || '[]'); }
+    catch { return []; }
+  }
+}
+
+/*  ────────────────────────────────────────────
+    dbListen(localKey, callback)
+    Real-time listener — calls callback(array)
+    whenever data changes in Firestore.
+    ──────────────────────────────────────────── */
+function dbListen(localKey, callback) {
+  const col = FB_COLLECTIONS[localKey];
+  if (!col) return;
+
+  db.collection(col).doc('_all').onSnapshot(doc => {
+    if (doc.exists && doc.data().items) {
+      const items = doc.data().items;
+      localStorage.setItem(localKey, JSON.stringify(items));
+      callback(items);
+    }
+  }, err => {
+    console.warn('Firestore listener error:', err.message);
+  });
+}
+
+// ── Helper: check if Firebase is ready ──
+function isFirebaseReady() {
+  try { return !!firebase.app(); } catch { return false; }
+}
+
+console.log('🔥 IAAS Firebase initialized — project:', firebaseConfig.projectId);
