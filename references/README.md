@@ -22,6 +22,8 @@
 | 04 | Franky's Hats | [رابط](https://www.frankys-hats.com/) · [تحليل](sites/04-frankys-hats.md) | متجر إلكتروني | ⏳ بانتظار الصور |
 | 05 | NON–LINEAR | [تحليل](sites/05-non-linear.md) | استوديو معماري | ✅ محلَّل |
 | 06 | WONDERLAND | [تحليل](sites/06-wonderland.md) | براند / تجربة 3D | ✅ محلَّل |
+| 07 | MANNA | [تحليل](sites/07-manna.md) | استوديو معماري | ✅ محلَّل |
+| 08 | sidstore (Sid Lee) | [تحليل](sites/08-sidstore.md) | متجر إبداعي | ✅ محلَّل |
 
 ---
 
