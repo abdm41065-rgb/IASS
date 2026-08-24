@@ -14,9 +14,12 @@
 
 ## 🗂️ فهرس المواقع المرجعية
 
-| # | الموقع | الرابط | لماذا مميّز؟ | حالة الدراسة |
-|---|--------|--------|--------------|--------------|
-| — | _(بانتظار أول موقع ترسله)_ | — | — | — |
+| # | الموقع | الرابط | الفئة | حالة الدراسة |
+|---|--------|--------|-------|--------------|
+| 01 | Daylight Computer | [رابط](https://daylightcomputer.com/) · [تحليل](sites/01-daylight-computer.md) | منتج تقني | ⏳ بانتظار الصور |
+| 02 | The Tiny Pod | [رابط](https://thetinypod.com/) · [تحليل](sites/02-the-tiny-pod.md) | منتج / إكسسوار | ⏳ بانتظار الصور |
+| 03 | Freytag & Anderson | [رابط](https://www.freytaganderson.com/) · [تحليل](sites/03-freytag-anderson.md) | استوديو تصميم | ⏳ بانتظار الصور |
+| 04 | Franky's Hats | [رابط](https://www.frankys-hats.com/) · [تحليل](sites/04-frankys-hats.md) | متجر إلكتروني | ⏳ بانتظار الصور |
 
 ---
 
