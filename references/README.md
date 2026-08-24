@@ -20,6 +20,8 @@
 | 02 | The Tiny Pod | [رابط](https://thetinypod.com/) · [تحليل](sites/02-the-tiny-pod.md) | منتج / إكسسوار | ⏳ بانتظار الصور |
 | 03 | Freytag & Anderson | [رابط](https://www.freytaganderson.com/) · [تحليل](sites/03-freytag-anderson.md) | استوديو تصميم | ⏳ بانتظار الصور |
 | 04 | Franky's Hats | [رابط](https://www.frankys-hats.com/) · [تحليل](sites/04-frankys-hats.md) | متجر إلكتروني | ⏳ بانتظار الصور |
+| 05 | NON–LINEAR | [تحليل](sites/05-non-linear.md) | استوديو معماري | ✅ محلَّل |
+| 06 | WONDERLAND | [تحليل](sites/06-wonderland.md) | براند / تجربة 3D | ✅ محلَّل |
 
 ---
 
