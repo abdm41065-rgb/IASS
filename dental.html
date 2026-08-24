@@ -1,0 +1,480 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>نُصوع — عيادات طب وتجميل الأسنان</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Noto+Kufi+Arabic:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ═══════════ TOKENS ═══════════ */
+:root{
+  --bg:#F4F8F7; --bg2:#EAF2F0; --paper:#ffffff;
+  --ink:#0C2626; --ink2:#3d5a58; --muted:#8aa3a0;
+  --teal:#12A594; --teal2:#0E8C7E; --deep:#083838; --mint:#D9F0EA; --mint2:#BFE6DD;
+  --coral:#FF7A66; --gold:#E3B34B; --sky:#4FB6E0;
+  --line:rgba(12,38,38,.10);
+  --r:16px; --r2:26px; --r3:38px;
+  --fen:'Space Grotesk',sans-serif; --far:'Noto Kufi Arabic',sans-serif;
+  --shadow:0 24px 60px -28px rgba(8,56,56,.45);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;font-size:15px}
+body{font-family:var(--far);background:var(--bg);color:var(--ink);overflow-x:hidden;-webkit-font-smoothing:antialiased;line-height:1.6}
+a{color:inherit;text-decoration:none}
+img{max-width:100%;display:block}
+::selection{background:var(--teal);color:#fff}
+::-webkit-scrollbar{width:0}
+.reduce *{animation:none!important;transition:none!important}
+svg{display:block}
+
+#progress{position:fixed;top:0;right:0;height:3px;width:0;background:linear-gradient(90deg,var(--teal),var(--coral));z-index:200}
+
+/* ═══════════ LOADER ═══════════ */
+#loader{position:fixed;inset:0;z-index:400;background:var(--deep);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:22px}
+#loader.done{animation:loadOut .8s cubic-bezier(.7,0,.2,1) forwards}
+@keyframes loadOut{to{transform:translateY(-100%);pointer-events:none}}
+#loader .tooth{animation:pulse 1.2s ease-in-out infinite}
+@keyframes pulse{50%{transform:scale(1.12)}}
+#loader .nm{font-weight:800;font-size:2rem;color:#fff;letter-spacing:.28em;opacity:0;animation:fin .8s .3s forwards}
+@keyframes fin{to{opacity:1}}
+#loader .bar{width:min(240px,55vw);height:2px;background:rgba(255,255,255,.18);overflow:hidden}
+#loader .bar i{display:block;height:100%;width:0;background:var(--teal);animation:lb 1.4s ease forwards}
+@keyframes lb{to{width:100%}}
+
+/* ═══════════ NAV ═══════════ */
+nav{position:fixed;top:0;inset-inline:0;z-index:150;display:flex;align-items:center;justify-content:space-between;padding:16px clamp(18px,4vw,50px);transition:.4s}
+nav.scrolled{background:rgba(244,248,247,.85);backdrop-filter:blur(14px);border-bottom:1px solid var(--line);padding-block:12px}
+nav .brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:1.3rem;color:var(--deep)}
+nav .brand .bi{width:34px;height:34px;background:var(--teal);border-radius:10px;display:grid;place-items:center}
+nav ul{display:flex;gap:4px;list-style:none}
+nav ul a{font-size:.9rem;padding:9px 15px;border-radius:99px;transition:.3s;color:var(--ink2);font-weight:500}
+nav ul a:hover,nav ul a.on{background:var(--mint);color:var(--deep)}
+nav .cta{background:var(--deep);color:#fff;padding:11px 22px;border-radius:99px;font-weight:600;font-size:.9rem;transition:.3s;white-space:nowrap}
+nav .cta:hover{background:var(--teal);transform:translateY(-2px)}
+@media(max-width:860px){nav ul{display:none}}
+
+/* ═══════════ HERO ═══════════ */
+.hero{min-height:100vh;display:grid;grid-template-columns:1.05fr .95fr;align-items:center;gap:40px;padding:120px clamp(18px,4vw,50px) 60px;position:relative}
+.hero .blob{position:absolute;border-radius:50%;filter:blur(70px);opacity:.5;z-index:0}
+.hero .blob.b1{width:44vw;height:44vw;background:var(--mint);top:-8%;inset-inline-start:-10%}
+.hero .blob.b2{width:30vw;height:30vw;background:#ffe0d8;bottom:0;inset-inline-end:6%}
+.hero .txt{position:relative;z-index:2}
+.pill{display:inline-flex;align-items:center;gap:8px;background:var(--paper);border:1px solid var(--line);padding:8px 16px;border-radius:99px;font-size:.82rem;color:var(--teal2);font-weight:600;box-shadow:var(--shadow);margin-bottom:24px;opacity:0}
+.hero.in .pill{animation:fu .7s .2s forwards}
+.pill .d{width:8px;height:8px;border-radius:50%;background:var(--teal);animation:blink 1.4s infinite}
+@keyframes blink{50%{opacity:.3}}
+.hero h1{font-weight:800;font-size:clamp(2.6rem,6.4vw,5rem);line-height:1.05;letter-spacing:-.01em;color:var(--deep)}
+.hero h1 span{color:var(--teal)}
+.hero h1 .ln{display:block;overflow:hidden}
+.hero h1 .ln i{display:inline-block;font-style:normal;transform:translateY(110%);opacity:0}
+.hero.in h1 .ln i{animation:hu .9s cubic-bezier(.2,.85,.25,1) forwards}
+.hero.in h1 .ln:nth-child(2) i{animation-delay:.12s}
+.hero.in h1 .ln:nth-child(3) i{animation-delay:.24s}
+@keyframes hu{to{transform:translateY(0);opacity:1}}
+.hero p.sub{max-width:460px;margin-top:22px;font-size:1.1rem;color:var(--ink2);opacity:0}
+.hero.in p.sub{animation:fu .8s .5s forwards}
+@keyframes fu{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+.hero .acts{display:flex;gap:14px;flex-wrap:wrap;margin-top:34px;opacity:0}
+.hero.in .acts{animation:fu .8s .65s forwards}
+.btn{padding:15px 30px;border-radius:99px;font-weight:600;font-size:1rem;transition:.35s;cursor:pointer;border:none;font-family:var(--far);display:inline-flex;align-items:center;gap:10px}
+.btn-p{background:var(--teal);color:#fff;box-shadow:0 14px 30px -10px rgba(18,165,148,.6)}
+.btn-p:hover{background:var(--teal2);transform:translateY(-3px)}
+.btn-g{background:transparent;color:var(--deep);border:1.5px solid var(--line)}
+.btn-g:hover{border-color:var(--teal);color:var(--teal)}
+.hero .trust{display:flex;gap:26px;margin-top:40px;opacity:0}
+.hero.in .trust{animation:fu .8s .8s forwards}
+.hero .trust .t .n{font-weight:800;font-size:1.7rem;color:var(--deep)}
+.hero .trust .t .k{font-size:.82rem;color:var(--muted)}
+
+/* hero visual — tilted card stack (NON-LINEAR) */
+.hviz{position:relative;height:min(74vh,600px);z-index:1}
+.hcard{position:absolute;border-radius:var(--r2);overflow:hidden;box-shadow:var(--shadow);border:7px solid #fff;transition:transform .6s cubic-bezier(.2,.8,.2,1)}
+.hcard.c1{width:64%;height:78%;top:0;inset-inline-end:0;transform:rotate(4deg)}
+.hcard.c2{width:52%;height:60%;bottom:4%;inset-inline-start:0;transform:rotate(-6deg);z-index:2}
+.hcard.c3{width:34%;height:34%;top:8%;inset-inline-start:8%;transform:rotate(3deg);z-index:3}
+.hviz:hover .c1{transform:rotate(6deg) translateY(-8px)}
+.hviz:hover .c2{transform:rotate(-9deg) translateY(8px)}
+.hviz:hover .c3{transform:rotate(6deg) scale(1.05)}
+.hbadge{position:absolute;z-index:4;bottom:2%;inset-inline-end:4%;background:#fff;border-radius:var(--r);padding:14px 18px;box-shadow:var(--shadow);display:flex;align-items:center;gap:12px}
+.hbadge .ic{width:40px;height:40px;background:var(--mint);border-radius:10px;display:grid;place-items:center;color:var(--teal2)}
+.hbadge .tx b{display:block;font-size:.95rem;color:var(--deep)}
+.hbadge .tx span{font-size:.76rem;color:var(--muted)}
+@media(max-width:900px){.hero{grid-template-columns:1fr}.hviz{height:60vh;margin-top:10px}}
+
+/* art tiles */
+.art{width:100%;height:100%;position:relative;display:grid;place-items:center}
+.art svg{width:34%;height:34%;opacity:.9}
+.g-teal{background:radial-gradient(120% 110% at 30% 20%,#3fd9c4,var(--teal) 55%,var(--deep))}
+.g-mint{background:radial-gradient(120% 110% at 25% 25%,#ffffff,var(--mint2) 90%)}
+.g-coral{background:radial-gradient(120% 110% at 70% 25%,#ffb3a6,var(--coral) 60%,#c74631)}
+.g-sky{background:radial-gradient(120% 110% at 30% 25%,#bfe9f7,var(--sky) 60%,#1f7fa8)}
+.g-deep{background:radial-gradient(120% 110% at 50% 10%,#186b64,var(--deep))}
+.g-gold{background:radial-gradient(120% 110% at 30% 25%,#f6d98a,var(--gold) 60%,#a87d1f)}
+
+/* ═══════════ MARQUEE ═══════════ */
+.marq{background:var(--deep);color:#fff;padding:18px 0;overflow:hidden;white-space:nowrap}
+.marq .tr{display:inline-block;animation:mv 24s linear infinite}
+.marq span{font-weight:600;font-size:1.15rem;padding:0 26px}
+.marq span svg{display:inline;vertical-align:-3px;margin-inline-start:10px;color:var(--teal)}
+@keyframes mv{to{transform:translateX(-50%)}}
+
+/* ═══════════ SECTION ═══════════ */
+.wrap{max-width:1240px;margin:0 auto;padding:clamp(60px,9vw,120px) clamp(18px,4vw,50px)}
+.eyebrow{display:inline-flex;align-items:center;gap:10px;font-family:var(--fen);font-size:.8rem;letter-spacing:.16em;text-transform:uppercase;color:var(--teal2);font-weight:600;margin-bottom:18px}
+.eyebrow::before{content:"";width:28px;height:2px;background:var(--teal)}
+.h2{font-weight:800;font-size:clamp(2rem,5vw,3.4rem);line-height:1.08;color:var(--deep);letter-spacing:-.01em}
+.lead{max-width:560px;margin-top:16px;font-size:1.08rem;color:var(--ink2)}
+.rv{opacity:0;transform:translateY(34px);transition:opacity .9s cubic-bezier(.2,.8,.2,1),transform .9s cubic-bezier(.2,.8,.2,1)}
+.rv.show{opacity:1;transform:none}
+.rv.d1{transition-delay:.1s}.rv.d2{transition-delay:.2s}.rv.d3{transition-delay:.3s}.rv.d4{transition-delay:.4s}
+
+/* ═══════════ SERVICES BENTO (sidstore) ═══════════ */
+.bento{display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:minmax(150px,auto);gap:16px;margin-top:44px}
+.cell{border-radius:var(--r2);padding:26px;position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:space-between;min-height:180px;transition:transform .5s cubic-bezier(.2,.8,.2,1),box-shadow .5s;background:var(--paper);border:1px solid var(--line)}
+.cell:hover{transform:translateY(-6px);box-shadow:var(--shadow)}
+.cell.big{grid-column:span 2;grid-row:span 2}
+.cell.wide{grid-column:span 2}
+.cell .ci{width:52px;height:52px;border-radius:14px;display:grid;place-items:center;background:var(--mint);color:var(--teal2);margin-bottom:auto}
+.cell h5{font-weight:700;font-size:1.35rem;color:var(--deep);margin-top:18px}
+.cell.big h5{font-size:clamp(1.6rem,3vw,2.3rem)}
+.cell p{font-size:.92rem;color:var(--ink2);margin-top:8px}
+.cell .go{position:absolute;top:24px;inset-inline-start:24px;width:38px;height:38px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;color:var(--teal);transition:.4s}
+.cell:hover .go{background:var(--teal);color:#fff;transform:rotate(-45deg)}
+.cell.feat{background:linear-gradient(150deg,var(--teal),var(--teal2));color:#fff;border:none}
+.cell.feat .ci{background:rgba(255,255,255,.2);color:#fff}
+.cell.feat h5,.cell.feat p{color:#fff}
+.cell.feat p{opacity:.9}
+.cell.feat .go{border-color:rgba(255,255,255,.4);color:#fff}
+.cell.feat{padding-bottom:82px}
+.cell.feat .go{top:auto;bottom:26px}
+.cell.feat .tag{position:absolute;top:26px;inset-inline-start:26px;background:rgba(255,255,255,.2);padding:7px 14px;border-radius:99px;font-size:.74rem;font-weight:600}
+.cell.dark{background:var(--deep);color:#fff;border:none}
+.cell.dark .ci{background:rgba(255,255,255,.12);color:var(--mint)}
+.cell.dark h5,.cell.dark p{color:#fff}.cell.dark p{opacity:.85}
+.cell.dark .go{border-color:rgba(255,255,255,.3);color:#fff}
+@media(max-width:820px){.bento{grid-template-columns:repeat(2,1fr)}.cell.big{grid-column:span 2;grid-row:span 1}}
+
+/* ═══════════ GALLERY (MANNA) ═══════════ */
+.gsec{background:var(--bg2)}
+.hint{font-family:var(--fen);font-size:.78rem;letter-spacing:.14em;color:var(--muted);padding:0 clamp(18px,4vw,50px);text-transform:uppercase;margin-top:8px}
+.gal{display:flex;gap:28px;overflow-x:auto;padding:22px clamp(18px,4vw,50px) 50px;scroll-snap-type:x mandatory;cursor:grab}
+.gal::-webkit-scrollbar{height:5px}.gal::-webkit-scrollbar-thumb{background:var(--teal);border-radius:9px}
+.gal.drag{cursor:grabbing}
+.gal figure{flex:0 0 auto;width:clamp(260px,38vw,420px);scroll-snap-align:start}
+.gal figure:nth-child(even){align-self:flex-end;width:clamp(230px,30vw,340px)}
+.gal .fr{width:100%;aspect-ratio:4/5;border-radius:var(--r2);overflow:hidden;box-shadow:var(--shadow)}
+.gal figure:nth-child(even) .fr{aspect-ratio:1/1}
+.gal figcaption{margin-top:14px;font-size:.92rem;color:var(--ink2)}
+.gal figcaption b{display:block;font-family:var(--fen);font-size:.76rem;color:var(--muted);font-weight:500;margin-top:2px}
+
+/* ═══════════ PROCESS PIN (WONDERLAND, light) ═══════════ */
+.pin{background:var(--deep);color:#fff;position:relative;overflow:hidden}
+.pin .glow{position:absolute;border-radius:50%;filter:blur(80px);opacity:.4}
+.pin .glow.g1{width:46vw;height:46vw;background:var(--teal);top:-10%;inset-inline-end:-6%}
+.pin .glow.g2{width:34vw;height:34vw;background:var(--coral);bottom:-12%;inset-inline-start:-4%}
+.pin .inner{position:relative;z-index:2;max-width:1240px;margin:0 auto;padding:clamp(60px,9vw,120px) clamp(18px,4vw,50px)}
+.pin .h2{color:#fff}
+.pin .eyebrow{color:var(--mint)}.pin .eyebrow::before{background:var(--mint)}
+.psteps{display:grid;grid-template-columns:repeat(4,1fr);gap:22px;margin-top:54px}
+.pstep{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);border-radius:var(--r2);padding:28px;transition:.5s}
+.pstep:hover{background:rgba(255,255,255,.09);transform:translateY(-6px)}
+.pstep .no{font-family:var(--fen);font-weight:700;font-size:2.4rem;color:var(--teal);opacity:.9}
+.pstep h4{font-weight:700;font-size:1.2rem;margin:12px 0 8px}
+.pstep p{color:#bcd6d2;font-size:.92rem}
+@media(max-width:820px){.psteps{grid-template-columns:repeat(2,1fr)}}
+
+/* ═══════════ DOCTORS ═══════════ */
+.docs{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:44px}
+.doc{background:var(--paper);border:1px solid var(--line);border-radius:var(--r2);overflow:hidden;transition:.5s}
+.doc:hover{transform:translateY(-6px);box-shadow:var(--shadow)}
+.doc .ph{aspect-ratio:1/1;position:relative}
+.doc .ph .art svg{width:44%;height:44%;opacity:.5}
+.doc .info{padding:22px}
+.doc .info h5{font-weight:700;font-size:1.2rem;color:var(--deep)}
+.doc .info .sp{color:var(--teal2);font-size:.9rem;font-weight:500}
+.doc .info p{color:var(--ink2);font-size:.88rem;margin-top:8px}
+@media(max-width:820px){.docs{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.docs{grid-template-columns:1fr}}
+
+/* ═══════════ TESTIMONIAL ═══════════ */
+.tsec{background:var(--mint)}
+.tgrid{display:grid;grid-template-columns:1.2fr 1fr;gap:26px;margin-top:44px}
+.tcard{background:var(--paper);border-radius:var(--r2);padding:34px;box-shadow:var(--shadow)}
+.tcard .stars{color:var(--gold);font-size:1.1rem;letter-spacing:3px}
+.tcard q{display:block;font-size:1.25rem;color:var(--deep);margin:18px 0;line-height:1.7;font-weight:500}
+.tcard .who{display:flex;align-items:center;gap:12px}
+.tcard .av{width:44px;height:44px;border-radius:50%;background:var(--teal);color:#fff;display:grid;place-items:center;font-weight:700}
+.tcard .who b{color:var(--deep)}.tcard .who span{color:var(--muted);font-size:.84rem;display:block}
+.tside{display:flex;flex-direction:column;gap:22px}
+.tmini{background:var(--deep);color:#fff;border-radius:var(--r2);padding:28px;flex:1;display:flex;flex-direction:column;justify-content:center}
+.tmini .n{font-weight:800;font-size:2.6rem;color:var(--teal)}
+.tmini p{color:#bcd6d2;font-size:.92rem}
+@media(max-width:820px){.tgrid{grid-template-columns:1fr}}
+
+/* ═══════════ FAQ ═══════════ */
+.faq{max-width:820px;margin:44px auto 0}
+.qa{border-bottom:1px solid var(--line)}
+.qa summary{list-style:none;cursor:pointer;padding:22px 0;font-weight:600;font-size:1.1rem;color:var(--deep);display:flex;justify-content:space-between;align-items:center}
+.qa summary::-webkit-details-marker{display:none}
+.qa summary .pm{width:30px;height:30px;border-radius:50%;background:var(--mint);color:var(--teal2);display:grid;place-items:center;transition:.3s;flex:0 0 auto}
+.qa[open] summary .pm{transform:rotate(45deg);background:var(--teal);color:#fff}
+.qa .ans{padding:0 0 22px;color:var(--ink2);max-width:70ch}
+
+/* ═══════════ BOOK CTA ═══════════ */
+.book{background:linear-gradient(150deg,var(--teal),var(--deep));color:#fff;border-radius:var(--r3);padding:clamp(40px,7vw,80px);text-align:center;position:relative;overflow:hidden;margin:0 clamp(18px,4vw,50px)}
+.book .g{position:absolute;width:40vw;height:40vw;border-radius:50%;background:rgba(255,255,255,.08);filter:blur(50px);top:-20%;inset-inline-start:-10%}
+.book h3{font-weight:800;font-size:clamp(1.8rem,5vw,3.2rem);position:relative}
+.book p{max-width:520px;margin:16px auto 30px;color:#d3ebe6;position:relative}
+.book .btn-w{background:#fff;color:var(--deep);position:relative}
+.book .btn-w:hover{background:var(--mint);transform:translateY(-3px)}
+
+/* ═══════════ FOOTER ═══════════ */
+footer{background:var(--deep);color:#fff;padding:clamp(60px,8vw,100px) clamp(18px,4vw,50px) 36px;margin-top:clamp(60px,9vw,120px)}
+footer .fgrid{display:grid;grid-template-columns:2fr 1fr 1fr 1.4fr;gap:32px}
+footer .brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:1.4rem;margin-bottom:14px}
+footer .brand .bi{width:36px;height:36px;background:var(--teal);border-radius:10px;display:grid;place-items:center}
+footer .col p{color:#a7c4bf;font-size:.92rem;max-width:34ch}
+footer h6{font-size:.78rem;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);margin-bottom:14px}
+footer a{display:block;padding:5px 0;color:#c3ddd8;transition:.3s;font-size:.94rem}
+footer a:hover{color:#fff;transform:translateX(-5px)}
+footer .hours{color:#a7c4bf;font-size:.9rem;line-height:2}
+footer .base{border-top:1px solid rgba(255,255,255,.12);margin-top:44px;padding-top:24px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;color:#8aa8a3;font-size:.82rem;font-family:var(--fen)}
+@media(max-width:820px){footer .fgrid{grid-template-columns:1fr 1fr}}
+
+.mtoggle{position:fixed;bottom:18px;inset-inline-start:18px;z-index:150;background:var(--deep);color:#fff;border:none;font-family:var(--fen);font-size:.72rem;letter-spacing:.08em;padding:9px 15px;border-radius:99px;cursor:pointer;display:flex;align-items:center;gap:8px}
+.mtoggle b{color:var(--teal)}
+</style>
+</head>
+<body>
+<div id="progress"></div>
+
+<!-- LOADER -->
+<div id="loader">
+  <svg class="tooth" width="54" height="54" viewBox="0 0 24 24" fill="none"><path d="M12 3C8 3 6.5 4.5 5 4.5S2.5 6 2.5 9c0 4 1.5 5 2.2 8.5C5.2 20 5.8 21 7 21c1.4 0 1.5-2 2.2-3.7C9.7 16 10.4 15.5 12 15.5s2.3.5 2.8 1.8C15.5 19 15.6 21 17 21c1.2 0 1.8-1 2.3-3.5C20 14 21.5 13 21.5 9c0-3-1-4.5-2.5-4.5S16 3 12 3Z" stroke="#12A594" stroke-width="1.5" stroke-linejoin="round"/></svg>
+  <div class="nm">نُصوع</div>
+  <div class="bar"><i></i></div>
+</div>
+
+<!-- reusable tooth icon -->
+<svg width="0" height="0" style="position:absolute"><symbol id="tooth" viewBox="0 0 24 24"><path d="M12 3C8 3 6.5 4.5 5 4.5S2.5 6 2.5 9c0 4 1.5 5 2.2 8.5C5.2 20 5.8 21 7 21c1.4 0 1.5-2 2.2-3.7C9.7 16 10.4 15.5 12 15.5s2.3.5 2.8 1.8C15.5 19 15.6 21 17 21c1.2 0 1.8-1 2.3-3.5C20 14 21.5 13 21.5 9c0-3-1-4.5-2.5-4.5S16 3 12 3Z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></symbol></svg>
+
+<!-- NAV -->
+<nav id="nav">
+  <a href="#top" class="brand"><span class="bi"><svg width="20" height="20" style="color:#fff"><use href="#tooth"/></svg></span> نُصوع</a>
+  <ul>
+    <li><a href="#services" class="on">خدماتنا</a></li>
+    <li><a href="#process">كيف نعمل</a></li>
+    <li><a href="#team">فريقنا</a></li>
+    <li><a href="#reviews">آراء المرضى</a></li>
+    <li><a href="#faq">أسئلة شائعة</a></li>
+  </ul>
+  <a href="#book" class="cta">احجز موعدك</a>
+</nav>
+
+<!-- HERO -->
+<header class="hero" id="top">
+  <div class="blob b1"></div><div class="blob b2"></div>
+  <div class="txt">
+    <span class="pill"><span class="d"></span> نستقبل حالات اليوم · حجز فوري</span>
+    <h1><span class="ln"><i>ابتسامةٌ صحّية</i></span><span class="ln"><i>تبدأ من</i></span><span class="ln"><i><span>عيادة نُصوع</span></i></span></h1>
+    <p class="sub">رعاية أسنان متكاملة بأحدث التقنيات وأيدٍ خبيرة — في بيئة مريحة تجعل زيارتك تجربة سهلة وخالية من الألم.</p>
+    <div class="acts">
+      <a href="#book" class="btn btn-p">احجز موعدك الآن <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+      <a href="#services" class="btn btn-g">تعرّف على خدماتنا</a>
+    </div>
+    <div class="trust">
+      <div class="t"><div class="n">+١٥ ألف</div><div class="k">مريض سعيد</div></div>
+      <div class="t"><div class="n">١٨ عاماً</div><div class="k">من الخبرة</div></div>
+      <div class="t"><div class="n">٤.٩ ★</div><div class="k">تقييم العملاء</div></div>
+    </div>
+  </div>
+  <div class="hviz">
+    <div class="hcard c1"><div class="art g-teal"><svg style="color:#fff"><use href="#tooth"/></svg></div></div>
+    <div class="hcard c2"><div class="art g-mint"><svg style="color:var(--teal2)"><use href="#tooth"/></svg></div></div>
+    <div class="hcard c3"><div class="art g-coral"><svg style="color:#fff"><use href="#tooth"/></svg></div></div>
+    <div class="hbadge">
+      <div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M20 6 9 17l-5-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="tx"><b>تعقيم معتمد</b><span>وفق أعلى المعايير</span></div>
+    </div>
+  </div>
+</header>
+
+<!-- MARQUEE -->
+<div class="marq"><div class="tr" id="tr">
+  <span>تقويم الأسنان <svg width="16" height="16"><use href="#tooth"/></svg></span><span>زراعة الأسنان <svg width="16" height="16"><use href="#tooth"/></svg></span><span>تبييض احترافي <svg width="16" height="16"><use href="#tooth"/></svg></span><span>ابتسامة هوليوود <svg width="16" height="16"><use href="#tooth"/></svg></span><span>طب أسنان الأطفال <svg width="16" height="16"><use href="#tooth"/></svg></span><span>حشوات تجميلية <svg width="16" height="16"><use href="#tooth"/></svg></span>
+  <span>تقويم الأسنان <svg width="16" height="16"><use href="#tooth"/></svg></span><span>زراعة الأسنان <svg width="16" height="16"><use href="#tooth"/></svg></span><span>تبييض احترافي <svg width="16" height="16"><use href="#tooth"/></svg></span><span>ابتسامة هوليوود <svg width="16" height="16"><use href="#tooth"/></svg></span><span>طب أسنان الأطفال <svg width="16" height="16"><use href="#tooth"/></svg></span><span>حشوات تجميلية <svg width="16" height="16"><use href="#tooth"/></svg></span>
+</div></div>
+
+<!-- SERVICES -->
+<section class="wrap" id="services">
+  <span class="eyebrow rv">خدماتنا</span>
+  <h2 class="h2 rv d1">عنايةٌ شاملة<br>لكل ابتسامة.</h2>
+  <p class="lead rv d2">من الفحص الدوري إلى أعقد عمليات التجميل — كل ما تحتاجه أسنانك تحت سقف واحد.</p>
+  <div class="bento">
+    <div class="cell feat big rv"><span class="tag">الأكثر طلباً</span><div class="ci"><svg width="26" height="26"><use href="#tooth"/></svg></div><h5>ابتسامة هوليوود وتجميل الأسنان</h5><p>عدسات وقشور خزفية (فينير) تمنحك ابتسامة متناسقة وطبيعية بأحدث تقنيات التصميم الرقمي للابتسامة.</p><div class="go"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
+    <div class="cell rv d1"><div class="ci"><svg width="24" height="24"><use href="#tooth"/></svg></div><h5>زراعة الأسنان</h5><p>تعويض الأسنان المفقودة بزراعات دائمة.</p><div class="go"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
+    <div class="cell rv d2"><div class="ci"><svg width="24" height="24"><use href="#tooth"/></svg></div><h5>تقويم الأسنان</h5><p>تقويم معدني وشفّاف لكل الأعمار.</p><div class="go"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
+    <div class="cell dark wide rv d1"><div class="ci"><svg width="24" height="24"><use href="#tooth"/></svg></div><h5>تبييض احترافي بالليزر</h5><p>ابتسامة أنصع بدرجات في جلسة واحدة وبأمان تام.</p><div class="go"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
+    <div class="cell rv d2"><div class="ci"><svg width="24" height="24"><use href="#tooth"/></svg></div><h5>طب أسنان الأطفال</h5><p>بيئة ودّية وآمنة لأطفالك.</p><div class="go"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
+    <div class="cell rv d3"><div class="ci"><svg width="24" height="24"><use href="#tooth"/></svg></div><h5>حشوات تجميلية</h5><p>علاج التسوّس بحشوات بلون السن.</p><div class="go"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
+    <div class="cell wide rv"><div class="ci"><svg width="24" height="24"><use href="#tooth"/></svg></div><h5>علاج الجذور واللثة</h5><p>علاج دقيق وخالٍ من الألم للحفاظ على أسنانك الطبيعية أطول فترة ممكنة.</p><div class="go"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
+  </div>
+</section>
+
+<!-- GALLERY -->
+<section class="gsec">
+  <div style="max-width:1240px;margin:0 auto;padding:clamp(60px,9vw,110px) clamp(18px,4vw,50px) 0">
+    <span class="eyebrow rv">قبل وبعد</span>
+    <h2 class="h2 rv d1">نتائجٌ تتحدّث عن نفسها.</h2>
+  </div>
+  <p class="hint rv">← اسحب للاستعراض · SWIPE / DRAG →</p>
+  <div class="gal" id="gal">
+    <figure><div class="fr"><div class="art g-teal"><svg style="color:#fff;width:30%"><use href="#tooth"/></svg></div></div><figcaption>ابتسامة هوليوود — تركيب فينير كامل.<b>حالة رقم ٠٤٢ · ٢٠٢٥</b></figcaption></figure>
+    <figure><div class="fr"><div class="art g-mint"><svg style="color:var(--teal2);width:34%"><use href="#tooth"/></svg></div></div><figcaption>تبييض بالليزر — ٦ درجات.<b>جلسة واحدة</b></figcaption></figure>
+    <figure><div class="fr"><div class="art g-sky"><svg style="color:#fff;width:30%"><use href="#tooth"/></svg></div></div><figcaption>زراعة سنّين أماميين.<b>حالة رقم ٠١٧</b></figcaption></figure>
+    <figure><div class="fr"><div class="art g-coral"><svg style="color:#fff;width:34%"><use href="#tooth"/></svg></div></div><figcaption>تقويم شفّاف — ١٤ شهراً.<b>Invisalign</b></figcaption></figure>
+    <figure><div class="fr"><div class="art g-gold"><svg style="color:#fff;width:30%"><use href="#tooth"/></svg></div></div><figcaption>إصلاح كسر وحشوات تجميلية.<b>حالة رقم ٠٨٩</b></figcaption></figure>
+    <figure><div class="fr"><div class="art g-deep"><svg style="color:var(--mint);width:34%"><use href="#tooth"/></svg></div></div><figcaption>ترميم كامل للفكّين.<b>حالة رقم ٠٣٣</b></figcaption></figure>
+  </div>
+</section>
+
+<!-- PROCESS PIN -->
+<section class="pin" id="process">
+  <div class="glow g1"></div><div class="glow g2"></div>
+  <div class="inner">
+    <span class="eyebrow rv">كيف نعمل</span>
+    <h2 class="h2 rv d1">رحلتك معنا<br>في أربع خطوات.</h2>
+    <div class="psteps">
+      <div class="pstep rv"><div class="no">٠١</div><h4>الحجز</h4><p>احجز موعدك أونلاين أو هاتفياً في دقائق، واختر الوقت الأنسب لك.</p></div>
+      <div class="pstep rv d1"><div class="no">٠٢</div><h4>الفحص والتشخيص</h4><p>فحص شامل بأشعة رقمية ثلاثية الأبعاد وخطة علاج واضحة ومكتوبة.</p></div>
+      <div class="pstep rv d2"><div class="no">٠٣</div><h4>العلاج</h4><p>علاج مريح وخالٍ من الألم على يد نخبة من الأطباء المتخصّصين.</p></div>
+      <div class="pstep rv d3"><div class="no">٠٤</div><h4>المتابعة</h4><p>متابعة دورية وبرنامج عناية منزلي للحفاظ على نتائجك دائماً.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- TEAM -->
+<section class="wrap" id="team">
+  <span class="eyebrow rv">فريقنا</span>
+  <h2 class="h2 rv d1">أطبّاء تثق بهم.</h2>
+  <p class="lead rv d2">نخبة من استشاريي طب الأسنان بخبرات محلية وعالمية.</p>
+  <div class="docs">
+    <div class="doc rv"><div class="ph"><div class="art g-teal"><svg style="color:#fff"><use href="#tooth"/></svg></div></div><div class="info"><h5>د. سارة العتيبي</h5><span class="sp">استشارية تجميل الأسنان</span><p>خبرة ١٢ عاماً في تصميم الابتسامة والفينير.</p></div></div>
+    <div class="doc rv d1"><div class="ph"><div class="art g-sky"><svg style="color:#fff"><use href="#tooth"/></svg></div></div><div class="info"><h5>د. خالد المنصور</h5><span class="sp">أخصائي زراعة الأسنان</span><p>أكثر من ٣٠٠٠ زراعة ناجحة بتقنيات رقمية.</p></div></div>
+    <div class="doc rv d2"><div class="ph"><div class="art g-coral"><svg style="color:#fff"><use href="#tooth"/></svg></div></div><div class="info"><h5>د. ليان الحربي</h5><span class="sp">أخصائية تقويم وأطفال</span><p>لمسة لطيفة تجعل زيارة الصغار ممتعة.</p></div></div>
+  </div>
+</section>
+
+<!-- REVIEWS -->
+<section class="tsec" id="reviews">
+  <div class="wrap">
+    <span class="eyebrow rv">آراء المرضى</span>
+    <h2 class="h2 rv d1">ثقةٌ نكسبها كل يوم.</h2>
+    <div class="tgrid">
+      <div class="tcard rv d1">
+        <div class="stars">★★★★★</div>
+        <q>«تجربة مختلفة تماماً. من لحظة دخولي شعرت بالراحة، والدكتورة شرحت لي كل خطوة. نتيجة الفينير فاقت توقّعاتي وابتسامتي صارت أجمل من أي وقت.»</q>
+        <div class="who"><div class="av">ن</div><div><b>نورة السالم</b><span>ابتسامة هوليوود</span></div></div>
+      </div>
+      <div class="tside">
+        <div class="tmini rv d2"><div class="n">٩٨٪</div><p>من مرضانا يوصون بنا لأصدقائهم وعائلاتهم.</p></div>
+        <div class="tcard rv d3" style="padding:26px">
+          <div class="stars">★★★★★</div>
+          <q style="font-size:1.05rem;margin:12px 0">«أفضل عيادة زرت. زراعة بدون ألم ومتابعة ممتازة.»</q>
+          <div class="who"><div class="av" style="background:var(--coral)">م</div><div><b>محمد الدوسري</b><span>زراعة أسنان</span></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="wrap" id="faq">
+  <span class="eyebrow rv">أسئلة شائعة</span>
+  <h2 class="h2 rv d1">كل ما تودّ معرفته.</h2>
+  <div class="faq">
+    <details class="qa rv" open><summary>هل جلسات العلاج مؤلمة؟ <span class="pm">+</span></summary><div class="ans">نحرص على تجربة خالية من الألم قدر الإمكان باستخدام تخدير موضعي حديث وتقنيات لطيفة. معظم مرضانا يصفون الجلسات بأنها مريحة وسريعة.</div></details>
+    <details class="qa rv"><summary>كم تستغرق زراعة السن؟ <span class="pm">+</span></summary><div class="ans">تختلف حسب الحالة، لكن غالباً تتم الزراعة في جلسة واحدة تمتد من ٣٠ إلى ٦٠ دقيقة، مع فترة التئام تتراوح بين ٨ إلى ١٢ أسبوعاً قبل تركيب التاج النهائي.</div></details>
+    <details class="qa rv"><summary>هل تقبلون التأمين الطبي؟ <span class="pm">+</span></summary><div class="ans">نعم، نتعامل مع معظم شركات التأمين الرئيسية. تواصل معنا وسنساعدك في التحقق من تغطيتك قبل الموعد.</div></details>
+    <details class="qa rv"><summary>هل تتوفّر مواعيد طارئة؟ <span class="pm">+</span></summary><div class="ans">بالتأكيد. نخصّص مواعيد يومية للحالات الطارئة كآلام الأسنان الحادة والكسور. اتصل بنا وسنستقبلك في أقرب وقت.</div></details>
+  </div>
+</section>
+
+<!-- BOOK CTA -->
+<section id="book">
+  <div class="book">
+    <div class="g"></div>
+    <h3>ابتسامتك تستحق البداية اليوم</h3>
+    <p>احجز موعدك الآن واحصل على فحص واستشارة مجانية لأول زيارة. فريقنا بانتظارك.</p>
+    <a href="#" class="btn btn-w">احجز موعدك المجاني <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="fgrid">
+    <div class="col">
+      <div class="brand"><span class="bi"><svg width="22" height="22" style="color:#fff"><use href="#tooth"/></svg></span> نُصوع</div>
+      <p>عيادات نُصوع لطب وتجميل الأسنان — رعاية تثق بها، وابتسامة تفخر بها.</p>
+    </div>
+    <div class="col"><h6>خدماتنا</h6><a href="#services">ابتسامة هوليوود</a><a href="#services">زراعة الأسنان</a><a href="#services">التقويم</a><a href="#services">التبييض</a></div>
+    <div class="col"><h6>روابط</h6><a href="#team">فريقنا</a><a href="#reviews">آراء المرضى</a><a href="#faq">أسئلة شائعة</a><a href="#book">احجز موعد</a></div>
+    <div class="col"><h6>تواصل وزيارة</h6><div class="hours">📍 الرياض — طريق الملك فهد<br>📞 ٩٢٠ ٠٠٠ ٠٠٠<br>🕐 السبت–الخميس · ٩ص – ٩م<br>✉️ hello@nusoo.sa</div></div>
+  </div>
+  <div class="base"><span>© ٢٠٢٦ عيادات نُصوع — جميع الحقوق محفوظة</span><span>مرخّصة من وزارة الصحة</span></div>
+</footer>
+
+<button class="mtoggle" id="mtoggle"><span style="width:7px;height:7px;border-radius:50%;background:var(--teal);display:inline-block"></span> الحركة <b id="mtxt">ON</b></button>
+
+<script>
+(function(){
+  if(window.matchMedia('(prefers-reduced-motion: reduce)').matches)document.body.classList.add('reduce');
+
+  window.addEventListener('load',function(){
+    setTimeout(function(){
+      var l=document.getElementById('loader');l.classList.add('done');
+      setTimeout(function(){l.style.display='none';},800);
+      document.querySelector('.hero').classList.add('in');
+    },1500);
+  });
+
+  /* progress */
+  var prog=document.getElementById('progress');
+  addEventListener('scroll',function(){
+    var h=document.documentElement,max=h.scrollHeight-h.clientHeight;
+    prog.style.width=(h.scrollTop/max*100)+'%';
+    document.getElementById('nav').classList.toggle('scrolled',h.scrollTop>40);
+  },{passive:true});
+
+  /* reveal */
+  var io=new IntersectionObserver(function(es){
+    es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('show');io.unobserve(e.target);}});
+  },{threshold:.14});
+  document.querySelectorAll('.rv').forEach(function(el){io.observe(el);});
+
+  /* drag gallery */
+  var g=document.getElementById('gal'),down=false,sx,sl;
+  g.addEventListener('mousedown',function(e){down=true;g.classList.add('drag');sx=e.pageX;sl=g.scrollLeft;});
+  addEventListener('mouseup',function(){down=false;g.classList.remove('drag');});
+  g.addEventListener('mousemove',function(e){if(!down)return;e.preventDefault();g.scrollLeft=sl-(e.pageX-sx)*1.5;});
+
+  /* nav active */
+  var ids=['services','process','team','reviews','faq'];
+  var nio=new IntersectionObserver(function(es){
+    es.forEach(function(e){if(e.isIntersecting){
+      document.querySelectorAll('nav ul a').forEach(function(a){a.classList.remove('on');});
+      var link=document.querySelector('nav ul a[href="#'+e.target.id+'"]');if(link)link.classList.add('on');
+    }});
+  },{rootMargin:'-45% 0px -45% 0px'});
+  ids.forEach(function(id){var el=document.getElementById(id);if(el)nio.observe(el);});
+
+  /* motion toggle */
+  var on=true;document.getElementById('mtoggle').addEventListener('click',function(){
+    on=!on;document.body.classList.toggle('reduce',!on);document.getElementById('mtxt').textContent=on?'ON':'OFF';
+  });
+})();
+</script>
+</body>
+</html>
