@@ -121,6 +121,15 @@ nav ul a:hover{background:var(--crimson-soft);color:var(--crimson)}
     color-mix(in srgb, var(--sunken) 90%, var(--ink)) 13px 26px)}
 .shot .ph b{font-size:.95rem;font-weight:600;color:var(--ink2)}
 .shot .ph span{font-size:.8rem;max-width:26ch;line-height:1.6}
+/* pick a photo from your own device — the page embeds and saves it */
+.shot .pick{position:absolute;inset-inline-end:10px;bottom:10px;display:inline-flex;align-items:center;gap:7px;
+  background:color-mix(in srgb,var(--paper) 92%,transparent);backdrop-filter:blur(8px);
+  border:1px solid var(--line2);color:var(--ink);border-radius:99px;padding:8px 14px;
+  font-family:var(--far);font-size:.82rem;font-weight:600;cursor:pointer;
+  box-shadow:var(--shadow);opacity:0;transform:translateY(4px);transition:.25s}
+.shot:hover .pick,.shot .pick:focus-visible,.shot.is-empty .pick{opacity:1;transform:none}
+.shot .pick:hover{border-color:var(--crimson);color:var(--crimson)}
+.shot .pick[disabled]{opacity:.5;cursor:progress}
 /* 3:2 suits a wide view (a sea-facing office) better than a square-ish frame */
 .hero-shot{aspect-ratio:3/2;border-radius:var(--r3);box-shadow:var(--shadow-lg)}
 .space .shot{aspect-ratio:4/3;border-radius:var(--r);margin-bottom:16px}
@@ -272,7 +281,7 @@ footer a.ln:hover{color:var(--crimson)}
 </style>
 
 <!-- ══════════ shared state: every booking lives here ══════════ -->
-<script id="state" type="application/json">{"bookings":[]}</script>
+<script id="state" type="application/json">{"bookings":[],"photos":{}}</script>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
   <!-- fills are presentation attributes, not classes: a <use> shadow tree
@@ -326,14 +335,7 @@ footer a.ln:hover{color:var(--crimson)}
         <div class="fact"><div class="n nums">300</div><div class="k">ميغابت إنترنت</div></div>
       </div>
     </div>
-    <figure class="shot hero-shot" data-photo="hero">
-      <img alt="صورة مساحة العمل في الديوان" hidden>
-      <div class="ph">
-        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2.5" stroke="currentColor" stroke-width="1.6"/><circle cx="8.5" cy="10" r="1.6" stroke="currentColor" stroke-width="1.6"/><path d="m4 17 5-4.5 4 3.5 3-2.5 4 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        <b>مكان صورة المساحة</b>
-        <span>ارفع صورك في مجلد <code class="ltr">media/</code> وستظهر هنا</span>
-      </div>
-    </figure>
+    <figure class="shot hero-shot" data-photo="hero"></figure>
   </div>
 </header>
 
@@ -497,8 +499,9 @@ footer a.ln:hover{color:var(--crimson)}
 
   function readState(){
     try{ var s=JSON.parse(d.getElementById('state').textContent||'{}');
-         return {bookings: Array.isArray(s.bookings)? s.bookings : []}; }
-    catch(e){ return {bookings:[]}; }
+         return {bookings: Array.isArray(s.bookings)? s.bookings : [],
+                 photos: (s.photos && typeof s.photos==='object')? s.photos : {}}; }
+    catch(e){ return {bookings:[], photos:{}}; }
   }
   var state=readState();
   var sel={space:SPACES[0].id, day:null, slot:null};
@@ -514,30 +517,28 @@ footer a.ln:hover{color:var(--crimson)}
   }
 
   /* ───────── space cards ───────── */
-  /* Photos: fill a space id with a real image URL (or a data: URI) and it renders
-     instead of the placeholder. Nothing here is drawn — an empty slot stays empty. */
-  var PHOTOS={ hero:'', private:'', desk:'', meeting:'', training:'' };
+  /* Photos live in the shared state as compressed data URIs, so a photo a visitor
+     picks on their own device is embedded in the page and saved for everyone. */
+  var LABELS={hero:'مساحة العمل', private:'مكتب خاص', desk:'مكتب مشترك',
+              meeting:'قاعة اجتماعات', training:'قاعة تدريب'};
+  var CAM='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 8h3l1.5-2h7L17 8h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><circle cx="12" cy="13" r="3.2" stroke="currentColor" stroke-width="1.7"/></svg>';
 
-  function shot(key, alt, extraClass){
-    var src=PHOTOS[key];
-    return '<figure class="shot '+(extraClass||'')+'" data-photo="'+key+'">'+
-      (src? '<img src="'+src+'" alt="'+alt+'">'
-          : '<img alt="'+alt+'" hidden><div class="ph">'+
-            '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2.5" stroke="currentColor" stroke-width="1.6"/><circle cx="8.5" cy="10" r="1.6" stroke="currentColor" stroke-width="1.6"/><path d="m4 17 5-4.5 4 3.5 3-2.5 4 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>'+
-            '<b>صورة '+alt+'</b></div>')+
-    '</figure>';
+  function paintShot(fig){
+    var key=fig.getAttribute('data-photo'), src=state.photos[key], alt='صورة '+(LABELS[key]||'');
+    fig.classList.toggle('is-empty', !src);
+    fig.innerHTML = (src
+      ? '<img src="'+src+'" alt="'+alt+'">'
+      : '<div class="ph">'+
+        '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2.5" stroke="currentColor" stroke-width="1.6"/><circle cx="8.5" cy="10" r="1.6" stroke="currentColor" stroke-width="1.6"/><path d="m4 17 5-4.5 4 3.5 3-2.5 4 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>'+
+        '<b>'+alt+'</b><span>اضغط لاختيار صورة من جهازك</span></div>')+
+      '<button class="pick" type="button" data-pickphoto="'+key+'">'+CAM+
+        (src? 'تغيير الصورة':'اختر صورة')+'</button>';
   }
-  /* hero slot follows the same rule */
-  (function(){
-    var h=d.querySelector('.hero-shot');
-    if(h && PHOTOS.hero){
-      h.innerHTML='<img src="'+PHOTOS.hero+'" alt="صورة مساحة العمل في الديوان">';
-    }
-  })();
+  function paintAllShots(){ d.querySelectorAll('[data-photo]').forEach(paintShot); }
 
   d.getElementById('spaceCards').innerHTML = SPACES.map(function(s){
     return '<article class="space rv">'+
-      shot(s.id, s.name)+
+      '<figure class="shot" data-photo="'+s.id+'"></figure>'+
       '<div class="top"><div class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none">'+s.icon+'</svg></div>'+
       '<span class="cap">'+s.cap+'</span></div>'+
       '<h3>'+s.name+'</h3><p>'+s.desc+'</p>'+
@@ -606,6 +607,73 @@ footer a.ln:hover{color:var(--crimson)}
 
   function renderAll(){ renderSlots(); renderSummary(); renderList(); }
   renderAll();
+  paintAllShots();
+
+  /* ───────── photo picking ─────────
+     The file lives on the visitor's device, so the browser reads it, shrinks it,
+     and the page saves it into its own state — no server or network involved. */
+  var fileInput=d.createElement('input');
+  fileInput.type='file'; fileInput.accept='image/*'; fileInput.hidden=true;
+  d.body.appendChild(fileInput);
+  var pendingKey=null;
+
+  function shrink(file, maxW, quality){
+    return new Promise(function(resolve, reject){
+      var url=URL.createObjectURL(file), im=new Image();
+      im.onload=function(){
+        var scale=Math.min(1, maxW/im.naturalWidth);
+        var w=Math.round(im.naturalWidth*scale), h=Math.round(im.naturalHeight*scale);
+        var c=d.createElement('canvas'); c.width=w; c.height=h;
+        c.getContext('2d').drawImage(im,0,0,w,h);
+        URL.revokeObjectURL(url);
+        try{ resolve(c.toDataURL('image/jpeg', quality)); }catch(e){ reject(e); }
+      };
+      im.onerror=function(){ URL.revokeObjectURL(url); reject(new Error('bad image')); };
+      im.src=url;
+    });
+  }
+
+  d.addEventListener('click', function(e){
+    var b=e.target.closest('[data-pickphoto]'); if(!b) return;
+    pendingKey=b.getAttribute('data-pickphoto');
+    fileInput.value=''; fileInput.click();
+  });
+
+  fileInput.addEventListener('change', function(){
+    var f=fileInput.files && fileInput.files[0];
+    if(!f || !pendingKey) return;
+    var key=pendingKey, fig=d.querySelector('[data-photo="'+key+'"]');
+    var btn=fig && fig.querySelector('.pick');
+    if(btn){ btn.disabled=true; btn.textContent='جارٍ المعالجة…'; }
+
+    shrink(f, key==='hero'? 1800 : 1200, key==='hero'? 0.84 : 0.8).then(function(dataUrl){
+      var next={ bookings: state.bookings, photos: Object.assign({}, state.photos) };
+      next.photos[key]=dataUrl;
+      /* keep the page comfortably inside the size ceiling */
+      var approx=JSON.stringify(next.photos).length;
+      if(approx > 12*1024*1024){
+        state=next; paintAllShots();
+        say('warn','الصورة كبيرة جداً لتُحفظ مع الصفحة — ظهرت لك فقط. جرّب صورة أصغر.');
+        return;
+      }
+      if(!api){
+        state=next; paintAllShots();
+        say('warn','ظهرت الصورة لك في هذه الجلسة فقط — لا تملك صلاحية الحفظ للجميع.');
+        return;
+      }
+      return api.publish(buildDoc(next)).then(function(){
+        say('ok','تم حفظ الصورة — ستظهر لكل من يفتح الصفحة.');
+      });
+    }).catch(function(err){
+      paintAllShots();
+      var code=err && err.code;
+      if(code==='not_granted' || code==='not_writer'){
+        say('warn','العرض فقط — لا تملك صلاحية تغيير صور هذه الصفحة.');
+      } else {
+        say('warn','تعذّر استخدام هذا الملف. جرّب صورة بصيغة JPG أو PNG.');
+      }
+    });
+  });
 
   /* ───────── interactions ───────── */
   function press(container, attr, value){
@@ -660,9 +728,12 @@ footer a.ln:hover{color:var(--crimson)}
     var prev=stateEl.textContent;
     stateEl.textContent=JSON.stringify(newState);
     /* publish a clean copy: strip runtime-rendered children and transient classes */
-    var dyn=['spaceCards','spaceChips','dayChips','slotGrid','blist'].map(function(id){
-      var el=d.getElementById(id); return {el:el, html:el.innerHTML};
-    });
+    /* the hero figure sits outside the cleared containers — empty it too, or its
+       photo would be stored twice: once in state and once in the markup */
+    var nodes=['spaceCards','spaceChips','dayChips','slotGrid','blist']
+      .map(function(id){ return d.getElementById(id); });
+    nodes.push(d.querySelector('.hero-shot'));
+    var dyn=nodes.filter(Boolean).map(function(el){ return {el:el, html:el.innerHTML}; });
     dyn.forEach(function(x){ x.el.innerHTML=''; });
     var revealed=[].slice.call(d.querySelectorAll('.rv.on'));
     revealed.forEach(function(el){ el.classList.remove('on'); });
