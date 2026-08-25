@@ -1,0 +1,459 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NOCTIS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500;600;700&family=Sora:wght@400;600;700;800&family=Noto+Kufi+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ═══════════ TOKENS ═══════════ */
+:root{
+  --void:#08090B; --graphite:#12151A; --slate:#1B1F26; --steel:#2A2F38;
+  --snow:#F4F6F8; --mist:#B9C0C9; --dim:#6E7681;
+  --copper:#C87F4A; --copper2:#E09B62; --ice:#8FB6C9;
+  --line:rgba(255,255,255,.09); --line2:rgba(255,255,255,.16);
+  --paint:#B9C0C9;               /* live paint colour */
+  --fdisp:'Oswald',sans-serif; --fhead:'Sora',sans-serif; --far:'Noto Kufi Arabic',sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;font-size:16px}
+body{font-family:var(--far);background:var(--void);color:var(--snow);line-height:1.65;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+svg{display:block}
+::selection{background:var(--copper);color:var(--void)}
+::-webkit-scrollbar{width:0}
+.reduce *{animation:none!important;transition:none!important}
+:focus-visible{outline:2px solid var(--copper);outline-offset:3px}
+h1,h2,h3{text-wrap:balance}
+
+.wrap{max-width:1320px;margin:0 auto;padding-inline:clamp(20px,5vw,64px)}
+section{padding-block:clamp(80px,14vh,190px);position:relative}
+
+/* latin display lockups must stay LTR inside an RTL document */
+.ltr{direction:ltr;unicode-bidi:isolate}
+
+#bar{position:fixed;top:0;right:0;height:2px;width:0;background:linear-gradient(90deg,var(--copper),var(--ice));z-index:90}
+
+/* ═══════════ NAV ═══════════ */
+nav{position:fixed;top:0;inset-inline:0;z-index:80;display:flex;align-items:center;justify-content:space-between;
+  padding:18px clamp(20px,5vw,64px);transition:background .5s,border-color .5s,padding .4s;border-bottom:1px solid transparent}
+nav.sc{background:rgba(8,9,11,.78);backdrop-filter:blur(18px);border-bottom-color:var(--line);padding-block:13px}
+nav .mark{font-family:var(--fdisp);font-weight:600;font-size:1.32rem;letter-spacing:.42em;color:var(--snow)}
+nav ul{display:flex;gap:34px;list-style:none}
+nav ul a{font-size:.9rem;color:var(--mist);transition:color .3s;position:relative}
+nav ul a::after{content:"";position:absolute;inset-inline-start:0;bottom:-7px;height:1px;width:0;background:var(--copper);transition:width .35s}
+nav ul a:hover{color:var(--snow)}nav ul a:hover::after{width:100%}
+nav .cta{font-size:.88rem;font-weight:600;padding:11px 24px;border:1px solid var(--line2);border-radius:2px;transition:.35s;white-space:nowrap}
+nav .cta:hover{background:var(--snow);color:var(--void);border-color:var(--snow)}
+@media(max-width:900px){nav ul{display:none}}
+
+/* ═══════════ THE CAR ═══════════ */
+.car{width:100%;height:auto;overflow:visible}
+.car .paint{fill:var(--paint);transition:fill .8s cubic-bezier(.4,0,.2,1)}
+.car .paint-dk{fill:color-mix(in srgb, var(--paint) 62%, #000);transition:fill .8s cubic-bezier(.4,0,.2,1)}
+.car .glass{fill:#0C1116;opacity:.92}
+.car .tyre{fill:#0B0D10}
+.car .rim{fill:none;stroke:var(--mist);stroke-width:3;opacity:.75}
+.car .spoke{stroke:var(--mist);stroke-width:6;opacity:.5}
+.car .beam{fill:var(--copper2)}
+.wheelspin{transform-box:fill-box;transform-origin:center;animation:roll 2.6s linear infinite}
+@keyframes roll{to{transform:rotate(360deg)}}
+.car .shadow{fill:#000;opacity:.55;filter:blur(1px)}
+
+/* ═══════════ HERO ═══════════ */
+.hero{min-height:100svh;display:flex;flex-direction:column;justify-content:center;align-items:center;
+  text-align:center;padding:clamp(110px,16vh,160px) 20px 70px;overflow:hidden}
+.hero .halo{position:absolute;width:min(120vw,1500px);aspect-ratio:2/1;left:50%;top:56%;transform:translate(-50%,-50%);
+  background:radial-gradient(ellipse at center, rgba(200,127,74,.20), transparent 66%);pointer-events:none}
+.hero .kicker{font-family:var(--fdisp);font-size:.8rem;letter-spacing:.44em;text-transform:uppercase;color:var(--copper);
+  opacity:0;transform:translateY(14px);animation:up .9s .15s forwards}
+.hero h1{font-family:var(--fdisp);font-weight:300;font-size:clamp(3.6rem,15vw,12rem);line-height:.9;letter-spacing:.16em;
+  margin-top:18px;color:var(--snow)}
+.hero h1 span{display:inline-block;opacity:0;transform:translateY(70px);animation:up 1.1s cubic-bezier(.16,.84,.3,1) forwards}
+.hero .ar{font-size:clamp(1.05rem,2.4vw,1.5rem);color:var(--mist);margin-top:12px;opacity:0;transform:translateY(16px);animation:up .9s .75s forwards}
+.hero .stage{width:min(1180px,96vw);margin-top:clamp(6px,3vh,34px);opacity:0;transform:translateY(60px) scale(.97);
+  animation:up 1.3s .5s cubic-bezier(.16,.84,.3,1) forwards;position:relative}
+.hero .acts{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:34px;opacity:0;transform:translateY(18px);animation:up .9s .95s forwards}
+@keyframes up{to{opacity:1;transform:none}}
+.btn{font-family:var(--far);font-size:.98rem;font-weight:600;padding:15px 34px;border-radius:2px;cursor:pointer;
+  border:1px solid transparent;transition:.35s;display:inline-flex;align-items:center;gap:10px}
+.btn-p{background:var(--snow);color:var(--void)}
+.btn-p:hover{background:var(--copper);color:var(--void);transform:translateY(-3px)}
+.btn-g{border-color:var(--line2);color:var(--snow)}
+.btn-g:hover{border-color:var(--snow);transform:translateY(-3px)}
+
+/* ═══════════ STAT STRIP ═══════════ */
+.strip{border-block:1px solid var(--line);padding-block:0}
+.strip .row{display:grid;grid-template-columns:repeat(4,1fr)}
+.strip .cell{padding:46px 24px;text-align:center;border-inline-start:1px solid var(--line)}
+.strip .cell:first-child{border-inline-start:none}
+.strip .n{font-family:var(--fdisp);font-weight:400;font-size:clamp(2.2rem,4.6vw,3.5rem);color:var(--snow);line-height:1;
+  font-variant-numeric:tabular-nums}
+.strip .n b{font-size:.44em;color:var(--copper);font-weight:400;margin-inline-start:6px}
+.strip .k{font-size:.85rem;color:var(--dim);margin-top:10px;letter-spacing:.02em}
+@media(max-width:820px){.strip .row{grid-template-columns:1fr 1fr}.strip .cell:nth-child(-n+2){border-block-end:1px solid var(--line)}.strip .cell:nth-child(odd){border-inline-start:none}}
+
+/* ═══════════ SECTION HEADINGS ═══════════ */
+.eyebrow{font-family:var(--fdisp);font-size:.78rem;letter-spacing:.36em;text-transform:uppercase;color:var(--copper);
+  display:flex;align-items:center;gap:14px;margin-bottom:22px}
+.eyebrow::before{content:"";width:44px;height:1px;background:var(--copper);flex:0 0 auto}
+.h2{font-family:var(--fhead);font-weight:800;font-size:clamp(2.1rem,5.6vw,4.2rem);line-height:1.04;letter-spacing:-.015em}
+.h2 .c{color:var(--copper)}
+.lead{max-width:60ch;margin-top:20px;color:var(--mist);font-size:clamp(1rem,1.6vw,1.15rem)}
+
+/* scroll reveals */
+.rv{opacity:0;transform:translateY(40px);transition:opacity 1.05s cubic-bezier(.16,.84,.3,1),transform 1.05s cubic-bezier(.16,.84,.3,1)}
+.rv.on{opacity:1;transform:none}
+.rv.d1{transition-delay:.1s}.rv.d2{transition-delay:.2s}.rv.d3{transition-delay:.3s}
+
+/* ═══════════ CONFIGURATOR ═══════════ */
+.config{background:var(--graphite);border-block:1px solid var(--line)}
+.config .grid{display:grid;grid-template-columns:1fr 380px;gap:clamp(30px,5vw,70px);align-items:center}
+.config .stage{position:relative}
+.config .stage .glow{position:absolute;inset:12% -6% -14% -6%;
+  background:radial-gradient(ellipse at 50% 60%, color-mix(in srgb,var(--paint) 26%, transparent), transparent 68%);
+  transition:background .8s;pointer-events:none}
+.config .panel .name{font-family:var(--fhead);font-weight:800;font-size:clamp(1.9rem,3.4vw,2.7rem);line-height:1.1}
+.config .panel .desc{color:var(--mist);margin-top:12px;min-height:3.2em}
+.config .swatches{display:flex;gap:12px;flex-wrap:wrap;margin-top:30px}
+.sw{width:46px;height:46px;border-radius:50%;cursor:pointer;border:0;position:relative;
+  box-shadow:inset 0 -10px 18px rgba(0,0,0,.45), inset 0 6px 12px rgba(255,255,255,.22);transition:transform .3s}
+.sw:hover{transform:scale(1.09)}
+.sw[aria-pressed="true"]::after{content:"";position:absolute;inset:-8px;border:1px solid var(--snow);border-radius:50%}
+.config .price{margin-top:34px;padding-top:24px;border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:baseline}
+.config .price .p{font-family:var(--fdisp);font-size:1.9rem;color:var(--snow);font-variant-numeric:tabular-nums}
+.config .price .t{font-size:.85rem;color:var(--dim)}
+@media(max-width:940px){.config .grid{grid-template-columns:1fr}.config .panel{text-align:center}.config .swatches{justify-content:center}}
+
+/* ═══════════ PINNED STATEMENT ═══════════ */
+.pin{height:230vh;position:relative}
+.pin .sticky{position:sticky;top:0;height:100svh;display:grid;place-items:center;overflow:hidden;text-align:center;padding-inline:20px}
+.pin .big{font-family:var(--fdisp);font-weight:300;font-size:clamp(2.6rem,11vw,9rem);line-height:.94;letter-spacing:.06em;color:var(--snow)}
+.pin .big em{font-style:normal;color:var(--copper)}
+.pin .sub{color:var(--mist);margin-top:22px;max-width:52ch;margin-inline:auto}
+.pin .ring{position:absolute;border:1px solid var(--line);border-radius:50%;left:50%;top:50%;translate:-50% -50%}
+
+/* ═══════════ GALLERY ═══════════ */
+.gal{display:flex;gap:22px;overflow-x:auto;padding:8px 0 46px;scroll-snap-type:x mandatory;cursor:grab}
+.gal::-webkit-scrollbar{height:3px}
+.gal::-webkit-scrollbar-thumb{background:var(--steel)}
+.gal.drag{cursor:grabbing}
+.gal figure:first-child{margin-inline-start:clamp(20px,5vw,64px)}
+.gal figure:last-child{margin-inline-end:clamp(20px,5vw,64px)}
+.gal figure{flex:0 0 auto;width:clamp(268px,34vw,440px);scroll-snap-align:start}
+.gal .fr{aspect-ratio:4/3;border:1px solid var(--line);position:relative;overflow:hidden;background:var(--graphite)}
+.gal .fr::after{content:"";position:absolute;inset:0;background:
+  radial-gradient(120% 90% at 30% 20%, rgba(255,255,255,.07), transparent 60%)}
+.gal figcaption{margin-top:14px;font-size:.92rem;color:var(--mist)}
+.gal figcaption b{display:block;font-family:var(--fdisp);font-size:.74rem;letter-spacing:.24em;color:var(--dim);
+  text-transform:uppercase;font-weight:400;margin-top:4px}
+.hint{font-family:var(--fdisp);font-size:.74rem;letter-spacing:.3em;color:var(--dim);text-transform:uppercase;
+  padding-inline:clamp(20px,5vw,64px);margin-bottom:10px}
+
+/* interior tiles drawn in CSS */
+.fr.t-cabin{background:
+  linear-gradient(105deg, #1a1d23 0%, #23272f 42%, #14171c 100%),
+  radial-gradient(60% 80% at 70% 30%, rgba(200,127,74,.22), transparent 70%)}
+.fr.t-seat{background:
+  repeating-linear-gradient(96deg, rgba(255,255,255,.045) 0 2px, transparent 2px 22px),
+  linear-gradient(160deg,#3a2a20,#1b1410)}
+.fr.t-wheelt{background:
+  conic-gradient(from 200deg at 50% 50%, #23262c, #34383f, #1a1d22, #23262c),
+  var(--graphite)}
+.fr.t-light{background:
+  linear-gradient(100deg,#0d1015 0%,#0d1015 44%, var(--copper) 46%, var(--copper2) 50%, #0d1015 52%, #0d1015 100%)}
+.fr.t-alloy{background:conic-gradient(from 0deg at 50% 50%, #1c1f25 0 8%, #40454d 8% 10%, #1c1f25 10% 20%,
+  #40454d 20% 22%, #1c1f25 22% 32%, #40454d 32% 34%, #1c1f25 34% 44%, #40454d 44% 46%, #1c1f25 46% 100%)}
+.fr.t-charge{background:
+  radial-gradient(70% 70% at 50% 45%, rgba(143,182,201,.35), transparent 66%), var(--slate)}
+
+/* ═══════════ SPEC LIST ═══════════ */
+.specs{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line)}
+.spec{background:var(--void);padding:38px 30px;transition:background .45s}
+.spec:hover{background:var(--graphite)}
+.spec .i{width:44px;height:44px;border:1px solid var(--line2);display:grid;place-items:center;color:var(--copper);margin-bottom:22px}
+.spec h4{font-family:var(--fhead);font-weight:700;font-size:1.14rem}
+.spec p{color:var(--mist);font-size:.93rem;margin-top:8px}
+@media(max-width:900px){.specs{grid-template-columns:1fr 1fr}}
+@media(max-width:600px){.specs{grid-template-columns:1fr}}
+
+/* ═══════════ CTA ═══════════ */
+.cta-b{border:1px solid var(--line);padding:clamp(46px,8vw,92px) clamp(24px,5vw,60px);text-align:center;position:relative;overflow:hidden}
+.cta-b .g{position:absolute;width:60%;aspect-ratio:2/1;left:50%;top:-30%;translate:-50% 0;
+  background:radial-gradient(ellipse,rgba(200,127,74,.22),transparent 68%)}
+.cta-b h3{font-family:var(--fdisp);font-weight:300;font-size:clamp(2rem,6vw,4rem);letter-spacing:.1em;position:relative}
+.cta-b p{color:var(--mist);max-width:46ch;margin:16px auto 34px;position:relative}
+
+/* ═══════════ FOOTER ═══════════ */
+footer{border-top:1px solid var(--line);padding:70px clamp(20px,5vw,64px) 40px}
+footer .fg{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:34px}
+footer .mark{font-family:var(--fdisp);font-weight:500;font-size:1.3rem;letter-spacing:.4em;margin-bottom:14px}
+footer p{color:var(--dim);font-size:.92rem;max-width:34ch}
+footer h6{font-family:var(--fdisp);font-size:.74rem;letter-spacing:.26em;text-transform:uppercase;color:var(--copper);margin-bottom:14px;font-weight:400}
+footer a{display:block;padding:6px 0;color:var(--mist);font-size:.92rem;transition:.3s}
+footer a:hover{color:var(--snow)}
+footer .base{margin-top:52px;padding-top:24px;border-top:1px solid var(--line);display:flex;justify-content:space-between;
+  flex-wrap:wrap;gap:12px;color:var(--dim);font-size:.8rem;font-family:var(--fdisp);letter-spacing:.12em}
+@media(max-width:820px){footer .fg{grid-template-columns:1fr 1fr}footer .fg>:first-child{grid-column:1/-1}}
+
+.mtog{position:fixed;bottom:18px;inset-inline-start:18px;z-index:80;background:var(--slate);color:var(--snow);
+  border:1px solid var(--line);font-family:var(--fdisp);font-size:.7rem;letter-spacing:.2em;padding:9px 15px;
+  border-radius:2px;cursor:pointer}
+.mtog b{color:var(--copper)}
+</style>
+</head>
+<body>
+<div id="bar"></div>
+
+<!-- car markup is injected by JS (light DOM, so page CSS applies) -->
+
+<!-- ════════ NAV ════════ -->
+<nav id="nav">
+  <a href="#top" class="mark ltr">NOCTIS</a>
+  <ul>
+    <li><a href="#design">التصميم</a></li>
+    <li><a href="#configure">الألوان</a></li>
+    <li><a href="#interior">المقصورة</a></li>
+    <li><a href="#tech">التقنية</a></li>
+  </ul>
+  <a href="#order" class="cta">احجز تجربة قيادة</a>
+</nav>
+
+<!-- ════════ HERO ════════ -->
+<header class="hero" id="top">
+  <div class="halo"></div>
+  <p class="kicker ltr">Fully Electric · 2026</p>
+  <h1 class="ltr" aria-label="NOCTIS"><span style="animation-delay:.18s">N</span><span style="animation-delay:.25s">O</span><span style="animation-delay:.32s">C</span><span style="animation-delay:.39s">T</span><span style="animation-delay:.46s">I</span><span style="animation-delay:.53s">S</span></h1>
+  <p class="ar">الصمت الذي يسبق السرعة.</p>
+  <div class="stage"><div class="car-slot"></div></div>
+  <div class="acts">
+    <a href="#configure" class="btn btn-p">صمّم سيارتك</a>
+    <a href="#design" class="btn btn-g">اكتشف المزيد</a>
+  </div>
+</header>
+
+<!-- ════════ STAT STRIP ════════ -->
+<section class="strip">
+  <div class="row">
+    <div class="cell"><div class="n" data-to="2.9">0.0<b>ث</b></div><div class="k">من ٠ إلى ١٠٠ كم/س</div></div>
+    <div class="cell"><div class="n" data-to="782">0<b>حصان</b></div><div class="k">قوة مزدوجة المحرك</div></div>
+    <div class="cell"><div class="n" data-to="710">0<b>كم</b></div><div class="k">مدى القيادة</div></div>
+    <div class="cell"><div class="n" data-to="18">0<b>دقيقة</b></div><div class="k">شحن ١٠٪ إلى ٨٠٪</div></div>
+  </div>
+</section>
+
+<!-- ════════ DESIGN ════════ -->
+<section class="wrap" id="design">
+  <p class="eyebrow rv ltr">The Silhouette</p>
+  <h2 class="h2 rv d1">خطٌّ واحد<br>من الأمام <span class="c">إلى الأفق</span>.</h2>
+  <p class="lead rv d2">سقفٌ ينساب دون انقطاع، ومقابض مخفيّة، وحوافّ نُحتت في نفق الهواء حتى بلغ معامل الجرّ ٠٫١٩ — الأدنى في فئتها. كل منحنى هنا وُجد لسببٍ واحد: أن تمرّ الريح دون أن تشعر بها.</p>
+</section>
+
+<!-- ════════ CONFIGURATOR ════════ -->
+<section class="config" id="configure">
+  <div class="wrap grid">
+    <div class="stage rv">
+      <div class="glow"></div>
+      <div class="car-slot"></div>
+    </div>
+    <div class="panel rv d1">
+      <p class="eyebrow ltr">Paint</p>
+      <div class="name" id="pName">فضّي قمري</div>
+      <p class="desc" id="pDesc">طلاءٌ معدنيّ ناعم يعكس الضوء كسطح مصقول، ويكشف انحناءات الهيكل عند كل زاوية.</p>
+      <div class="swatches" id="sw" role="group" aria-label="اختيار اللون"></div>
+      <div class="price">
+        <div><div class="p ltr" id="pPrice">٣٤٩٬٠٠٠</div><div class="t">ريال · شامل الضريبة</div></div>
+        <a href="#order" class="btn btn-p" style="padding:12px 26px">احجز</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════ PINNED STATEMENT ════════ -->
+<section class="pin">
+  <div class="sticky">
+    <div class="ring" style="width:64vmin;height:64vmin"></div>
+    <div class="ring" style="width:88vmin;height:88vmin"></div>
+    <div>
+      <p class="big ltr">SILENCE<br><em>IS POWER</em></p>
+      <p class="sub">لا صوت محرّك. لا اهتزاز. فقط دفعةٌ فوريّة تُلصقك بالمقعد، ثم هدوءٌ تسمع فيه الموسيقى كما سُجّلت تماماً.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ════════ INTERIOR GALLERY ════════ -->
+<section id="interior" style="padding-bottom:clamp(40px,6vh,70px)">
+  <div class="wrap" style="padding-bottom:44px">
+    <p class="eyebrow rv ltr">The Cabin</p>
+    <h2 class="h2 rv d1">صُنعت <span class="c">باليد</span>.</h2>
+  </div>
+  <p class="hint rv">اسحب للاستعراض · Drag</p>
+  <div class="gal" id="gal">
+    <figure><div class="fr t-cabin"></div><figcaption>لوحة قيادة مقوّسة بشاشة ممتدّة ١٤٫٦ بوصة.<b>Cockpit</b></figcaption></figure>
+    <figure><div class="fr t-seat"></div><figcaption>جلد ناپا مدبوغ نباتياً بخياطة يدوية.<b>Nappa Leather</b></figcaption></figure>
+    <figure><div class="fr t-wheelt"></div><figcaption>مقود مسطّح القاعدة بألياف الكربون.<b>Steering</b></figcaption></figure>
+    <figure><div class="fr t-light"></div><figcaption>إضاءة محيطية بـ ٦٤ لوناً تتفاعل مع القيادة.<b>Ambient</b></figcaption></figure>
+    <figure><div class="fr t-alloy"></div><figcaption>جنوط ٢١ بوصة مزوّرة، مصقولة بالماس.<b>21" Forged</b></figcaption></figure>
+    <figure><div class="fr t-charge"></div><figcaption>شحن سريع ٣٥٠ كيلوواط بمنفذ مزدوج.<b>Charging</b></figcaption></figure>
+  </div>
+</section>
+
+<!-- ════════ TECH ════════ -->
+<section class="wrap" id="tech">
+  <p class="eyebrow rv ltr">Engineering</p>
+  <h2 class="h2 rv d1">هندسةٌ لا تُرى<br>لكنها <span class="c">تُحسّ</span>.</h2>
+  <div class="specs rv d2" style="margin-top:54px">
+    <div class="spec"><div class="i"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M13 2 4 14h7l-1 8 9-12h-7l1-8Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg></div><h4>محرّكان كهربائيان</h4><p>دفع رباعي بعزم فوري وتوزيع ذكيّ للقوة بين المحورين آلاف المرات في الثانية.</p></div>
+    <div class="spec"><div class="i"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><rect x="3" y="7" width="15" height="10" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M21 11v2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div><h4>بطارية ١٠٨ ك.و.س</h4><p>خلايا مبرّدة بالسائل مع إدارة حرارية تحافظ على الأداء في حرارة الصيف.</p></div>
+    <div class="spec"><div class="i"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6l-8-3Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg></div><h4>مساعدات قيادة</h4><p>٣٢ مستشعراً ورادار بعيد المدى لقيادة شبه ذاتية على الطرق السريعة.</p></div>
+    <div class="spec"><div class="i"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4 16c2-6 14-6 16 0" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="7" cy="18" r="2" stroke="currentColor" stroke-width="1.6"/><circle cx="17" cy="18" r="2" stroke="currentColor" stroke-width="1.6"/></svg></div><h4>تعليق هوائي تكيّفي</h4><p>يقرأ الطريق ٥٠٠ مرة بالثانية ويخفض الهيكل تلقائياً عند السرعات العالية.</p></div>
+    <div class="spec"><div class="i"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/><path d="M12 7v5l3 3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div><h4>تحديثات لاسلكية</h4><p>سيارتك تتحسّن وهي واقفة — أداء وميزات جديدة تصل عبر الهواء.</p></div>
+    <div class="spec"><div class="i"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M3 12h4l3-7 4 14 3-7h4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div><h4>صوت محيطي ٢١ سمّاعة</h4><p>عزلٌ صوتي بزجاج مزدوج يجعل المقصورة أهدأ من غرفة استماع.</p></div>
+  </div>
+</section>
+
+<!-- ════════ CTA ════════ -->
+<section class="wrap" id="order">
+  <div class="cta-b rv">
+    <div class="g"></div>
+    <h3 class="ltr">TAKE THE WHEEL</h3>
+    <p>احجز تجربة قيادة في أقرب صالة عرض، أو ابدأ بتصميم سيارتك أونلاين خلال دقائق.</p>
+    <a href="#" class="btn btn-p">احجز تجربة قيادة</a>
+  </div>
+</section>
+
+<!-- ════════ FOOTER ════════ -->
+<footer>
+  <div class="fg">
+    <div><div class="mark ltr">NOCTIS</div><p>علامة سيارات كهربائية فاخرة — تصميم مفهومي وُجد ليُظهر ما يمكن للتفاصيل أن تفعله.</p></div>
+    <div><h6 class="ltr">Models</h6><a href="#design">NOCTIS S</a><a href="#design">NOCTIS S Performance</a><a href="#configure">الطلبات الخاصة</a></div>
+    <div><h6 class="ltr">Explore</h6><a href="#interior">المقصورة</a><a href="#tech">التقنية</a><a href="#order">تجربة القيادة</a></div>
+    <div><h6 class="ltr">Contact</h6><a href="#">الرياض · جدة · الدمام</a><a href="#">٩٢٠ ٠٠٠ ٠٠٠</a><a href="#">hello@noctis.auto</a></div>
+  </div>
+  <div class="base"><span class="ltr">© 2026 NOCTIS — CONCEPT DESIGN</span><span class="ltr">RIYADH</span></div>
+</footer>
+
+<button class="mtog" id="mtog">الحركة <b id="mtxt">ON</b></button>
+
+<script>
+(function(){
+  var d=document, reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(reduced) d.body.classList.add('reduce');
+
+  /* ---- the car, injected into the light DOM so page CSS + var(--paint) apply ---- */
+  function wheel(cx){
+    return '<circle class="tyre" cx="'+cx+'" cy="286" r="84"/>'+
+      '<circle cx="'+cx+'" cy="286" r="83" fill="none" stroke="#000" stroke-width="2" opacity=".8"/>'+
+      '<g class="wheelspin">'+
+        '<circle cx="'+cx+'" cy="286" r="50" fill="#171A1F"/>'+
+        '<circle class="rim" cx="'+cx+'" cy="286" r="50"/>'+
+        '<g class="spoke"><path d="M'+cx+',240 L'+cx+',332 M'+(cx-46)+',286 L'+(cx+46)+',286'+
+          ' M'+(cx-32)+',254 L'+(cx+32)+',318 M'+(cx+32)+',254 L'+(cx-32)+',318"/></g>'+
+        '<circle cx="'+cx+'" cy="286" r="11" fill="var(--steel)"/>'+
+      '</g>';
+  }
+  function carSVG(){
+    return '<svg class="car" viewBox="0 0 1240 400" role="img" aria-label="سيارة نوكتيس الكهربائية">'+
+      '<ellipse class="shadow" cx="620" cy="358" rx="470" ry="14"/>'+
+      /* body */
+      '<path class="paint" d="M78,306 C60,300 54,278 60,252 C64,232 84,220 116,214 L200,202'+
+        ' C250,152 322,120 424,110 C540,99 660,104 748,124 C838,145 928,178 1010,206'+
+        ' L1112,224 C1152,234 1170,254 1166,282 C1164,300 1148,306 1120,306 Z"/>'+
+      /* lower body shading + rocker */
+      '<path class="paint-dk" d="M78,306 C60,300 54,278 60,252 L1166,278 C1164,300 1148,306 1120,306 Z" opacity=".42"/>'+
+      '<path d="M300,300 L940,300" stroke="rgba(0,0,0,.45)" stroke-width="10" stroke-linecap="round" fill="none"/>'+
+      /* glass */
+      '<path class="glass" d="M356,196 C398,152 448,128 512,118 L512,196 Z"/>'+
+      '<path class="glass" d="M536,116 C610,112 682,120 742,136 L846,190 L536,196 Z"/>'+
+      /* seams, handle, mirror */
+      '<path d="M524,196 L524,292 M756,190 L742,292" stroke="rgba(0,0,0,.3)" stroke-width="2" fill="none"/>'+
+      '<rect x="560" y="216" width="54" height="7" rx="3.5" fill="rgba(0,0,0,.4)"/>'+
+      '<path class="paint-dk" d="M368,190 L334,181 L334,197 L368,201 Z"/>'+
+      /* head light + tail light */
+      '<path class="beam" d="M80,236 L158,228 L158,244 L82,251 C73,247 73,240 80,236 Z"/>'+
+      '<rect x="1084" y="246" width="70" height="11" rx="4" fill="#D8474A"/>'+
+      /* wheel wells */
+      '<path d="M204,290 A96,96 0 0 1 396,290 Z" fill="rgba(0,0,0,.55)"/>'+
+      '<path d="M844,290 A96,96 0 0 1 1036,290 Z" fill="rgba(0,0,0,.55)"/>'+
+      wheel(300)+wheel(940)+
+    '</svg>';
+  }
+  d.querySelectorAll('.car-slot').forEach(function(s){ s.innerHTML=carSVG(); });
+
+  /* ---- paint options ---- */
+  var PAINTS=[
+    {c:'#B9C0C9', n:'فضّي قمري',  d:'طلاءٌ معدنيّ ناعم يعكس الضوء كسطح مصقول، ويكشف انحناءات الهيكل عند كل زاوية.', p:'٣٤٩٬٠٠٠'},
+    {c:'#0E1116', n:'أسود عميق',  d:'أسودٌ لا نهائي بثلاث طبقات لكّ مصقولة يدوياً — يبتلع الضوء ويعيده كمرآة.', p:'٣٥٤٬٠٠٠'},
+    {c:'#7C1F24', n:'أحمر عقيق',  d:'أحمرٌ داكن بعمق الياقوت، يتحوّل إلى قرمزيّ متوهّج تحت شمس الغروب.', p:'٣٦١٬٠٠٠'},
+    {c:'#1E3A5C', n:'أزرق ليلي',  d:'أزرقٌ يميل إلى سواد الليل، ولا يفصح عن زرقته إلا حين يلامسه الضوء المباشر.', p:'٣٥٧٬٠٠٠'},
+    {c:'#3E4A3C', n:'أخضر زيتوني',d:'أخضرٌ مطفأ مستوحى من سيارات السباق الكلاسيكية — هادئ، نادر، وواثق.', p:'٣٦٤٬٠٠٠'},
+    {c:'#D8D3C6', n:'أبيض رملي',  d:'أبيضٌ دافئ بلمسة رمليّة، يبرز الظلال ويمنح الهيكل إحساساً نحتيّاً.', p:'٣٥١٬٠٠٠'}
+  ];
+  var sw=d.getElementById('sw');
+  PAINTS.forEach(function(p,i){
+    var b=d.createElement('button');
+    b.className='sw'; b.style.background=p.c; b.title=p.n;
+    b.setAttribute('aria-label',p.n);
+    b.setAttribute('aria-pressed', i===0?'true':'false');
+    b.addEventListener('click',function(){
+      d.documentElement.style.setProperty('--paint',p.c);
+      d.getElementById('pName').textContent=p.n;
+      d.getElementById('pDesc').textContent=p.d;
+      d.getElementById('pPrice').textContent=p.p;
+      [].forEach.call(sw.children,function(c){c.setAttribute('aria-pressed','false');});
+      b.setAttribute('aria-pressed','true');
+    });
+    sw.appendChild(b);
+  });
+
+  /* ---- scroll progress + nav ---- */
+  var bar=d.getElementById('bar'), nav=d.getElementById('nav');
+  addEventListener('scroll',function(){
+    var e=d.documentElement, max=e.scrollHeight-e.clientHeight;
+    bar.style.width=(max>0? e.scrollTop/max*100 : 0)+'%';
+    nav.classList.toggle('sc', e.scrollTop>30);
+  },{passive:true});
+
+  /* ---- reveals ---- */
+  var io=new IntersectionObserver(function(es){
+    es.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('on'); io.unobserve(e.target); } });
+  },{threshold:.16});
+  d.querySelectorAll('.rv').forEach(function(el){ io.observe(el); });
+
+  /* ---- animated counters (Arabic-Indic digits) ---- */
+  function ar(s){ return String(s).replace(/[0-9]/g,function(x){ return '٠١٢٣٤٥٦٧٨٩'[x]; }); }
+  var cio=new IntersectionObserver(function(es){
+    es.forEach(function(e){
+      if(!e.isIntersecting) return;
+      var el=e.target, to=parseFloat(el.dataset.to), dec=(to%1!==0)?1:0, unit=el.querySelector('b'), t0=null;
+      function step(ts){
+        if(!t0) t0=ts;
+        var k=Math.min(1,(ts-t0)/1100), eased=1-Math.pow(1-k,3), v=(to*eased).toFixed(dec);
+        el.firstChild.nodeValue=ar(v);
+        if(k<1) requestAnimationFrame(step);
+      }
+      if(reduced){ el.firstChild.nodeValue=ar(to.toFixed(dec)); }
+      else requestAnimationFrame(step);
+      cio.unobserve(el);
+    });
+  },{threshold:.6});
+  d.querySelectorAll('[data-to]').forEach(function(el){ cio.observe(el); });
+
+  /* ---- drag gallery ---- */
+  var g=d.getElementById('gal'), down=false, sx=0, sl=0;
+  g.addEventListener('mousedown',function(e){ down=true; g.classList.add('drag'); sx=e.pageX; sl=g.scrollLeft; });
+  addEventListener('mouseup',function(){ down=false; g.classList.remove('drag'); });
+  g.addEventListener('mousemove',function(e){ if(!down) return; e.preventDefault(); g.scrollLeft=sl-(e.pageX-sx)*1.6; });
+
+  /* ---- motion toggle ---- */
+  var on=true;
+  d.getElementById('mtog').addEventListener('click',function(){
+    on=!on; d.body.classList.toggle('reduce',!on);
+    d.getElementById('mtxt').textContent=on?'ON':'OFF';
+  });
+})();
+</script>
+</body>
+</html>
