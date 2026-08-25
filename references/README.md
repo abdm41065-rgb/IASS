@@ -24,6 +24,7 @@
 | 06 | WONDERLAND | [تحليل](sites/06-wonderland.md) | براند / تجربة 3D | ✅ محلَّل |
 | 07 | MANNA | [تحليل](sites/07-manna.md) | استوديو معماري | ✅ محلَّل |
 | 08 | sidstore (Sid Lee) | [تحليل](sites/08-sidstore.md) | متجر إبداعي | ✅ محلَّل |
+| 09 | GARDEN EIGHT | [تحليل](sites/09-garden-eight.md) | استوديو تصميم (طوكيو) | ✅ محلَّل |
 
 ---
 
