@@ -591,6 +591,141 @@ a{color:inherit;text-decoration:none}
 .cl-info small{font-family:var(--ar);letter-spacing:.02em}
 .chip,.f-block legend,.send-hint{font-family:var(--ar)}
 
+
+
+/* =================================================================
+   PREMIUM PASS — material discipline
+   The brand stays black-and-turquoise. What changes is the finish:
+   depth comes from ground contrast and hairlines, not from glow;
+   radii come from one scale, not eight ad-hoc values; and every
+   missing photo resolves into a designed plate instead of a void.
+   ================================================================= */
+:root{
+  /* one radius scale, replacing 14/16/18/20/22/24/26/28px */
+  --r-1:10px;   /* chips, swatches, small controls */
+  --r-2:16px;   /* media, tiles */
+  --r-3:22px;   /* cards, panels */
+  --r-4:28px;   /* full sheets */
+  --r-pill:100px;
+  /* plate grounds — printed board, not lit gradient */
+  --plate-1:#0b2c28;
+  --plate-2:#06322c;
+  --plate-3:#041412;
+  /* setback depth: a shadow that sits an object down, never one that glows */
+  --setback:0 26px 64px -30px rgba(0,0,0,.85);
+}
+
+/* ---------- 1. the brand plate ----------
+   Every missing image resolves to the same object: a quiet turquoise board,
+   the DOSE mark set into it as a watermark, and the label on a lacquer veil
+   along the bottom edge. Text never sits on the bare texture. */
+.post-media,.ig-media,.cl-photo,.hsx{
+  background:linear-gradient(168deg,var(--plate-2),var(--plate-1) 58%,var(--plate-3))}
+
+.post-media.empty::before,.ig-media.empty::before,.cl-photo.empty::before{
+  content:'';position:absolute;inset:0;background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'%3E%3Cg fill='none' stroke='%232dd4bf' stroke-width='5' stroke-linejoin='round'%3E%3Ccircle cx='60' cy='60' r='50'/%3E%3Cpath d='M44 38h14c14 0 23 9 23 22s-9 22-23 22H44z'/%3E%3C/g%3E%3Ccircle cx='88' cy='40' r='6' fill='%232dd4bf'/%3E%3C/svg%3E")
+    center/38% no-repeat;
+  opacity:.17}
+
+/* A work card already carries its title underneath, so a caption on the plate
+   would only repeat it. The Instagram tile has no title of its own, so there
+   the caption is the only thing naming the post — it stays, on a veil. */
+.post-media.empty::after{content:none}
+.ig-media.empty::after{
+  content:attr(data-label);position:absolute;inset:auto 0 0 0;display:block;
+  padding:26px 8px 10px;text-align:center;font-size:11.5px;
+  font-family:var(--ar);font-weight:700;letter-spacing:0;color:var(--sky-4);
+  text-shadow:none;
+  background:linear-gradient(180deg,transparent,rgba(4,10,9,.86) 62%)}
+
+/* a doctor with no photo becomes a monogram, not a caption */
+.cl-photo.empty::before{background-size:0;opacity:0}
+.cl-photo.empty::after{
+  content:attr(data-label);position:absolute;inset:0;display:grid;place-items:center;
+  font-family:var(--ar);font-weight:800;letter-spacing:.08em;
+  font-size:clamp(26px,3.4vw,40px);color:var(--sky-4);text-shadow:none}
+.cl-photo.empty{background:
+  radial-gradient(70% 70% at 50% 38%,rgba(45,212,191,.16),transparent 70%),
+  linear-gradient(168deg,var(--plate-2),var(--plate-3))}
+
+/* hero plates: hairline, not a 70%-white outline; setback, not a glow */
+.hsx{border:1px solid var(--line-2);box-shadow:var(--setback);border-radius:var(--r-2)}
+.hsx::before{content:'';position:absolute;inset:0;background:
+  url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'%3E%3Cg fill='none' stroke='%232dd4bf' stroke-width='5' stroke-linejoin='round'%3E%3Ccircle cx='60' cy='60' r='50'/%3E%3Cpath d='M44 38h14c14 0 23 9 23 22s-9 22-23 22H44z'/%3E%3C/g%3E%3Ccircle cx='88' cy='40' r='6' fill='%232dd4bf'/%3E%3C/svg%3E")
+  center/42% no-repeat;opacity:.2}
+.hsx img{position:relative;z-index:1}
+
+/* ---------- 2. one radius scale ---------- */
+.post,.cl,.wy,.ac,.srv-card{border-radius:var(--r-3)}
+.post-media,.ig-media,.cl-photo{border-radius:0}
+.cta-form,.sheet{border-radius:var(--r-4)}
+.msg-preview,.chip,.sh-deliver li{border-radius:var(--r-1)}
+.chip{border-radius:var(--r-pill)}
+.plate{border-radius:var(--r-3)}
+.plate-board,.sh-board,.app{border-radius:var(--r-2)}
+
+/* ---------- 3. hairline before shadow ----------
+   Hover lifts the object and firms its edge; it does not switch on a light. */
+.post:hover,.cl:hover{box-shadow:var(--setback);border-color:var(--line-2)}
+.plate:hover,.plate:focus-visible{box-shadow:var(--setback);border-color:var(--b3)}
+
+/* ---------- 4. data reads as data ---------- */
+.hs b,.wy b,.id-count b,.plate-row .en,.sh-pal b,.ig-stats b,.post-meta .en,.foot-ver{
+  font-variant-numeric:tabular-nums}
+
+/* ---------- 5. headings hold their shape ---------- */
+.hero-title,.sec-head h2,.work-head h2,.cta-title,.id-hero h1,.sh-title h3,.ac h3,.srv h3{
+  text-wrap:balance}
+
+/* ---------- 6. every control shows focus ----------
+   One visible ring, on the brand colour, offset so it never crowds the edge. */
+a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
+.chip:focus-visible,.plate:focus-visible{
+  outline:2px solid var(--sky-2);outline-offset:3px;border-radius:var(--r-1)}
+.btn:focus-visible,.btn-mini:focus-visible,.dock-btn:focus-visible{border-radius:var(--r-pill)}
+
+/* ---------- 7. the bridge ----------
+   The band that carries a reader from one page to the other. It shows the
+   destination rather than describing it: four live plates, then the door. */
+.bridge{max-width:1500px;margin:0 auto;padding:clamp(56px,9vh,104px) var(--pad)}
+.bridge-inner{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);
+  gap:clamp(24px,4vw,60px);align-items:center;
+  border:1px solid var(--line);border-radius:var(--r-4);background:var(--surface);
+  padding:clamp(24px,3.4vw,48px);box-shadow:var(--setback)}
+.bridge-copy h2{font-size:clamp(24px,3.2vw,42px);font-weight:800;line-height:1.25;
+  letter-spacing:-.02em;margin:10px 0 14px;text-wrap:balance}
+.bridge-copy p{color:var(--ink-soft);max-width:46ch;font-size:15.5px;margin-bottom:24px}
+.bridge-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.bridge-plate{aspect-ratio:4/5;border-radius:var(--r-2);border:1px solid var(--line);
+  display:grid;place-items:center;overflow:hidden;
+  background:radial-gradient(120% 100% at 30% 10%,var(--b2),var(--b1) 72%);
+  transition:transform .55s var(--ease)}
+.bridge-inner:hover .bridge-plate{transform:translateY(-5px)}
+.bridge-inner:hover .bridge-plate:nth-child(2){transition-delay:.05s}
+.bridge-inner:hover .bridge-plate:nth-child(3){transition-delay:.1s}
+.bridge-inner:hover .bridge-plate:nth-child(4){transition-delay:.15s}
+.bridge-plate .mark{width:52%}
+@media (max-width:900px){
+  .bridge-inner{grid-template-columns:1fr}
+  .bridge-strip{grid-template-columns:repeat(4,1fr)}
+}
+@media (prefers-reduced-motion:reduce){
+  .bridge-inner:hover .bridge-plate{transform:none}
+}
+
+/* ---------- 8. the drawn mark ----------
+   Shared by the identities page and the bridge on the home page, so both
+   pages speak the same shorthand for "a brand we built". Colours come from
+   whichever plate the mark is sitting in. */
+.mark{width:38%;max-width:96px;aspect-ratio:1;overflow:visible}
+.mark.big{width:104px;max-width:none}
+.mark .s1,.mark .s2,.mark .s3{fill:none;stroke-width:5;stroke-linecap:round;stroke-linejoin:round}
+.mark .s1{stroke:var(--b4)}
+.mark .s2{stroke:var(--b3);stroke-width:3.4}
+.mark .s3{stroke:var(--b3)}
+.mark .f2{fill:var(--b4)}
+.mark .f3{fill:var(--b3)}
 </style>
 </head>
 <body>
@@ -946,6 +1081,24 @@ a{color:inherit;text-decoration:none}
         </div>
       </div>
       <div class="rail-hint"><span>واصل التمرير لتصفّح الأعمال</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ BRIDGE → IDENTITIES ============ -->
+<section class="bridge">
+  <div class="bridge-inner reveal">
+    <div class="bridge-copy">
+      <span class="kicker">الهويات البصرية</span>
+      <h2>وراء كل منشور <span class="grad">هوية كاملة</span></h2>
+      <p>ما تراه أعلاه هو الطبقة الظاهرة. تحتها شعار ونظام ألوان وخطوط ودليل استخدام. افتح لوحات العلامات التي بنيناها، بألوانها وتطبيقاتها كما سُلّمت.</p>
+      <a href="identities.html" class="btn magnetic" data-cursor="btn"><span>شاهد الهويات العشر</span><svg viewBox="0 0 24 24"><path d="M14 5l-7 7 7 7" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+    </div>
+    <div class="bridge-strip" aria-hidden="true">
+      <span class="bridge-plate" style="--b1:#0E1B3A;--b2:#1E3A8A;--b3:#E8B84B;--b4:#F5F0E6" aria-hidden="true"><svg class="mark" viewBox="0 0 100 100"><circle class="f2" cx="50" cy="50" r="17"/><line class="s1" x1="50" y1="26" x2="50" y2="12" transform="rotate(0 50 50)"/><line class="s1" x1="50" y1="26" x2="50" y2="12" transform="rotate(45 50 50)"/><line class="s1" x1="50" y1="26" x2="50" y2="12" transform="rotate(90 50 50)"/><line class="s1" x1="50" y1="26" x2="50" y2="12" transform="rotate(135 50 50)"/><line class="s1" x1="50" y1="26" x2="50" y2="12" transform="rotate(180 50 50)"/><line class="s1" x1="50" y1="26" x2="50" y2="12" transform="rotate(225 50 50)"/><line class="s1" x1="50" y1="26" x2="50" y2="12" transform="rotate(270 50 50)"/><line class="s1" x1="50" y1="26" x2="50" y2="12" transform="rotate(315 50 50)"/></svg></span>
+      <span class="bridge-plate" style="--b1:#06302A;--b2:#0E7C66;--b3:#9FE0CF;--b4:#F2F5F3" aria-hidden="true"><svg class="mark" viewBox="0 0 100 100"><circle class="s2" cx="50" cy="50" r="38"/><rect class="f2" x="43" y="24" width="14" height="52" rx="7"/><rect class="f2" x="24" y="43" width="52" height="14" rx="7"/></svg></span>
+      <span class="bridge-plate" style="--b1:#1A1036;--b2:#6D48D9;--b3:#4ADEC0;--b4:#EFEAFB" aria-hidden="true"><svg class="mark" viewBox="0 0 100 100"><path class="s1" d="M50 14 82 32v36L50 86 18 68V32z"/><path class="s3" d="M28 50h10l6-13 9 26 6-13h13"/></svg></span>
+      <span class="bridge-plate" style="--b1:#0A1420;--b2:#1D4E6B;--b3:#35C6E8;--b4:#E4F2F7" aria-hidden="true"><svg class="mark" viewBox="0 0 100 100"><circle class="f2" cx="50" cy="50" r="13"/><path class="s1" d="M50 37V18M50 63v19M37 50H18M63 50h19M40 40 26 26M60 60l14 14"/><circle class="f3" cx="74" cy="74" r="6"/></svg></span>
     </div>
   </div>
 </section>
