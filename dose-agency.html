@@ -289,27 +289,6 @@ a{color:inherit;text-decoration:none}
   background:linear-gradient(180deg,var(--sky),var(--sky-4));-webkit-background-clip:text;background-clip:text;color:transparent}
 .wy span{display:block;margin-top:12px;color:var(--ink-soft);font-size:14px}
 
-/* ================= PROCESS ================= */
-.process{background:linear-gradient(180deg,#040a09,#081b19 50%,#040a09)}
-.proc-track{height:420vh;position:relative}
-.proc-sticky{position:sticky;top:0;height:100vh;height:100svh;display:flex;flex-direction:column;justify-content:center;padding:0 var(--pad);overflow:hidden}
-.proc-head h2{font-family:var(--en);font-size:clamp(28px,5vw,62px);font-weight:800;margin-bottom:34px;letter-spacing:-.025em}
-.proc-stage{position:relative;flex:0 0 auto}
-.proc-rail{height:3px;background:rgba(255,255,255,.10);border-radius:3px;overflow:hidden;margin-bottom:34px}
-.proc-rail i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--sky-3),var(--sky))}
-.proc-steps{position:relative;min-height:clamp(258px,30vh,272px)}
-.step{position:absolute;inset-inline:0;top:0;max-width:840px;
-  transition:opacity .7s var(--ease),transform .7s var(--ease)}
-.anim .step{opacity:0;transform:translateY(40px) scale(.97);pointer-events:none}
-.anim .step.on{opacity:1;transform:none;pointer-events:auto}
-/* without JS the steps would stack on top of each other — lay them out instead */
-html:not(.anim) .proc-steps{position:static;display:grid;gap:30px}
-html:not(.anim) .step{position:static}
-.step-n{font-family:var(--en);font-size:clamp(52px,9vw,120px);font-weight:800;line-height:.9;display:block;
-  background:linear-gradient(180deg,var(--sky),rgba(126,240,224,.25));-webkit-background-clip:text;background-clip:text;color:transparent}
-.step h3{font-family:var(--en);font-size:clamp(24px,3.6vw,44px);font-weight:800;margin:10px 0 12px;letter-spacing:-.02em}
-.step p{color:var(--ink-soft);font-size:clamp(15px,1.7vw,19px);max-width:660px}
-
 /* ================= CLIENTS ================= */
 .cl-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:20px;max-width:1500px;margin:50px auto 0;padding:0 var(--pad)}
 .cl{border:1px solid var(--line);border-radius:24px;overflow:hidden;background:var(--surface);box-shadow:var(--shadow);
@@ -489,11 +468,6 @@ html:not(.anim) .step{position:static}
   .rail-inner{transform:none!important}
   .post{scroll-snap-align:center;width:74vw}
   .rail-progress{display:none}
-  .proc-track{height:auto}
-  .proc-sticky{position:static;height:auto;padding-block:70px}
-  .proc-steps{min-height:0;display:grid;gap:34px}
-  .step{position:static;opacity:1;transform:none;pointer-events:auto}
-  .proc-rail{display:none}
   .f-row{grid-template-columns:1fr}
   .srv:hover{padding-inline:8px}
   .srv p{max-height:none;opacity:1;margin-top:8px}
@@ -544,12 +518,10 @@ html:not(.anim) .step{position:static}
 /* --- short landscape phones: never trap the user in a pinned section --- */
 @media (max-height:520px) and (orientation:landscape){
   .hero{min-height:auto;padding-block:110px 40px}
-  .work-sticky,.proc-sticky{position:static;height:auto;padding-block:60px}
-  .work-track,.proc-track{height:auto}
+  .work-sticky{position:static;height:auto;padding-block:60px}
+  .work-track{height:auto}
   .rail{overflow-x:auto}
   .rail-inner{transform:none!important}
-  .step{position:static;opacity:1;transform:none}
-  .proc-steps{min-height:0;display:grid;gap:28px}
   .dock{flex-direction:row}
 }
 
@@ -577,13 +549,13 @@ html:not(.anim) .step{position:static}
    Display faces switch to Tajawal: Syne carries no Arabic glyphs, so leaving it
    on Arabic headings meant a silent fallback to whatever the OS chose. Arabic
    also gets no letter-spacing — it loosens the joined script and reads broken. */
-.hero-title,.cta-title,.sec-head h2,.work-head h2,.proc-head h2,
-.ac h3,.srv h3,.post-body h3,.step h3,.cl-info h3,.testi-text,
+.hero-title,.cta-title,.sec-head h2,.work-head h2,
+.ac h3,.srv h3,.post-body h3,.cl-info h3,.testi-text,
 .menu-inner a,.ig-name,.big-read,.post-body.center h3{
   font-family:var(--ar);letter-spacing:0;font-weight:900}
 .hero-title,.cta-title{line-height:1.16}
-.sec-head h2,.work-head h2,.proc-head h2{line-height:1.28}
-.srv h3,.step h3,.post-body h3{line-height:1.4;font-weight:800}
+.sec-head h2,.work-head h2{line-height:1.28}
+.srv h3,.post-body h3{line-height:1.4;font-weight:800}
 .testi-text{line-height:1.65;font-weight:700}
 .big-read{font-weight:500;line-height:1.65}
 .kicker{font-family:var(--ar);font-weight:700;letter-spacing:.02em;font-size:13px}
@@ -595,12 +567,12 @@ html:not(.anim) .step{position:static}
    product names never reorder inside the surrounding Arabic. Placed last so it
    wins over the Arabic rules above on elements carrying both classes. */
 .en{font-family:var(--en);direction:ltr;unicode-bidi:isolate}
-.hs b,.wy b,.step-n,.ac-num,.srv-i,.foot-ver,.post-meta span,.ig-stats b,.cl-info small{
+.hs b,.wy b,.ac-num,.srv-i,.foot-ver,.post-meta span,.ig-stats b,.cl-info small{
   direction:ltr;unicode-bidi:isolate}
 /* direction:ltr keeps the digits and their suffix in order, but on a block box it
    also drags `text-align:start` to the left. Pull the block ones back to the
    page's own edge so a number never strands itself away from its label. */
-.hs b,.step-n,.srv-i,.post-meta span{text-align:right}
+.hs b,.srv-i,.post-meta span{text-align:right}
 
 /* direction-dependent details */
 .srv:hover .srv-arrow{transform:rotate(-45deg) scale(1.2)}
@@ -644,7 +616,6 @@ html:not(.anim) .step{position:static}
     <a href="#about" data-cursor="link">من نحن</a>
     <a href="#services" data-cursor="link">خدماتنا</a>
     <a href="#work" data-cursor="link">أعمالنا</a>
-    <a href="#process" data-cursor="link">آلية العمل</a>
     <a href="#clients" data-cursor="link">عملاؤنا</a>
     <a href="#instagram" data-cursor="link">إنستغرام</a>
   </nav>
@@ -658,10 +629,9 @@ html:not(.anim) .step{position:static}
     <a href="#about"><span>٠١</span> من نحن</a>
     <a href="#services"><span>٠٢</span> خدماتنا</a>
     <a href="#work"><span>٠٣</span> أعمالنا</a>
-    <a href="#process"><span>٠٤</span> آلية العمل</a>
-    <a href="#clients"><span>٠٥</span> عملاؤنا</a>
-    <a href="#instagram"><span>٠٦</span> إنستغرام</a>
-    <a href="#contact"><span>٠٧</span> تواصل معنا</a>
+    <a href="#clients"><span>٠٤</span> عملاؤنا</a>
+    <a href="#instagram"><span>٠٥</span> إنستغرام</a>
+    <a href="#contact"><span>٠٦</span> تواصل معنا</a>
   </div>
 </div>
 
@@ -989,28 +959,6 @@ html:not(.anim) .step{position:static}
     <div class="wy reveal" data-delay="80"><b class="count en" data-to="24" data-suffix="h">0</b><span>متوسط تسليم أول مقترح بصري</span></div>
     <div class="wy reveal" data-delay="160"><b class="count en" data-to="3" data-suffix="x">0</b><span>متوسط نمو التفاعل خلال ٩٠ يوماً</span></div>
     <div class="wy reveal" data-delay="240"><b class="count en" data-to="24" data-suffix="/7">0</b><span>فريق متابعة ودعم مستمر</span></div>
-  </div>
-</section>
-
-<!-- ============ PROCESS — PINNED STEPS ============ -->
-<section class="process" id="process">
-  <div class="proc-track" id="procTrack">
-    <div class="proc-sticky">
-      <div class="proc-head">
-        <span class="kicker">آلية العمل</span>
-        <h2>من الفكرة <span class="grad">إلى السيطرة</span></h2>
-      </div>
-      <div class="proc-stage">
-        <div class="proc-rail"><i id="procBar"></i></div>
-        <div class="proc-steps" id="procSteps">
-          <article class="step"><span class="step-n en">01</span><h3>التشخيص</h3><p>نحلّل سوقك ومنافسيك وجمهورك. نقرأ الأرقام قبل أن نفتح أي برنامج تصميم — تماماً كما يُقرأ التحليل قبل وصف الدواء.</p></article>
-          <article class="step"><span class="step-n en">02</span><h3>الاستراتيجية</h3><p>نضع تموضعك، ونبرة صوتك، ورسائلك الأساسية في وثيقة واحدة واضحة تصبح دستور علامتك.</p></article>
-          <article class="step"><span class="step-n en">03</span><h3>الهوية البصرية</h3><p>نظام بصري متكامل مع دليل استخدام يضمن ثبات شكلك على كل منصة وكل مطبوع.</p></article>
-          <article class="step"><span class="step-n en">04</span><h3>الإنتاج</h3><p>تصوير وموشن وكتابة محتوى علمي مُراجَع. ننتج شهرياً بجدول منضبط لا يتأخر.</p></article>
-          <article class="step"><span class="step-n en">05</span><h3>النمو والقياس</h3><p>حملات مموّلة وتقارير شهرية بالأرقام: وصول، وتفاعل، ورسائل، وحجوزات فعلية.</p></article>
-        </div>
-      </div>
-    </div>
   </div>
 </section>
 
@@ -1398,7 +1346,6 @@ html:not(.anim) .step{position:static}
   /* ---------- SCROLL-DRIVEN LOOP ---------- */
   const bar = $('#scrollBar');
   const workTrack = $('#workTrack'), railInner = $('#railInner'), rail = $('#rail'), railBar = $('#railBar');
-  const procTrack = $('#procTrack'), steps = $$('#procSteps .step'), procBar = $('#procBar');
   const parallax = $$('[data-speed]');
   const readers = $$('[data-words]');
   let railX = 0, railTarget = 0;
@@ -1431,15 +1378,6 @@ html:not(.anim) .step{position:static}
       railBar.style.width = (prog * 100) + '%';
       railX = lerp(railX, railTarget, 0.12);
       railInner.style.transform = `translate3d(${railX.toFixed(2)}px,0,0)`;
-    }
-
-    /* pinned process steps */
-    if (procTrack && !isMobile() && steps.length) {
-      const r = procTrack.getBoundingClientRect();
-      const prog = clamp(-r.top / (r.height - vh));
-      procBar.style.width = (prog * 100) + '%';
-      const idx = Math.min(steps.length - 1, Math.floor(prog * steps.length * 0.999));
-      steps.forEach((s, i) => s.classList.toggle('on', i === idx));
     }
 
     /* word-by-word readers */
