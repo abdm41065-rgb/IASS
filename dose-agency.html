@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>دوز إيجنسي (Copy)</title>
+<title>دوز إيجنسي — وكالة التسويق الطبي</title>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&family=Syne:wght@400;600;700;800&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 /* ================= DOSE AGENCY — black & turquoise ================= */
@@ -32,7 +32,7 @@
   --pad:clamp(20px,5vw,92px);
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+html{direction:rtl;scroll-behavior:smooth;-webkit-text-size-adjust:100%}
 body{
   background:var(--bg);color:var(--ink);font-family:var(--ui);
   font-size:16px;line-height:1.72;overflow-x:hidden;-webkit-font-smoothing:antialiased;
@@ -129,7 +129,7 @@ a{color:inherit;text-decoration:none}
 
 /* ================= HERO ================= */
 .hero{position:relative;min-height:100vh;min-height:100svh;display:flex;flex-direction:column;justify-content:center;
-  padding:130px var(--pad) 0;overflow:hidden;
+  padding:130px var(--pad) 96px;overflow:hidden;
   background:radial-gradient(120% 80% at 70% 0%,#0a201d 0%,#040a09 62%)}
 .hero-mesh{position:absolute;inset:-20%;z-index:0}
 .orb{position:absolute;border-radius:50%;filter:blur(80px)}
@@ -594,9 +594,9 @@ html:not(.anim) .step{position:static}
 /* Latin fragments: keep the Latin face and isolate them so digits, handles and
    product names never reorder inside the surrounding Arabic. Placed last so it
    wins over the Arabic rules above on elements carrying both classes. */
-.en{font-family:var(--en);unicode-bidi:isolate}
+.en{font-family:var(--en);direction:ltr;unicode-bidi:isolate}
 .hs b,.wy b,.step-n,.ac-num,.srv-i,.foot-ver,.post-meta span,.ig-stats b,.cl-info small{
-  unicode-bidi:isolate}
+  direction:ltr;unicode-bidi:isolate}
 
 /* direction-dependent details */
 .srv:hover .srv-arrow{transform:rotate(-45deg) scale(1.2)}
@@ -695,7 +695,7 @@ html:not(.anim) .step{position:static}
   <div class="hero-stats">
     <div class="hs reveal"><b class="count en" data-to="5" data-suffix="+">0</b><small>سنوات في السوق الطبي</small></div>
     <div class="hs reveal" data-delay="80"><b class="count en" data-to="150" data-suffix="+">0</b><small>مشروع وهوية بصرية</small></div>
-    <div class="hs reveal" data-delay="160"><b class="count en" data-to="40" data-suffix="+">0</b><small>طبيب وصيدلية</small></div>
+    <div class="hs reveal" data-delay="160"><b class="count en" data-to="100" data-suffix="+">0</b><small>طبيب وصيدلية</small></div>
     <div class="hs reveal" data-delay="240"><b class="count en" data-to="12" data-suffix="M+">0</b><small>مشاهدة على محتوانا</small></div>
   </div>
 
@@ -732,7 +732,7 @@ html:not(.anim) .step{position:static}
       <article class="ac reveal" data-cursor="tilt">
         <span class="ac-num en">01</span>
         <h3>تخصّص طبي بحت</h3>
-        <p>لا نعمل مع الجميع. صيدليات وعيادات وأطباء ومنتجات طبية فقط — لأن التخصص هو ما يصنع الفرق.</p>
+        <p>لا نعمل مع الجميع. صيدليات وعيادات وأطباء ومنتجات طبية فقط — لأن التخصّص هو ما يصنع الفرق.</p>
       </article>
       <article class="ac reveal" data-delay="90" data-cursor="tilt">
         <span class="ac-num en">02</span>
@@ -981,8 +981,8 @@ html:not(.anim) .step{position:static}
     <h2 class="reveal" data-delay="80">الفرق بين وكالة <span class="grad">وأخرى</span><br>هو الفرق بين عيادة ممتلئة وأخرى فارغة.</h2>
   </div>
   <div class="why-grid">
-    <div class="wy reveal"><b class="count en" data-to="98" data-suffix="%">0</b><span>نسبة رضا العملاء وتجديد العقود</span></div>
-    <div class="wy reveal" data-delay="80"><b class="count en" data-to="72" data-suffix="h">0</b><span>متوسط تسليم أول مقترح بصري</span></div>
+    <div class="wy reveal"><b class="count en" data-to="99" data-suffix="%">0</b><span>نسبة رضا العملاء وتجديد العقود</span></div>
+    <div class="wy reveal" data-delay="80"><b class="count en" data-to="24" data-suffix="h">0</b><span>متوسط تسليم أول مقترح بصري</span></div>
     <div class="wy reveal" data-delay="160"><b class="count en" data-to="3" data-suffix="x">0</b><span>متوسط نمو التفاعل خلال ٩٠ يوماً</span></div>
     <div class="wy reveal" data-delay="240"><b class="count en" data-to="24" data-suffix="/7">0</b><span>فريق متابعة ودعم مستمر</span></div>
   </div>
@@ -1003,7 +1003,7 @@ html:not(.anim) .step{position:static}
           <article class="step"><span class="step-n en">02</span><h3>الاستراتيجية</h3><p>نضع تموضعك، ونبرة صوتك، ورسائلك الأساسية في وثيقة واحدة واضحة تصبح دستور علامتك.</p></article>
           <article class="step"><span class="step-n en">03</span><h3>الهوية البصرية</h3><p>نظام بصري متكامل مع دليل استخدام يضمن ثبات شكلك على كل منصة وكل مطبوع.</p></article>
           <article class="step"><span class="step-n en">04</span><h3>الإنتاج</h3><p>تصوير وموشن وكتابة محتوى علمي مُراجَع. ننتج شهرياً بجدول منضبط لا يتأخر.</p></article>
-          <article class="step"><span class="step-n en">05</span><h3>النمو والقياس</h3><p>حملات ممولة وتقارير شهرية بالأرقام: وصول، وتفاعل، ورسائل، وحجوزات فعلية.</p></article>
+          <article class="step"><span class="step-n en">05</span><h3>النمو والقياس</h3><p>حملات مموّلة وتقارير شهرية بالأرقام: وصول، وتفاعل، ورسائل، وحجوزات فعلية.</p></article>
         </div>
       </div>
     </div>
@@ -1125,7 +1125,7 @@ html:not(.anim) .step{position:static}
   <div class="cta-inner">
     <span class="kicker">خابِرنا</span>
     <h2 class="cta-title"><span class="line" data-split>جاهز تكسر</span><span class="line accent" data-split>النمط؟</span></h2>
-    <p class="cta-p reveal" data-delay="120">اختر ما تحتاجه، اكتب سطراً واحداً، وأرسله مباشرة إلى واتسابنا أو رسائل إنستغرام. نردّ خلال ٧٢ ساعة.</p>
+    <p class="cta-p reveal" data-delay="120">اختر ما تحتاجه، اكتب سطراً واحداً، وأرسله مباشرة إلى واتسابنا أو رسائل إنستغرام. نردّ خلال ٢٤ ساعة.</p>
 
     <form class="cta-form reveal" data-delay="200" id="ctaForm" novalidate>
 
@@ -1146,8 +1146,8 @@ html:not(.anim) .step{position:static}
           <button type="button" class="chip" data-service="المحتوى الطبي">المحتوى الطبي</button>
           <button type="button" class="chip" data-service="الإنتاج المرئي">الإنتاج المرئي</button>
           <button type="button" class="chip" data-service="تصوير درون">تصوير درون</button>
-          <button type="button" class="chip" data-service="حملات ممولة">حملات ممولة</button>
-          <button type="button" class="chip" data-service="موشن جرافيك و 3D">موشن و 3D</button>
+          <button type="button" class="chip" data-service="حملات مموّلة">حملات مموّلة</button>
+          <button type="button" class="chip" data-service="موشن جرافيك و3D">موشن و3D</button>
           <button type="button" class="chip" data-service="استشارة تسويقية">استشارة</button>
         </div>
       </fieldset>
@@ -1190,7 +1190,7 @@ html:not(.anim) .step{position:static}
   </div>
   <div class="foot-big en" aria-hidden="true">DOSE AGENCY</div>
   <div class="foot-row">
-    <span>© <b id="year" class="en">2026</b> دوز إيجنسي — كل الحقوق محفوظة</span>
+    <span>© <b id="year" class="en">2026</b> دوز إيجنسي — جميع الحقوق محفوظة</span>
     <span><a href="tel:+9647750506697" data-cursor="link" class="en">0775 050 6697</a> · <a href="https://www.instagram.com/dose.agency_iq" target="_blank" rel="noopener" data-cursor="link" class="en">@dose.agency_iq</a></span>
     <a href="#top" data-cursor="link">العودة للأعلى ↑</a>
   </div>
