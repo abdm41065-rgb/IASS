@@ -22,14 +22,16 @@ repo root (`/home/user/IASS`).
 
 ## Prerequisites
 
-Chromium is already in the image. Only Playwright's Node bindings are missing:
+Chromium is already in the image. Only the Playwright bindings are missing —
+Node for the driver, Python for the interaction tests:
 
 ```bash
 npm i -g playwright
+pip install playwright
 ```
 
-Every command below is prefixed with `NODE_PATH=$(npm root -g)` so Node finds
-that global install. The driver refuses to start with a usage hint if it can't.
+Node commands are prefixed with `NODE_PATH=$(npm root -g)` so Node finds that
+global install. The driver refuses to start with a usage hint if it can't.
 
 ## Run (agent path)
 
@@ -113,8 +115,29 @@ with no server at all. This is also how the files are delivered to the client.
 
 ## Test
 
-There is no test suite. `driver.mjs check` **is** the test — run it after any
-edit to a page.
+Two layers, both gates — each exits 1 on failure.
+
+```bash
+NODE_PATH=$(npm root -g) node .claude/skills/run-iass/driver.mjs check   # page health
+python3 .claude/skills/run-iass/test_flows.py                            # interactions
+```
+
+`test_flows.py` covers what `check` cannot see — the paths a visitor actually
+takes. It runs off `file://`, so it needs no server:
+
+- **Booking form.** Picks an intent, toggles services, fills name/phone/details,
+  then asserts the built message and that `#sendWa`, `#dockWa` and `#waPlain`
+  all carry that exact text URL-encoded into their `wa.me` links. Also: intent
+  behaves as a radio, deselecting every service falls back to `لم أحدّد بعد`,
+  the Instagram button surfaces a note even when the clipboard is unavailable,
+  and submitting does not navigate.
+- **Mobile drawer** at 390px — burger opens it, `body.locked` is set, a link
+  closes it and releases the scroll lock.
+- **Identity sheet keyboard** — focus enters the sheet, Tab stays trapped
+  inside, Escape closes it, focus returns to the plate that opened it.
+
+Verified with 24 passing assertions, and verified to actually bite: renaming
+the message's `الهاتف:` label made it report `FAIL phone in message` and exit 1.
 
 ## Gotchas
 
@@ -164,3 +187,4 @@ edit to a page.
 | Screenshot shows empty sections | You didn't scroll first. `shot` does; hand-rolled scripts must |
 | `check` reports a counter like `94%` | Animation hadn't landed — increase the settle wait |
 | `<html> intercepts pointer events` | Click through `page.evaluate(() => el.click())` |
+| `test_flows.py` times out on `.chip.on` | Each click leaves the `.on` set, so a held list of locators goes stale — re-query between clicks |
