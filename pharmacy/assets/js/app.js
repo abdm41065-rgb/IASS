@@ -115,7 +115,11 @@
         '<div class="hm-prod-body">' +
           '<p class="hm-prod-brand"><bdi>' + esc(product.brand) + '</bdi></p>' +
           '<h3 class="hm-prod-name">' + esc(product.name) + '</h3>' +
-          '<p class="hm-prod-latin"><bdi>' + esc(product.latin) + '</bdi> &middot; <bdi>' + esc(product.size) + '</bdi></p>' +
+          '<p class="hm-prod-latin">' +
+            '<bdi class="hm-latin-name">' + esc(product.latin) + '</bdi>' +
+            '<span class="hm-latin-sep"> &middot; </span>' +
+            '<bdi>' + esc(product.size) + '</bdi>' +
+          '</p>' +
           '<p class="hm-prod-note">' + esc(product.note) + '</p>' +
           '<div class="hm-tag-row">' + tags + '</div>' +
         '</div>' +

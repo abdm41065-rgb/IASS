@@ -386,6 +386,70 @@
   color: var(--hm-text-faint);
 }
 
+/* ── الشبكة على الجوال: منتجان في كل صف ─────────────────────────────────
+   البطاقة تضيق إلى نصف الشاشة، فتُشدّ المسافات وتُقصّ نبذة المنتج إلى
+   سطرين. الوسوم تُخفى لأنها تتكدّس في العرض الضيّق، والتفاصيل الكاملة
+   متاحة بنقرة واحدة في اللوحة الجانبية.
+   ------------------------------------------------------------------------ */
+
+@media (max-width: 640px) {
+  .hm-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .hm-shot { aspect-ratio: 1 / 1; }
+  .hm-shot-art { block-size: 66%; }
+  .hm-shot-off { inset-block-start: 8px; inset-inline-start: 8px; padding: 3px 7px; font-size: 0.68rem; }
+
+  .hm-prod-body { padding: 12px; gap: 4px; }
+  .hm-prod-brand { font-size: 0.7rem; }
+  .hm-prod-name { font-size: 0.94rem; line-height: 1.45; }
+  /* اسم المنتج اللاتيني يُطوى سطرين في العرض الضيّق، فنكتفي بالحجم هنا
+     والاسم الكامل يظهر في اللوحة الجانبية */
+  .hm-prod-latin { font-size: 0.72rem; }
+  .hm-prod-latin .hm-latin-name,
+  .hm-prod-latin .hm-latin-sep { display: none; }
+
+  .hm-prod-note {
+    font-size: 0.8rem;
+    line-height: 1.6;
+    /* سطران بحد أقصى: النبذة الكاملة في اللوحة الجانبية */
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .hm-prod .hm-tag-row { display: none; }
+  .hm-prod-body > .hm-prod-note { margin-block-start: auto; }
+
+  .hm-prod-foot {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 9px;
+    padding: 12px;
+  }
+  .hm-prod-foot .hm-btn { inline-size: 100%; min-block-size: 38px; padding-inline: 10px; font-size: 0.82rem; }
+  .hm-prod-foot .hm-btn svg { inline-size: 15px; block-size: 15px; }
+
+  .hm-price { flex-direction: row; align-items: baseline; gap: 7px; }
+  .hm-price-now { font-size: 0.94rem; }
+  .hm-price-was { font-size: 0.72rem; }
+
+  /* التمرير برفع البطاقة لا معنى له باللمس، ويُبقي حالة hover عالقة */
+  .hm-prod:hover { transform: none; box-shadow: none; }
+}
+
+/* شاشات ضيّقة جداً: تصغير أخير حتى لا ينكسر اسم المنتج */
+@media (max-width: 360px) {
+  .hm-grid { gap: 8px; }
+  .hm-prod-body { padding: 10px; }
+  .hm-prod-foot { padding: 10px; }
+  .hm-prod-name { font-size: 0.88rem; }
+  .hm-prod-foot .hm-btn { font-size: 0.78rem; }
+}
+
 /* ── شريط التوصيل الداكن ────────────────────────────────────────────────── */
 
 .hm-band { background: var(--hm-ink-panel); color: var(--hm-on-ink); }
