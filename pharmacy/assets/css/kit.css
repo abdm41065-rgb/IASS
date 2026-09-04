@@ -117,10 +117,10 @@ strong { color: var(--hm-text-strong); font-weight: 600; }
   font-weight: 600;
   line-height: 1;
   cursor: pointer;
-  transition: background-color .22s var(--hm-ease),
-              border-color .22s var(--hm-ease),
-              color .22s var(--hm-ease),
-              transform .22s var(--hm-ease);
+  transition: background-color .3s var(--hm-ease),
+              border-color .3s var(--hm-ease),
+              color .3s var(--hm-ease),
+              transform .3s var(--hm-ease);
 }
 .hm-btn:hover { transform: translateY(-1px); }
 .hm-btn:active { transform: translateY(0); }
@@ -190,7 +190,7 @@ strong { color: var(--hm-text-strong); font-weight: 600; }
   border-radius: var(--hm-r-sm);
   color: var(--hm-text-strong);
   font-size: 0.95rem;
-  transition: border-color .2s var(--hm-ease), background-color .2s var(--hm-ease);
+  transition: border-color .28s var(--hm-ease), background-color .28s var(--hm-ease);
 }
 .hm-input::placeholder, .hm-textarea::placeholder { color: var(--hm-text-off); }
 .hm-input:focus, .hm-select:focus, .hm-textarea:focus {
@@ -213,7 +213,7 @@ strong { color: var(--hm-text-strong); font-weight: 600; }
 
 .hm-chips { display: flex; flex-wrap: wrap; gap: 8px; }
 .hm-chip {
-  padding: 9px 16px;
+  padding: 10px 17px;
   background: var(--hm-surface);
   border: 1px solid var(--hm-rule);
   border-radius: var(--hm-r-pill);
@@ -221,7 +221,7 @@ strong { color: var(--hm-text-strong); font-weight: 600; }
   font-size: var(--hm-small-size);
   font-weight: 600;
   cursor: pointer;
-  transition: all .2s var(--hm-ease);
+  transition: all .28s var(--hm-ease);
 }
 .hm-chip:hover { border-color: var(--hm-rule-strong); color: var(--hm-blue-deep); }
 .hm-chip[aria-pressed="true"] {

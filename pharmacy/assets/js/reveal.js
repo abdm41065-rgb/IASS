@@ -13,7 +13,7 @@
 (function (window, document) {
   'use strict';
 
-  var DEFAULTS = { duration: 700, delay: 0, offset: 90, once: true };
+  var DEFAULTS = { duration: 850, delay: 0, offset: 80, once: true };
   var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var observer = null;
   var seen = new WeakSet();

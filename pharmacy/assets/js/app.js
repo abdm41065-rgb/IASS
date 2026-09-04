@@ -90,6 +90,7 @@
     saveCart();
     renderCart();
     syncCardStates();
+    if (openPanelEl === prodPanel) renderDetail();
   }
 
   /* ── بطاقة المنتج ───────────────────────────────────────────────────── */
@@ -104,6 +105,9 @@
 
     return '' +
       '<article class="hm-prod" data-prod="' + esc(product.id) + '" data-aos="fade-up">' +
+        '<button class="hm-prod-open" type="button" data-open="' + esc(product.id) + '">' +
+          '<span class="hm-sr">تفاصيل ' + esc(product.name) + '</span>' +
+        '</button>' +
         '<div class="hm-shot">' +
           (off ? '<span class="hm-shot-off">خصم ' + off + '%</span>' : '') +
           illustration(product) +
@@ -185,9 +189,47 @@
     });
   }
 
-  /* ── درج السلة ──────────────────────────────────────────────────────── */
+  /* ── اللوحات الجانبية ───────────────────────────────────────────────── */
 
-  var drawer, backdrop, lastFocus = null;
+  var drawer, prodPanel, backdrop, openPanelEl = null, lastFocus = null;
+
+  function openPanel(el) {
+    // فتح لوحة بينما أخرى مفتوحة: نبدّل المحتوى دون إغلاق الخلفية
+    var switching = openPanelEl && openPanelEl !== el;
+    if (switching) {
+      openPanelEl.classList.remove('is-open');
+      openPanelEl.hidden = true;
+    } else {
+      lastFocus = document.activeElement;
+      document.body.classList.add('is-locked');
+    }
+
+    openPanelEl = el;
+    el.hidden = false;
+    backdrop.hidden = false;
+
+    // الإطار التالي حتى تلتقط المتصفّحات انتقال الفتح
+    requestAnimationFrame(function () {
+      el.classList.add('is-open');
+      backdrop.classList.add('is-open');
+      var close = $('[data-panel-close]', el);
+      if (close) close.focus();
+    });
+  }
+
+  function closePanel() {
+    if (!openPanelEl) return;
+    var el = openPanelEl;
+    openPanelEl = null;
+    el.classList.remove('is-open');
+    backdrop.classList.remove('is-open');
+    document.body.classList.remove('is-locked');
+    window.setTimeout(function () {
+      el.hidden = true;
+      if (!openPanelEl) backdrop.hidden = true;
+    }, 380);
+    if (lastFocus && lastFocus.focus) lastFocus.focus();
+  }
 
   function renderCart() {
     var list = $('[data-cart-list]');
@@ -240,34 +282,90 @@
     totalEl.textContent = money(cartTotal());
   }
 
-  function openCart() {
-    lastFocus = document.activeElement;
-    drawer.hidden = false;
-    backdrop.hidden = false;
-    document.body.classList.add('is-locked');
-    // الإطار التالي حتى تلتقط المتصفّحات انتقال الفتح
-    requestAnimationFrame(function () {
-      drawer.classList.add('is-open');
-      backdrop.classList.add('is-open');
-      var focusTarget = $('[data-cart-close]', drawer);
-      if (focusTarget) focusTarget.focus();
-    });
+  function openCart() { openPanel(drawer); }
+
+  /* ── لوحة تفاصيل المنتج ─────────────────────────────────────────────── */
+
+  function detailHTML(p) {
+    var off = p.was && p.was > p.price ? Math.round((1 - p.price / p.was) * 100) : 0;
+    var tags = (p.tags || []).map(function (t) {
+      return '<span class="hm-tag">' + esc(t) + '</span>';
+    }).join('');
+
+    return '' +
+      '<div class="hm-detail-shot">' +
+        (off ? '<span class="hm-shot-off">خصم ' + off + '%</span>' : '') +
+        illustration(p) +
+      '</div>' +
+      '<div class="hm-detail-head">' +
+        '<p class="hm-prod-brand"><bdi>' + esc(p.brand) + '</bdi></p>' +
+        '<h3 id="hm-detail-title">' + esc(p.name) + '</h3>' +
+        '<p class="hm-prod-latin"><bdi>' + esc(p.latin) + '</bdi> &middot; <bdi>' + esc(p.size) + '</bdi></p>' +
+      '</div>' +
+      '<div class="hm-tag-row">' + tags + '</div>' +
+      '<p class="hm-detail-note">' + esc(p.note) + '</p>' +
+      '<dl class="hm-detail-facts">' +
+        '<div><dt>لمن يصلح</dt><dd>' + esc(p.who) + '</dd></div>' +
+        '<div><dt>كيف يُستعمل</dt><dd>' + esc(p.use) + '</dd></div>' +
+        '<div><dt>الحجم</dt><dd><bdi>' + esc(p.size) + '</bdi></dd></div>' +
+      '</dl>' +
+      '<p class="hm-detail-fine">' + esc(CFG.legal.advice) + '</p>';
   }
 
-  function closeCart() {
-    drawer.classList.remove('is-open');
-    backdrop.classList.remove('is-open');
-    document.body.classList.remove('is-locked');
-    window.setTimeout(function () {
-      drawer.hidden = true;
-      backdrop.hidden = true;
-    }, 260);
-    if (lastFocus && lastFocus.focus) lastFocus.focus();
+  function detailFootHTML(p) {
+    var qty = cart[p.id] || 0;
+    var off = p.was && p.was > p.price;
+
+    return '' +
+      '<div class="hm-detail-price">' +
+        '<span class="hm-price-now">' + esc(money(p.price)) + '</span>' +
+        (off ? '<s class="hm-price-was">' + esc(money(p.was)) + '</s>' : '') +
+      '</div>' +
+      (qty > 0
+        ? '<div class="hm-detail-step">' +
+            '<span>الكمية في السلة</span>' +
+            '<div class="hm-step">' +
+              '<button type="button" class="hm-step-btn" data-dec="' + esc(p.id) + '" aria-label="إنقاص الكمية">' +
+                '<svg class="hm-icon hm-icon-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/></svg>' +
+              '</button>' +
+              '<span class="hm-step-qty">' + qty + '</span>' +
+              '<button type="button" class="hm-step-btn" data-inc="' + esc(p.id) + '" aria-label="زيادة الكمية">' +
+                '<svg class="hm-icon hm-icon-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>' +
+              '</button>' +
+            '</div>' +
+          '</div>' +
+          '<button class="hm-btn hm-btn-primary hm-detail-cta" type="button" data-cart-open>عرض السلة وإرسال الطلب</button>'
+        : '<button class="hm-btn hm-btn-primary hm-detail-cta" type="button" data-add="' + esc(p.id) + '">' +
+            '<svg class="hm-icon hm-icon-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>' +
+            '<span data-add-label>أضف للسلة</span>' +
+          '</button>') +
+      '<a class="hm-btn hm-btn-ghost hm-detail-ask" ' +
+         'href="https://wa.me/' + CFG.contact.phoneIntl + '?text=' +
+         encodeURIComponent('السلام عليكم، أريد الاستفسار عن: ' + p.name + ' (' + p.brand + ' — ' + p.size + ')') +
+         '" target="_blank" rel="noopener">اسأل عن هذا المنتج</a>';
+  }
+
+  var openDetailId = null;
+
+  function renderDetail() {
+    if (!openDetailId) return;
+    var p = byId[openDetailId];
+    if (!p) return;
+    $('[data-detail-body]').innerHTML = detailHTML(p);
+    $('[data-detail-foot]').innerHTML = detailFootHTML(p);
+  }
+
+  function openDetail(id) {
+    if (!byId[id]) return;
+    openDetailId = id;
+    renderDetail();
+    $('[data-detail-body]').scrollTop = 0;
+    openPanel(prodPanel);
   }
 
   function trapFocus(ev) {
-    if (ev.key !== 'Tab' || drawer.hidden) return;
-    var focusables = $$('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])', drawer)
+    if (ev.key !== 'Tab' || !openPanelEl) return;
+    var focusables = $$('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])', openPanelEl)
       .filter(function (el) { return !el.disabled && el.offsetParent !== null; });
     if (focusables.length === 0) return;
     var first = focusables[0], last = focusables[focusables.length - 1];
@@ -375,6 +473,7 @@
 
   function init() {
     drawer = $('[data-cart]');
+    prodPanel = $('[data-detail]');
     backdrop = $('[data-backdrop]');
 
     bindConfig();
@@ -394,11 +493,14 @@
       var dec = ev.target.closest('[data-dec]');
       if (dec) { var d = dec.getAttribute('data-dec'); setQty(d, (cart[d] || 0) - 1); return; }
 
+      var open = ev.target.closest('[data-open]');
+      if (open) { openDetail(open.getAttribute('data-open')); return; }
+
       var chip = ev.target.closest('[data-cat]');
       if (chip) { setCat(chip.getAttribute('data-cat')); return; }
 
       if (ev.target.closest('[data-cart-open]')) { openCart(); return; }
-      if (ev.target.closest('[data-cart-close]') || ev.target.closest('[data-backdrop]')) { closeCart(); return; }
+      if (ev.target.closest('[data-panel-close]') || ev.target.closest('[data-backdrop]')) { closePanel(); return; }
       if (ev.target.closest('[data-send-order]')) { sendOrder(); return; }
 
       var clear = ev.target.closest('[data-cart-clear]');
@@ -406,7 +508,7 @@
     });
 
     document.addEventListener('keydown', function (ev) {
-      if (ev.key === 'Escape' && !drawer.hidden) closeCart();
+      if (ev.key === 'Escape' && openPanelEl) closePanel();
       trapFocus(ev);
     });
 

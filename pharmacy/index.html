@@ -459,7 +459,7 @@
 <aside class="hm-drawer" data-cart hidden role="dialog" aria-modal="true" aria-label="سلة الطلب">
   <header class="hm-drawer-head">
     <h2>سلة الطلب</h2>
-    <button class="hm-icon-btn" type="button" data-cart-close aria-label="إغلاق السلة">
+    <button class="hm-icon-btn" type="button" data-panel-close aria-label="إغلاق السلة">
       <svg class="hm-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
     </button>
   </header>
@@ -481,6 +481,19 @@
     </button>
     <button class="hm-btn hm-btn-ghost hm-drawer-clear" type="button" data-cart-clear>إفراغ السلة</button>
   </footer>
+</aside>
+
+<aside class="hm-drawer hm-drawer--detail" data-detail hidden role="dialog" aria-modal="true" aria-labelledby="hm-detail-title">
+  <header class="hm-drawer-head">
+    <h2>تفاصيل المنتج</h2>
+    <button class="hm-icon-btn" type="button" data-panel-close aria-label="إغلاق التفاصيل">
+      <svg class="hm-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+    </button>
+  </header>
+
+  <div class="hm-drawer-body" data-detail-body></div>
+
+  <footer class="hm-drawer-foot" data-detail-foot></footer>
 </aside>
 
 <script src="assets/js/config.js"></script>

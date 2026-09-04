@@ -11,16 +11,16 @@
 .js-reveal [data-aos] {
   opacity: 0;
   transition-property: opacity, transform;
-  transition-duration: 700ms;
-  transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  transition-duration: 850ms;
+  transition-timing-function: cubic-bezier(0.22, 0.72, 0.28, 1);
   will-change: opacity, transform;
 }
 
-.js-reveal [data-aos="fade-up"]    { transform: translate3d(0, 26px, 0); }
-.js-reveal [data-aos="fade-down"]  { transform: translate3d(0, -22px, 0); }
-.js-reveal [data-aos="fade-left"]  { transform: translate3d(28px, 0, 0); }
-.js-reveal [data-aos="fade-right"] { transform: translate3d(-28px, 0, 0); }
-.js-reveal [data-aos="zoom-in"]    { transform: scale(0.96); }
+.js-reveal [data-aos="fade-up"]    { transform: translate3d(0, 18px, 0); }
+.js-reveal [data-aos="fade-down"]  { transform: translate3d(0, -14px, 0); }
+.js-reveal [data-aos="fade-left"]  { transform: translate3d(20px, 0, 0); }
+.js-reveal [data-aos="fade-right"] { transform: translate3d(-20px, 0, 0); }
+.js-reveal [data-aos="zoom-in"]    { transform: scale(0.975); }
 .js-reveal [data-aos="fade-in"]    { transform: none; }
 
 .js-reveal [data-aos].aos-animate {
@@ -35,7 +35,7 @@
    كانت تدفع المحتوى خارج حدود الشاشة أثناء تشغيل الحركة. */
 @media (max-width: 900px) {
   .js-reveal [data-aos="fade-left"],
-  .js-reveal [data-aos="fade-right"] { transform: translate3d(0, 26px, 0); }
+  .js-reveal [data-aos="fade-right"] { transform: translate3d(0, 18px, 0); }
 }
 
 @media (prefers-reduced-motion: reduce) {
