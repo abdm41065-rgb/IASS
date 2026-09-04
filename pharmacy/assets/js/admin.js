@@ -465,7 +465,14 @@
     $('[data-gen-label]').textContent = 'المحتوى أدناه يخصّ الملف: assets/js/' + currentFile.name;
   }
 
+  /* داخل إطار مضمّن (عارض الرابط مثلاً) يُمنع التنزيل من الصفحة صمتاً،
+     فلا تظهر أزرار التنزيل أصلاً ويكون النسخ هو الطريق. */
+  var canDownload = (function () {
+    try { return window.self === window.top; } catch (err) { return false; }
+  })();
+
   function download(name, text, type) {
+    if (!canDownload) { toast('التنزيل غير متاح هنا — استعمل زر النسخ'); return; }
     try {
       var blob = new Blob([text], { type: (type || 'text/javascript') + ';charset=utf-8' });
       var url = URL.createObjectURL(blob);
@@ -517,8 +524,20 @@
     renderSettings();
   }
 
+  function adaptToSandbox() {
+    if (canDownload) return;
+    $$('[data-download]').forEach(function (b) { b.hidden = true; });
+    $$('[data-backup]').forEach(function (b) { b.textContent = 'أظهر النسخة الاحتياطية للنسخ'; });
+    $$('.ad-hint').forEach(function (el) {
+      if (el.textContent.indexOf('إذا لم يبدأ التنزيل') === 0) {
+        el.textContent = 'التنزيل معطّل داخل هذا العارض. استعمل زر النسخ والصق المحتوى في الملف.';
+      }
+    });
+  }
+
   function init() {
     initGate();
+    adaptToSandbox();
 
     document.addEventListener('click', function (ev) {
       var t = ev.target;
@@ -551,9 +570,17 @@
       if (t.closest('[data-download]')) { download(currentFile.name, currentFile.text); return; }
 
       if (t.closest('[data-backup]')) {
-        download('hayat-al-majd-backup.json',
-                 JSON.stringify({ products: products, categories: categories, settings: settings }, null, 2),
-                 'application/json');
+        var backup = JSON.stringify({ products: products, categories: categories, settings: settings }, null, 2);
+        if (canDownload) {
+          download('hayat-al-majd-backup.json', backup, 'application/json');
+        } else {
+          // بلا تنزيل، نعرض النسخة في مربّع الكود ليأخذها المستخدم بالنسخ
+          currentFile = { name: 'hayat-al-majd-backup.json', text: backup };
+          $('[data-code]').value = backup;
+          $('[data-gen-label]').textContent = 'النسخة الاحتياطية — انسخها واحفظها في ملف باسم hayat-al-majd-backup.json';
+          $('[data-code]').scrollIntoView({ block: 'center' });
+          toast('النسخة جاهزة للنسخ في الأسفل');
+        }
         return;
       }
 
