@@ -1,0 +1,47 @@
+/* ── كشف العناصر عند التمرير ───────────────────────────────────────────────
+   واجهة التأليف نفسها المعتمدة في AOS: data-aos / data-aos-delay /
+   data-aos-duration / data-aos-offset / data-aos-once.
+   منفَّذة محلياً عبر IntersectionObserver (assets/js/reveal.js) بدل تحميل
+   المكتبة من CDN — لا اعتماد خارجي، فلا يوجد سيناريو تفشل فيه الصفحة.
+
+   الإخفاء الأولي مشروط بالصنف .js-reveal الذي يضعه سكربت مضمّن في <head>،
+   فإذا تعطّلت الجافاسكربت يبقى المحتوى ظاهراً بالكامل.
+   ------------------------------------------------------------------------ */
+
+.js-reveal [data-aos] {
+  opacity: 0;
+  transition-property: opacity, transform;
+  transition-duration: 700ms;
+  transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
+}
+
+.js-reveal [data-aos="fade-up"]    { transform: translate3d(0, 26px, 0); }
+.js-reveal [data-aos="fade-down"]  { transform: translate3d(0, -22px, 0); }
+.js-reveal [data-aos="fade-left"]  { transform: translate3d(28px, 0, 0); }
+.js-reveal [data-aos="fade-right"] { transform: translate3d(-28px, 0, 0); }
+.js-reveal [data-aos="zoom-in"]    { transform: scale(0.96); }
+.js-reveal [data-aos="fade-in"]    { transform: none; }
+
+.js-reveal [data-aos].aos-animate {
+  opacity: 1;
+  transform: translate3d(0, 0, 0) scale(1);
+}
+
+/* بعد انتهاء الحركة نرفع will-change حتى لا تبقى الطبقة قائمة بلا داع */
+.js-reveal [data-aos].aos-settled { will-change: auto; }
+
+/* على الشاشات الضيّقة تتحوّل الحركة الأفقية إلى رأسية: الإزاحة الأفقية
+   كانت تدفع المحتوى خارج حدود الشاشة أثناء تشغيل الحركة. */
+@media (max-width: 900px) {
+  .js-reveal [data-aos="fade-left"],
+  .js-reveal [data-aos="fade-right"] { transform: translate3d(0, 26px, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .js-reveal [data-aos] {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+}
