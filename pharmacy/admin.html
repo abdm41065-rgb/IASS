@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>لوحة إدارة — صيدلية حياة المجد</title>
+
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 3c6 7 9 11 9 15a9 9 0 1 1-18 0c0-4 3-8 9-15Z' fill='%232f68d8'/%3E%3C/svg%3E">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=Albert+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+
+<link rel="stylesheet" href="assets/css/tokens.css">
+<link rel="stylesheet" href="assets/css/kit.css">
+<link rel="stylesheet" href="assets/css/site.css">
+<link rel="stylesheet" href="assets/css/admin.css">
+</head>
+<body class="ad-page">
+
+<!-- ══ بوابة الدخول ═══════════════════════════════════════════════════════ -->
+<div class="ad-gate" data-gate>
+  <div class="ad-gate-card">
+    <svg class="hm-mark" viewBox="0 0 40 40" aria-hidden="true">
+      <path d="M20 3.5c7.6 8.6 11.4 13.7 11.4 18.6A11.4 11.4 0 0 1 8.6 22.1C8.6 17.2 12.4 12.1 20 3.5Z"/>
+    </svg>
+    <h1>لوحة الإدارة</h1>
+    <p>أدخل رمز الدخول للمتابعة.</p>
+
+    <form class="ad-gate-form" data-gate-form>
+      <div class="hm-field">
+        <label for="pass">رمز الدخول</label>
+        <input class="hm-input" id="pass" type="password" data-pass autocomplete="current-password" inputmode="numeric">
+      </div>
+      <p class="ad-gate-err" data-gate-err role="alert"></p>
+      <button class="hm-btn hm-btn-primary" type="submit">دخول</button>
+    </form>
+
+    <p class="ad-hint" style="margin-block-start:16px">
+      هذا القفل يمنع الفضول لا أكثر: الرمز موجود في ملفات الموقع ويستطيع أي
+      زائر قراءته. الحماية الحقيقية أن لا تُرفع هذه الصفحة على الاستضافة،
+      وأن تُستعمل من جهازك ثم يُرفع ملف المنتجات المصدَّر.
+    </p>
+  </div>
+</div>
+
+<!-- ══ اللوحة ═════════════════════════════════════════════════════════════ -->
+<div class="ad-shell" data-shell hidden>
+
+  <header class="ad-top">
+    <a class="hm-brand" href="index.html">
+      <svg class="hm-mark" viewBox="0 0 40 40" aria-hidden="true">
+        <path d="M20 3.5c7.6 8.6 11.4 13.7 11.4 18.6A11.4 11.4 0 0 1 8.6 22.1C8.6 17.2 12.4 12.1 20 3.5Z"/>
+      </svg>
+      <span class="hm-brand-text"><span class="hm-brand-ar">حياة المجد</span></span>
+    </a>
+    <span class="ad-top-badge">لوحة الإدارة</span>
+
+    <div class="ad-top-actions">
+      <a class="hm-btn hm-btn-secondary hm-btn-sm" href="index.html" target="_blank" rel="noopener">معاينة الموقع</a>
+      <button class="hm-btn hm-btn-ghost hm-btn-sm" type="button" data-lock>خروج</button>
+    </div>
+  </header>
+
+  <nav class="ad-tabs" role="tablist" aria-label="أقسام اللوحة">
+    <button class="ad-tab" type="button" role="tab" data-tab="products" aria-selected="true">المنتجات</button>
+    <button class="ad-tab" type="button" role="tab" data-tab="settings" aria-selected="false">الإعدادات</button>
+    <button class="ad-tab" type="button" role="tab" data-tab="publish"  aria-selected="false">النشر</button>
+  </nav>
+
+  <main class="ad-main">
+
+    <!-- ── المنتجات ────────────────────────────────────────────────────── -->
+    <section data-panel="products">
+      <div class="ad-panel-head">
+        <h2>المنتجات</h2>
+        <p>عدّل السعر مباشرة من الجدول، أو افتح المنتج لتعديل كل تفاصيله. التغييرات تُحفظ في هذا المتصفّح فوراً وتظهر في معاينة الموقع.</p>
+      </div>
+
+      <div class="ad-toolbar">
+        <div class="hm-search">
+          <svg class="hm-icon hm-icon-sm" viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="11" cy="11" r="7"/><path d="m20 20-3.6-3.6"/>
+          </svg>
+          <label class="hm-sr" for="adq">ابحث</label>
+          <input class="hm-input" id="adq" type="search" data-ad-search placeholder="ابحث بالاسم أو الماركة…">
+        </div>
+
+        <label class="hm-sr" for="adcat">القسم</label>
+        <select class="hm-select" id="adcat" data-ad-cat style="flex:0 1 210px"></select>
+
+        <button class="hm-btn hm-btn-primary hm-btn-sm" type="button" data-add-product>
+          <svg class="hm-icon hm-icon-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+          منتج جديد
+        </button>
+
+        <span class="ad-count" data-ad-count></span>
+      </div>
+
+      <div class="ad-table-wrap">
+        <table class="ad-table">
+          <thead>
+            <tr>
+              <th>المنتج</th>
+              <th>القسم</th>
+              <th>الحجم</th>
+              <th>السعر (د.ع)</th>
+              <th>قبل الخصم</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody data-ad-rows></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ── الإعدادات ───────────────────────────────────────────────────── -->
+    <section data-panel="settings" hidden>
+      <div class="ad-panel-head">
+        <h2>الإعدادات</h2>
+        <p>بيانات التواصل والنصوص الثابتة التي تظهر في الموقع كلّه.</p>
+      </div>
+      <form class="ad-form" data-settings-form></form>
+    </section>
+
+    <!-- ── النشر ───────────────────────────────────────────────────────── -->
+    <section data-panel="publish" hidden>
+      <div class="ad-panel-head">
+        <h2>النشر</h2>
+        <p>تعديلاتك محفوظة في هذا المتصفّح فقط. لتصل إلى الزبائن، صدّر الملف وارفعه بدل القديم على الاستضافة.</p>
+      </div>
+
+      <div class="ad-note is-warn">
+        <svg class="hm-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 9v5M12 17.5v.01"/><path d="M10.3 4.3 2.9 17a2 2 0 0 0 1.7 3h14.8a2 2 0 0 0 1.7-3L13.7 4.3a2 2 0 0 0-3.4 0Z"/>
+        </svg>
+        <span>الموقع لا يملك خادماً يحفظ التغييرات مركزياً. ما تعدّله هنا تراه أنت على هذا الجهاز فقط، حتى ترفع الملف المصدَّر.</span>
+      </div>
+
+      <div class="ad-fieldset">
+        <h3>الخطوة 1 — انسخ الملف</h3>
+        <div class="hm-btn-row">
+          <button class="hm-btn hm-btn-secondary hm-btn-sm" type="button" data-gen="catalog">توليد assets/js/catalog.js</button>
+          <button class="hm-btn hm-btn-secondary hm-btn-sm" type="button" data-gen="config">توليد assets/js/config.js</button>
+        </div>
+        <p class="ad-hint" data-gen-label>اختر الملف الذي عدّلته: المنتجات في catalog.js، وبيانات التواصل في config.js.</p>
+        <textarea class="ad-code" data-code readonly spellcheck="false"></textarea>
+        <div class="hm-btn-row">
+          <button class="hm-btn hm-btn-primary hm-btn-sm" type="button" data-copy>انسخ المحتوى</button>
+          <button class="hm-btn hm-btn-secondary hm-btn-sm" type="button" data-download>نزّل الملف</button>
+        </div>
+        <p class="ad-hint">إذا لم يبدأ التنزيل (بعض المتصفّحات تمنعه)، استعمل زر النسخ والصق المحتوى في الملف يدوياً.</p>
+      </div>
+
+      <div class="ad-fieldset">
+        <h3>الخطوة 2 — ارفعه</h3>
+        <p class="ad-hint">
+          افتح ملف الموقع على الاستضافة، واستبدل محتوى الملف المذكور بما نسخته،
+          ثم احفظ. حدّث صفحة الموقع وستظهر التعديلات للجميع.
+        </p>
+      </div>
+
+      <div class="ad-fieldset">
+        <h3>نسخة احتياطية</h3>
+        <p class="ad-hint">احفظ نسخة من بياناتك، أو استرجع نسخة سابقة. الملف بصيغة JSON.</p>
+        <div class="hm-btn-row">
+          <button class="hm-btn hm-btn-secondary hm-btn-sm" type="button" data-backup>حفظ نسخة احتياطية</button>
+          <label class="hm-btn hm-btn-secondary hm-btn-sm" style="cursor:pointer">
+            استرجاع من ملف
+            <input type="file" accept="application/json,.json" data-restore hidden>
+          </label>
+        </div>
+      </div>
+
+      <div class="ad-fieldset">
+        <h3>استرجاع الأصل</h3>
+        <p class="ad-hint">يمسح كل تعديلاتك المحلية ويعيد الموقع إلى ما في الملفات المرفوعة. لا يمكن التراجع.</p>
+        <div class="hm-btn-row">
+          <button class="hm-btn hm-btn-secondary hm-btn-sm" type="button" data-reset
+                  style="--_fg: var(--hm-danger); --_bd: var(--hm-danger)">امسح التعديلات المحلية</button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- ══ شريط الحفظ ═════════════════════════════════════════════════════════ -->
+<div class="ad-save" data-save-bar>
+  <p data-save-text>لديك تعديلات غير محفوظة.</p>
+  <div class="hm-btn-row">
+    <button class="hm-btn hm-btn-ghost hm-btn-sm" type="button" data-discard>تراجع</button>
+    <button class="hm-btn hm-btn-primary hm-btn-sm" type="button" data-save>احفظ</button>
+  </div>
+</div>
+
+<div class="ad-toast" data-toast role="status"></div>
+
+<!-- ══ محرّر المنتج ═══════════════════════════════════════════════════════ -->
+<div class="hm-backdrop" data-backdrop hidden></div>
+
+<aside class="hm-drawer hm-drawer--detail" data-editor hidden role="dialog" aria-modal="true" aria-label="تعديل المنتج">
+  <header class="hm-drawer-head">
+    <h2 data-editor-title>تعديل المنتج</h2>
+    <button class="hm-icon-btn" type="button" data-panel-close aria-label="إغلاق">
+      <svg class="hm-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+    </button>
+  </header>
+
+  <div class="hm-drawer-body">
+    <form class="ad-form" data-editor-form></form>
+  </div>
+
+  <footer class="hm-drawer-foot">
+    <button class="hm-btn hm-btn-primary" type="button" data-editor-save style="inline-size:100%">احفظ المنتج</button>
+    <button class="hm-btn hm-btn-ghost" type="button" data-editor-delete
+            style="inline-size:100%;margin-block-start:6px;--_fg:var(--hm-danger)">احذف المنتج</button>
+  </footer>
+</aside>
+
+<script src="assets/js/config.js"></script>
+<script src="assets/js/catalog.js"></script>
+<script src="assets/js/store.js"></script>
+<script src="assets/js/admin.js"></script>
+</body>
+</html>

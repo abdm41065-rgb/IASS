@@ -14,8 +14,13 @@
   ITEMS.forEach(function (p) { byId[p.id] = p; });
 
   var money = CFG.currency.format;
-  var $ = function (sel, root) { return (root || document).querySelector(sel); };
-  var $$ = function (sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); };
+  /* في النسخة ذات الملف الواحد يعيش الموقع ولوحة الإدارة في صفحة واحدة،
+     فتُحصر استعلامات كلٍّ منهما داخل جذره. في الصفحات المنفصلة لا وجود
+     للجذر، فيعود المدى إلى المستند كاملاً. */
+  var ROOT = document.querySelector('[data-shop]') || document;
+
+  var $ = function (sel, root) { return (root || ROOT).querySelector(sel); };
+  var $$ = function (sel, root) { return Array.prototype.slice.call((root || ROOT).querySelectorAll(sel)); };
 
   function esc(str) {
     return String(str).replace(/[&<>"']/g, function (ch) {
