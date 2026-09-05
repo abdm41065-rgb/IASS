@@ -221,22 +221,6 @@ body.lang-ar .scroll-cue{font-size:.72rem;letter-spacing:.02em;text-transform:no
 @keyframes cue{0%{transform:translateY(0)}60%,100%{transform:translateY(92px)}}
 @media(max-width:700px){.scroll-cue,.hero-badge{display:none}}
 
-/* ═══════════════════════════════════════
-   MARQUEE
-═══════════════════════════════════════ */
-.marquee{
-  background:var(--ink);color:var(--bone);overflow:hidden;
-  padding-block:16px;border-block:1px solid rgba(245,242,234,.1);
-}
-.marquee-track{display:flex;gap:0;width:max-content;animation:slide 34s linear infinite}
-[dir=rtl] .marquee-track{animation-direction:reverse}
-.marquee-track span{
-  font-family:var(--serif);font-size:1.05rem;letter-spacing:.24em;
-  text-transform:uppercase;padding-inline:34px;opacity:.75;white-space:nowrap;
-}
-body.lang-ar .marquee-track span{font-family:var(--ar);font-size:.9rem;letter-spacing:.02em;text-transform:none}
-.marquee-track span::after{content:'✦';padding-inline-start:34px;color:var(--clay2);opacity:.9}
-@keyframes slide{to{transform:translateX(-50%)}}
 
 /* ═══════════════════════════════════════
    SECTION SHELL
@@ -870,21 +854,6 @@ body.lang-ar #rail .lbl{font-size:.72rem;letter-spacing:0;text-transform:none}
   <div class="scroll-cue"><span data-en="Scroll" data-ar="مرّر">Scroll</span><i></i></div>
 </section>
 
-<!-- ══════ MARQUEE ══════ -->
-<div class="marquee" aria-hidden="true">
-  <div class="marquee-track" id="marquee">
-    <span data-en="Privacy" data-ar="خصوصية">Privacy</span>
-    <span data-en="Wellbeing" data-ar="رفاهية">Wellbeing</span>
-    <span data-en="Sea views" data-ar="إطلالات بحرية">Sea views</span>
-    <span data-en="Natural materials" data-ar="مواد طبيعية">Natural materials</span>
-    <span data-en="Timeless design" data-ar="تصميم خالد">Timeless design</span>
-    <span data-en="Privacy" data-ar="خصوصية">Privacy</span>
-    <span data-en="Wellbeing" data-ar="رفاهية">Wellbeing</span>
-    <span data-en="Sea views" data-ar="إطلالات بحرية">Sea views</span>
-    <span data-en="Natural materials" data-ar="مواد طبيعية">Natural materials</span>
-    <span data-en="Timeless design" data-ar="تصميم خالد">Timeless design</span>
-  </div>
-</div>
 
 <!-- ══════ VISION ══════ -->
 <section class="pad" id="vision">
@@ -1482,7 +1451,7 @@ function measureTones(){
     return pos!=='fixed' && pos!=='absolute';
   }).map(function(el){
     var dark = el.classList.contains('tone-dark') || el.id==='hero' || el.id==='gallery'
-            || el.classList.contains('marquee') || el.tagName==='FOOTER';
+            || el.tagName==='FOOTER';
     return {top:el.offsetTop, bottom:el.offsetTop+el.offsetHeight, dark:dark};
   });
 }
