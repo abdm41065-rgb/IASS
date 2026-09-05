@@ -186,6 +186,24 @@ nav.top a:hover{color:var(--white)}
 nav.top a:hover::after{width:100%}
 nav.top a.on{color:var(--acc)}
 nav.top a.on::after{width:100%}
+
+/* quick links — icon + label, the reference's nav pattern */
+.nav-sep{width:1px;height:15px;background:var(--line);flex:none;margin-inline:3px}
+.qk{
+  display:inline-flex;align-items:center;gap:6px;flex:none;
+  font-family:var(--mono);font-size:.85rem;color:var(--grey);
+  background:none;border:0;padding:5px 0;cursor:pointer;transition:color .22s;
+}
+body.lang-ar .qk{font-family:var(--ar)}
+.qk svg{width:14px;height:14px;flex:none;stroke:currentColor;fill:none;stroke-width:1.8;opacity:.7;transition:opacity .22s}
+.qk svg.fill{fill:currentColor;stroke:none}
+.qk:hover{color:var(--acc)}
+.qk:hover svg{opacity:1}
+@media(max-width:920px){
+  .nav-sep{display:none}
+  .qk{width:100%;justify-content:flex-start;padding:14px 0;border-bottom:1px solid var(--line);font-size:.95rem}
+  .qk svg{width:16px;height:16px}
+}
 .hd-r{display:flex;align-items:center;gap:10px}
 .lang{
   font-family:var(--mono);font-size:.76rem;color:var(--grey);cursor:pointer;
@@ -493,6 +511,19 @@ footer{border-top:1px solid var(--line);padding-block:clamp(38px,5vw,58px) 26px;
     <a href="#services" data-en="Services" data-ar="الخدمات">الخدمات</a>
     <a href="#bot" data-en="Try the bots" data-ar="جرّب البوتات">جرّب البوتات</a>
     <a href="#faq" data-en="FAQ" data-ar="أسئلة">أسئلة</a>
+    <span class="nav-sep" aria-hidden="true"></span>
+    <button type="button" class="qk" id="qkBot">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 01-9 8.4 8.5 8.5 0 01-4-1L3 21l2.1-5a8.4 8.4 0 01-1-4 8.5 8.5 0 018.4-9 8.5 8.5 0 018.5 8.5z" stroke-linejoin="round"/></svg>
+      <span data-en="Bot" data-ar="البوت">البوت</span>
+    </button>
+    <a class="qk" href="https://wa.me/00000000000" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24" aria-hidden="true" class="fill"><path d="M12 2a10 10 0 00-8.6 15.1L2 22l5.1-1.3A10 10 0 1012 2zm0 18.1a8.2 8.2 0 01-4.2-1.1l-.3-.2-3 .8.8-3-.2-.3A8.2 8.2 0 1112 20.1zm4.6-6.1c-.25-.13-1.5-.74-1.73-.82s-.4-.13-.57.12-.66.82-.8 1-.3.18-.55.06a6.7 6.7 0 01-2-1.24 7.4 7.4 0 01-1.36-1.7c-.15-.25 0-.38.11-.5l.38-.45.25-.42a.46.46 0 000-.44c-.06-.12-.57-1.37-.78-1.87s-.41-.43-.57-.44h-.48a.94.94 0 00-.68.32 2.83 2.83 0 00-.88 2.1 4.9 4.9 0 001.03 2.6 11.3 11.3 0 004.32 3.82c.6.26 1.08.41 1.45.53a3.5 3.5 0 001.6.1 2.62 2.62 0 001.72-1.21 2.13 2.13 0 00.15-1.21c-.06-.11-.22-.17-.47-.29z"/></svg>
+      <span data-en="WhatsApp" data-ar="واتساب">واتساب</span>
+    </a>
+    <a class="qk" href="mailto:hello@flowline.example">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="4.5" width="19" height="15" rx="2.5"/><path d="m3.5 6.5 8.5 6 8.5-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span data-en="Email" data-ar="بريد">بريد</span>
+    </a>
   </nav>
   <div class="hd-r">
     <span class="hd-stat" id="hdStat"><i></i><em></em></span>
@@ -793,7 +824,11 @@ function paintStatus(){
 var hdr=$('#hdr');
 $('#burger').addEventListener('click',function(){ document.body.classList.toggle('menu'); });
 $$('#nav a').forEach(function(a){ a.addEventListener('click',function(){ document.body.classList.remove('menu'); }); });
-var hdProg=$('#hdProg'), spy=$$('#nav a').map(function(a){
+var hdProg=$('#hdProg'), spy=$$('#nav a').filter(function(a){
+  /* the nav now also holds external shortcuts — only in-page hrefs are spy targets */
+  var h=a.getAttribute('href')||'';
+  return h.charAt(0)==='#' && h.length>1;
+}).map(function(a){
   return {a:a, el:document.querySelector(a.getAttribute('href'))};
 }).filter(function(x){ return x.el; }), spyCur=null, tick=false;
 
@@ -1196,6 +1231,12 @@ function toBot(){
   setTimeout(function(){ mainChat.focus(); }, REDUCED?0:700);
 }
 $('#heroTry').addEventListener('click',toBot);
+$('#qkBot').addEventListener('click',function(){
+  document.body.classList.remove('menu');
+  if(!document.body.classList.contains('dock')){
+    document.body.classList.add('dock'); dockChat.greet(); setTimeout(dockChat.focus,320);
+  }
+});
 $('#ctaTry').addEventListener('click',toBot);
 addEventListener('keydown',function(e){ if(e.key==='Escape') document.body.classList.remove('dock','menu'); });
 
