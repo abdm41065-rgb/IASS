@@ -228,10 +228,8 @@ body.menu .burger i:nth-child(3){transform:translateY(-5.75px) rotate(-45deg)}
   .qk{padding:8px 9px}
 }
 /* English labels run longer than the Arabic ones, so it tightens sooner */
-@media(max-width:1700px){ body.lang-en nav.top a{padding:8px 9px} }
-@media(max-width:1450px){ body.lang-en nav.top a{padding:7px 7px;font-size:.79rem} }
-@media(max-width:1300px){ body.lang-en nav.top a{padding:6px 6px;font-size:.76rem} }
-@media(max-width:1350px){ body.lang-en .hd-cta{display:none} }
+@media(max-width:1400px){ body.lang-en nav.top a{padding:8px 9px} }
+@media(max-width:1220px){ body.lang-en nav.top a{padding:7px 7px;font-size:.79rem} }
 @media(max-width:1400px){
   nav.top a{padding:8px 10px;font-size:.81rem}
   .hd-stat,.hd-div{display:none}
@@ -398,23 +396,7 @@ body.lang-ar .say figcaption span{font-family:var(--ar);font-size:.82rem}
 .step2 h3{margin-bottom:8px}
 .step2 p{color:var(--grey);font-size:.92rem;line-height:1.7}
 
-/* results */
-.res{display:grid;gap:6px;align-content:start}
-.res-n{font-family:var(--mono);font-size:clamp(2rem,3.4vw,2.7rem);font-weight:500;line-height:1;color:var(--acc);letter-spacing:-.02em;unicode-bidi:isolate}
-.res-l{font-family:var(--mono);font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:var(--grey2);margin-bottom:12px}
-body.lang-ar .res-l{font-family:var(--ar);font-size:.78rem;letter-spacing:0;text-transform:none}
-.res h3{margin-bottom:8px}
-.res .foot{unicode-bidi:isolate}
 
-/* chips */
-.chips{display:flex;flex-wrap:wrap;gap:8px}
-.chip{
-  font-family:var(--mono);font-size:.8rem;color:var(--grey);
-  border:1px solid var(--line);border-radius:8px;padding:8px 13px;background:var(--ink);
-  transition:border-color .22s,color .22s;
-}
-.chip:hover{border-color:var(--acc);color:var(--acc)}
-.chip.dash{border-style:dashed;color:var(--grey2)}
 
 
 /* ═══════════════════════════════════════════════
@@ -574,15 +556,13 @@ footer{border-top:1px solid var(--line);padding-block:clamp(38px,5vw,58px) 26px;
     Flowline
   </a>
   <nav class="top" id="nav">
-    <a href="#examples" data-en="Examples" data-ar="أمثلة">أمثلة</a>
     <a href="#services" data-en="Our services" data-ar="خدماتنا">خدماتنا</a>
     <a href="#industries" data-en="Industries" data-ar="الصناعات">الصناعات</a>
-    <a href="#stack" data-en="Integrations" data-ar="التكاملات">التكاملات</a>
-    <a href="#results" data-en="Results" data-ar="النتائج">النتائج</a>
     <a href="#says" data-en="Clients" data-ar="آراء العملاء">آراء العملاء</a>
     <a href="#bot" data-en="Try the bots" data-ar="جرّب البوتات">جرّب البوتات</a>
     <a href="#security" data-en="Security" data-ar="الأمان">الأمان</a>
     <a href="#faq" data-en="FAQ" data-ar="أسئلة">أسئلة</a>
+    <a href="#examples" data-en="Examples" data-ar="أمثلة">أمثلة</a>
     <span class="nav-sep" aria-hidden="true"></span>
     <button type="button" class="qk" id="qkBot">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 01-9 8.4 8.5 8.5 0 01-4-1L3 21l2.1-5a8.4 8.4 0 01-1-4 8.5 8.5 0 018.4-9 8.5 8.5 0 018.5 8.5z" stroke-linejoin="round"/></svg>
@@ -645,40 +625,6 @@ footer{border-top:1px solid var(--line);padding-block:clamp(38px,5vw,58px) 26px;
   </div>
 </section>
 
-<!-- ═════════ WORKFLOW EXAMPLES ═════════ -->
-<section id="examples">
-  <div class="wrap">
-    <div class="head rv">
-      <div class="eyebrow" data-en="WORKFLOW EXAMPLES" data-ar="أمثلة على سير العمل">أمثلة على سير العمل</div>
-      <h2 class="h2" data-en="Four flows we ship most often." data-ar="أربعة مسارات نبنيها كثيراً.">أربعة مسارات نبنيها كثيراً.</h2>
-      <p class="lede" data-en="Each one is a real running workflow — a trigger, a few steps, and something useful at the end. Yours gets shaped around your tools." data-ar="كل واحد منها سير عمل حقيقي يعمل — مُشغِّل، وبضع خطوات، ونتيجة مفيدة في النهاية. ونصمّم مسارك حول أدواتك أنت.">كل واحد منها سير عمل حقيقي يعمل — مُشغِّل، وبضع خطوات، ونتيجة مفيدة في النهاية. ونصمّم مسارك حول أدواتك أنت.</p>
-    </div>
-    <div class="panel rv">
-      <div class="panel-tabs" id="tabs" role="tablist">
-        <span class="lbl" data-en="FLOW" data-ar="المسار">المسار</span>
-      </div>
-      <div class="panel-body">
-        <div class="flow">
-          <svg id="flowSvg" viewBox="0 0 726 300" role="img" aria-label="workflow diagram">
-            <defs>
-              <linearGradient id="ndFill" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0" stop-color="#191d23"/><stop offset="1" stop-color="#101317"/>
-              </linearGradient>
-              <filter id="ndShadow" x="-30%" y="-60%" width="160%" height="260%">
-                <feGaussianBlur stdDeviation="5"/>
-              </filter>
-              <filter id="pktGlow" x="-300%" y="-300%" width="700%" height="700%">
-                <feGaussianBlur stdDeviation="2.4"/>
-              </filter>
-            </defs>
-          </svg>
-          <div class="flow-legend" id="flowLegend"></div>
-        </div>
-        <aside class="panel-side" id="flowSide"></aside>
-      </div>
-    </div>
-  </div>
-</section>
 
 <!-- ═════════ SERVICES ═════════ -->
 <section id="services">
@@ -759,60 +705,8 @@ footer{border-top:1px solid var(--line);padding-block:clamp(38px,5vw,58px) 26px;
   </div>
 </section>
 
-<!-- ═════════ INTEGRATIONS ═════════ -->
-<section id="stack">
-  <div class="wrap">
-    <div class="head rv">
-      <div class="eyebrow" data-en="INTEGRATIONS" data-ar="التكاملات">التكاملات</div>
-      <h2 class="h2" data-en="Your tools, already talking." data-ar="أدواتك، تتحدث مع بعضها.">أدواتك، تتحدث مع بعضها.</h2>
-      <p class="lede" data-en="If it has an API or a webhook, it can be part of the flow. These are the ones we reach for most." data-ar="إن كان للأداة API أو ويب هوك فيمكن ضمّها إلى المسار. وهذه أكثر ما نستخدمه.">إن كان للأداة API أو ويب هوك فيمكن ضمّها إلى المسار. وهذه أكثر ما نستخدمه.</p>
-    </div>
-    <div class="chips rv">
-      <span class="chip">WhatsApp</span><span class="chip">Telegram</span><span class="chip">Gmail</span>
-      <span class="chip">Google Sheets</span><span class="chip">Slack</span><span class="chip">Notion</span>
-      <span class="chip">Airtable</span><span class="chip">HubSpot</span><span class="chip">Shopify</span>
-      <span class="chip">Salla</span><span class="chip">Stripe</span><span class="chip">Postgres</span>
-      <span class="chip">OpenAI</span><span class="chip">Claude</span><span class="chip">Drive</span>
-      <span class="chip">Instagram</span><span class="chip">Calendly</span>
-      <span class="chip dash" data-en="+ 400 more" data-ar="+ ٤٠٠ غيرها">+ ٤٠٠ غيرها</span>
-    </div>
-  </div>
-</section>
 
 
-<!-- ═════════ RESULTS ═════════ -->
-<section id="results">
-  <div class="wrap">
-    <div class="head rv">
-      <div class="eyebrow" data-en="RESULTS" data-ar="النتائج">النتائج</div>
-      <h2 class="h2" data-en="What changed after the flow went live." data-ar="ما الذي تغيّر بعد تشغيل المسار.">ما الذي تغيّر بعد تشغيل المسار.</h2>
-    </div>
-    <div class="grid g3 stg">
-      <article class="card res">
-        <div class="res-n">-84%</div>
-        <div class="res-l" data-en="time to first reply" data-ar="زمن أول رد">زمن أول رد</div>
-        <h3 class="h3" data-en="Retail · WhatsApp" data-ar="تجزئة · واتساب">تجزئة · واتساب</h3>
-        <p data-en="Enquiries used to sit until someone opened the inbox. The agent now answers in seconds and escalates only what it cannot close." data-ar="كانت الاستفسارات تنتظر حتى يفتح أحدهم البريد. صار الوكيل يرد خلال ثوانٍ ولا يحوّل إلا ما يعجز عن إغلاقه.">كانت الاستفسارات تنتظر حتى يفتح أحدهم البريد. صار الوكيل يرد خلال ثوانٍ ولا يحوّل إلا ما يعجز عن إغلاقه.</p>
-        <div class="foot" data-en="4h 20m → 40s" data-ar="٤:٢٠ ساعة ← ٤٠ ثانية">٤:٢٠ ساعة ← ٤٠ ثانية</div>
-      </article>
-      <article class="card res">
-        <div class="res-n">31h</div>
-        <div class="res-l" data-en="saved every month" data-ar="موفَّرة كل شهر">موفَّرة كل شهر</div>
-        <h3 class="h3" data-en="Distribution · invoices" data-ar="توزيع · الفواتير">توزيع · الفواتير</h3>
-        <p data-en="Supplier invoices are read, matched against the purchase order and filed. Only mismatches reach a person now." data-ar="فواتير المورّدين تُقرأ وتُطابَق مع أمر الشراء وتُحفَظ. ولا يصل الموظف الآن إلا ما اختلف.">فواتير المورّدين تُقرأ وتُطابَق مع أمر الشراء وتُحفَظ. ولا يصل الموظف الآن إلا ما اختلف.</p>
-        <div class="foot" data-en="≈ 240 invoices / month" data-ar="≈ ٢٤٠ فاتورة/شهر">≈ ٢٤٠ فاتورة/شهر</div>
-      </article>
-      <article class="card res">
-        <div class="res-n">0</div>
-        <div class="res-l" data-en="leads lost to follow-up" data-ar="عميل ضائع بلا متابعة">عميل ضائع بلا متابعة</div>
-        <h3 class="h3" data-en="Services · lead capture" data-ar="خدمات · استقبال العملاء">خدمات · استقبال العملاء</h3>
-        <p data-en="Every form, DM and missed call creates one record, gets assigned, and chases itself until someone closes it." data-ar="كل نموذج ورسالة ومكالمة فائتة تُنشئ سجلاً واحداً، يُسنَد ويتابع نفسه حتى يغلقه أحد.">كل نموذج ورسالة ومكالمة فائتة تُنشئ سجلاً واحداً، يُسنَد ويتابع نفسه حتى يغلقه أحد.</p>
-        <div class="foot" data-en="3 sources → 1 pipeline" data-ar="٣ مصادر ← مسار واحد">٣ مصادر ← مسار واحد</div>
-      </article>
-    </div>
-    <p class="mono dim rv" style="margin-top:20px" data-en="Sample figures for this template — replace them with your own." data-ar="أرقام نموذجية في هذا القالب — استبدلها بأرقامك.">أرقام نموذجية في هذا القالب — استبدلها بأرقامك.</p>
-  </div>
-</section>
 
 <!-- ═════════ TESTIMONIALS ═════════ -->
 <section id="says">
@@ -889,6 +783,41 @@ footer{border-top:1px solid var(--line);padding-block:clamp(38px,5vw,58px) 26px;
   </div>
 </section>
 
+<!-- ═════════ WORKFLOW EXAMPLES ═════════ -->
+<section id="examples">
+  <div class="wrap">
+    <div class="head rv">
+      <div class="eyebrow" data-en="WORKFLOW EXAMPLES" data-ar="أمثلة على سير العمل">أمثلة على سير العمل</div>
+      <h2 class="h2" data-en="Four flows we ship most often." data-ar="أربعة مسارات نبنيها كثيراً.">أربعة مسارات نبنيها كثيراً.</h2>
+      <p class="lede" data-en="Each one is a real running workflow — a trigger, a few steps, and something useful at the end. Yours gets shaped around your tools." data-ar="كل واحد منها سير عمل حقيقي يعمل — مُشغِّل، وبضع خطوات، ونتيجة مفيدة في النهاية. ونصمّم مسارك حول أدواتك أنت.">كل واحد منها سير عمل حقيقي يعمل — مُشغِّل، وبضع خطوات، ونتيجة مفيدة في النهاية. ونصمّم مسارك حول أدواتك أنت.</p>
+    </div>
+    <div class="panel rv">
+      <div class="panel-tabs" id="tabs" role="tablist">
+        <span class="lbl" data-en="FLOW" data-ar="المسار">المسار</span>
+      </div>
+      <div class="panel-body">
+        <div class="flow">
+          <svg id="flowSvg" viewBox="0 0 726 300" role="img" aria-label="workflow diagram">
+            <defs>
+              <linearGradient id="ndFill" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#191d23"/><stop offset="1" stop-color="#101317"/>
+              </linearGradient>
+              <filter id="ndShadow" x="-30%" y="-60%" width="160%" height="260%">
+                <feGaussianBlur stdDeviation="5"/>
+              </filter>
+              <filter id="pktGlow" x="-300%" y="-300%" width="700%" height="700%">
+                <feGaussianBlur stdDeviation="2.4"/>
+              </filter>
+            </defs>
+          </svg>
+          <div class="flow-legend" id="flowLegend"></div>
+        </div>
+        <aside class="panel-side" id="flowSide"></aside>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- ═════════ CTA ═════════ -->
 <section id="contact">
   <div class="wrap">
@@ -916,7 +845,6 @@ footer{border-top:1px solid var(--line);padding-block:clamp(38px,5vw,58px) 26px;
         <a href="#examples" data-en="Examples" data-ar="أمثلة">أمثلة</a>
         <a href="#services" data-en="Services" data-ar="الخدمات">الخدمات</a>
         <a href="#industries" data-en="Industries" data-ar="الصناعات">الصناعات</a>
-        <a href="#results" data-en="Results" data-ar="النتائج">النتائج</a>
         <a href="#says" data-en="Clients" data-ar="آراء العملاء">آراء العملاء</a>
         <a href="#security" data-en="Security" data-ar="الأمان">الأمان</a></div>
       <div><h4 data-en="Contact" data-ar="تواصل">تواصل</h4>
