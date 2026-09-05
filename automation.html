@@ -161,7 +161,7 @@ body.lang-ar .hd-stat{font-family:var(--ar);font-size:.78rem}
 .hd-stat i{width:6px;height:6px;border-radius:50%;background:currentColor;flex:none;animation:blip 2.2s infinite}
 .hd-stat.live{color:var(--ok)}
 .hd-div{width:1px;height:20px;background:var(--line);flex:none}
-@media(max-width:1180px){.hd-stat,.hd-div{display:none}}
+
 
 /* segmented language switch */
 .lang-seg{display:flex;border:1px solid var(--line);border-radius:9px;overflow:hidden;flex:none}
@@ -222,13 +222,22 @@ body.lang-ar .qk{font-family:var(--ar)}
 body.menu .burger i:nth-child(1){transform:translateY(5.75px) rotate(45deg)}
 body.menu .burger i:nth-child(2){opacity:0}
 body.menu .burger i:nth-child(3){transform:translateY(-5.75px) rotate(-45deg)}
-/* seven links plus three shortcuts: drop the shortcut labels first */
-@media(max-width:1400px){
+/* ten links plus three shortcuts — shed weight in stages, widest first */
+@media(max-width:1620px){
   .qk span{display:none}
   .qk{padding:8px 9px}
 }
-@media(max-width:1180px){
-  nav.top a{padding:8px 10px;font-size:.8rem}
+@media(max-width:1400px){
+  nav.top a{padding:8px 10px;font-size:.81rem}
+  .hd-stat,.hd-div{display:none}
+}
+@media(max-width:1200px){
+  nav.top a{padding:7px 8px;font-size:.78rem}
+  nav.top{padding:4px 5px}
+}
+@media(max-width:1150px){
+  /* the call-to-action repeats in the hero and the contact block */
+  .hd-cta{display:none}
 }
 @media(max-width:920px){
   nav.top{
@@ -353,6 +362,36 @@ body.lang-ar .nd-t{font-family:'IBM Plex Sans Arabic',sans-serif;font-size:12.5p
 .card h3{margin-bottom:9px}
 .card p{color:var(--grey);font-size:.94rem;line-height:1.75}
 .card .foot{font-family:var(--mono);font-size:.72rem;color:var(--grey2);margin-top:16px;padding-top:14px;border-top:1px solid var(--line)}
+
+/* industries */
+.ind{position:relative}
+.ind-k{
+  position:absolute;top:clamp(20px,2.3vw,28px);inset-inline-end:clamp(20px,2.3vw,28px);
+  font-family:var(--mono);font-size:.72rem;color:var(--faint);
+}
+.ind h3{margin-bottom:9px;padding-inline-end:28px}
+
+/* testimonials */
+.say{display:grid;gap:18px;align-content:start}
+.say blockquote{
+  font-size:1.02rem;line-height:1.75;color:var(--white);
+  border:0;position:relative;padding-top:26px;
+}
+.say blockquote::before{
+  content:'\201C';position:absolute;top:-6px;inset-inline-start:-2px;
+  font-family:var(--serif);font-size:3.2rem;line-height:1;color:var(--acc);opacity:.55;
+}
+.say figcaption{display:grid;gap:2px;padding-top:14px;border-top:1px solid var(--line)}
+.say figcaption b{font-size:.9rem;font-weight:600}
+body.lang-ar .say figcaption b{font-weight:500}
+.say figcaption span{font-family:var(--mono);font-size:.74rem;color:var(--grey2)}
+body.lang-ar .say figcaption span{font-family:var(--ar);font-size:.82rem}
+
+/* security points */
+.step2{padding-top:22px;border-top:1px solid var(--line)}
+.step2 .n{font-family:var(--mono);font-size:.74rem;color:var(--acc);display:block;margin-bottom:14px}
+.step2 h3{margin-bottom:8px}
+.step2 p{color:var(--grey);font-size:.92rem;line-height:1.7}
 
 /* results */
 .res{display:grid;gap:6px;align-content:start}
@@ -532,10 +571,13 @@ footer{border-top:1px solid var(--line);padding-block:clamp(38px,5vw,58px) 26px;
   <nav class="top" id="nav">
     <a href="#examples" data-en="Examples" data-ar="أمثلة">أمثلة</a>
     <a href="#services" data-en="Services" data-ar="الخدمات">الخدمات</a>
+    <a href="#industries" data-en="Industries" data-ar="الصناعات">الصناعات</a>
     <a href="#stack" data-en="Integrations" data-ar="التكاملات">التكاملات</a>
     <a href="#results" data-en="Results" data-ar="النتائج">النتائج</a>
+    <a href="#says" data-en="Clients" data-ar="آراء العملاء">آراء العملاء</a>
     <a href="#bot" data-en="Try the bots" data-ar="جرّب البوتات">جرّب البوتات</a>
     <a href="#about" data-en="Team" data-ar="الفريق">الفريق</a>
+    <a href="#security" data-en="Security" data-ar="الأمان">الأمان</a>
     <a href="#faq" data-en="FAQ" data-ar="أسئلة">أسئلة</a>
     <span class="nav-sep" aria-hidden="true"></span>
     <button type="button" class="qk" id="qkBot">
@@ -682,6 +724,37 @@ footer{border-top:1px solid var(--line);padding-block:clamp(38px,5vw,58px) 26px;
   </div>
 </section>
 
+<!-- ═════════ INDUSTRIES ═════════ -->
+<section id="industries">
+  <div class="wrap">
+    <div class="head rv">
+      <div class="eyebrow" data-en="WHO WE BUILD FOR" data-ar="لمن نبني">لمن نبني</div>
+      <h2 class="h2" data-en="Different businesses, the same tired steps." data-ar="أعمال مختلفة، والخطوات المرهقة نفسها.">أعمال مختلفة، والخطوات المرهقة نفسها.</h2>
+      <p class="lede" data-en="Find the one closest to you — the first flow we build is usually the same one." data-ar="اختر الأقرب إلى نشاطك — أول مسار نبنيه يكون عادةً هو نفسه.">اختر الأقرب إلى نشاطك — أول مسار نبنيه يكون عادةً هو نفسه.</p>
+    </div>
+    <div class="grid g3 stg">
+      <article class="card ind"><span class="ind-k">01</span>
+        <h3 class="h3" data-en="Online stores" data-ar="المتاجر الإلكترونية">المتاجر الإلكترونية</h3>
+        <p data-en="Order updates, stock alerts, abandoned carts, and a bot that answers about sizes and shipping." data-ar="تحديثات الطلبات، تنبيهات المخزون، السلات المتروكة، وبوت يجيب عن المقاسات والشحن.">تحديثات الطلبات، تنبيهات المخزون، السلات المتروكة، وبوت يجيب عن المقاسات والشحن.</p></article>
+      <article class="card ind"><span class="ind-k">02</span>
+        <h3 class="h3" data-en="Clinics" data-ar="العيادات">العيادات</h3>
+        <p data-en="Bookings, reminders that cut no-shows, and follow-up messages after the visit." data-ar="الحجوزات، وتذكيرات تقلّل الغياب، ورسائل متابعة بعد الزيارة.">الحجوزات، وتذكيرات تقلّل الغياب، ورسائل متابعة بعد الزيارة.</p></article>
+      <article class="card ind"><span class="ind-k">03</span>
+        <h3 class="h3" data-en="Restaurants" data-ar="المطاعم">المطاعم</h3>
+        <p data-en="Reservations, daily sales summaries, supplier orders, and reviews collected without chasing." data-ar="الحجوزات، وملخّص المبيعات اليومي، وطلبات المورّدين، وجمع التقييمات بلا مطاردة.">الحجوزات، وملخّص المبيعات اليومي، وطلبات المورّدين، وجمع التقييمات بلا مطاردة.</p></article>
+      <article class="card ind"><span class="ind-k">04</span>
+        <h3 class="h3" data-en="Real estate" data-ar="العقارات">العقارات</h3>
+        <p data-en="Every enquiry matched to a listing, viewings booked, and owners updated on their own schedule." data-ar="كل استفسار يُطابَق بعقار، والمعاينات تُحجَز، والملّاك يصلهم التحديث في موعده.">كل استفسار يُطابَق بعقار، والمعاينات تُحجَز، والملّاك يصلهم التحديث في موعده.</p></article>
+      <article class="card ind"><span class="ind-k">05</span>
+        <h3 class="h3" data-en="Logistics" data-ar="النقل والشحن">النقل والشحن</h3>
+        <p data-en="Shipment status pushed to the customer, delays flagged early, and proof of delivery filed on arrival." data-ar="حالة الشحنة تصل العميل، والتأخير يُرصد مبكراً، وإثبات التسليم يُحفَظ فور الوصول.">حالة الشحنة تصل العميل، والتأخير يُرصد مبكراً، وإثبات التسليم يُحفَظ فور الوصول.</p></article>
+      <article class="card ind"><span class="ind-k">06</span>
+        <h3 class="h3" data-en="Training centres" data-ar="مراكز التدريب">مراكز التدريب</h3>
+        <p data-en="Registrations, payment reminders, attendance, and certificates issued the moment a course closes." data-ar="التسجيلات، وتذكيرات الدفع، والحضور، والشهادات تصدر لحظة انتهاء الدورة.">التسجيلات، وتذكيرات الدفع، والحضور، والشهادات تصدر لحظة انتهاء الدورة.</p></article>
+    </div>
+  </div>
+</section>
+
 <!-- ═════════ INTEGRATIONS ═════════ -->
 <section id="stack">
   <div class="wrap">
@@ -737,6 +810,31 @@ footer{border-top:1px solid var(--line);padding-block:clamp(38px,5vw,58px) 26px;
   </div>
 </section>
 
+<!-- ═════════ TESTIMONIALS ═════════ -->
+<section id="says">
+  <div class="wrap">
+    <div class="head rv">
+      <div class="eyebrow" data-en="WHAT THEY SAY" data-ar="ماذا يقولون">ماذا يقولون</div>
+      <h2 class="h2" data-en="The line we hear most: I stopped thinking about it." data-ar="الجملة التي تتكرر: توقّفت عن التفكير فيها.">الجملة التي تتكرر: توقّفت عن التفكير فيها.</h2>
+    </div>
+    <div class="grid g3 stg">
+      <figure class="card say">
+        <blockquote data-en="We used to open the laptop on weekends just to move numbers between two systems. That has not happened since March." data-ar="كنا نفتح الحاسوب في العطلة لننقل أرقاماً بين نظامين. لم يحدث ذلك منذ مارس.">كنا نفتح الحاسوب في العطلة لننقل أرقاماً بين نظامين. لم يحدث ذلك منذ مارس.</blockquote>
+        <figcaption><b data-en="Operations manager" data-ar="مدير العمليات">مدير العمليات</b><span data-en="distribution company" data-ar="شركة توزيع">شركة توزيع</span></figcaption>
+      </figure>
+      <figure class="card say">
+        <blockquote data-en="The bot answers at 2am better than we answered at 2pm. Customers cannot tell, and honestly neither can I." data-ar="البوت يرد الثانية فجراً أفضل مما كنا نرد الثانية ظهراً. العملاء لا يفرّقون، وأنا كذلك بصراحة.">البوت يرد الثانية فجراً أفضل مما كنا نرد الثانية ظهراً. العملاء لا يفرّقون، وأنا كذلك بصراحة.</blockquote>
+        <figcaption><b data-en="Owner" data-ar="مالك">مالك</b><span data-en="online store" data-ar="متجر إلكتروني">متجر إلكتروني</span></figcaption>
+      </figure>
+      <figure class="card say">
+        <blockquote data-en="What sold me was the handover. Everything documented, running on our server, no one holding us hostage." data-ar="ما أقنعني هو التسليم. كل شيء موثّق، ويعمل على خادمنا، ولا أحد يمسك بنا رهينة.">ما أقنعني هو التسليم. كل شيء موثّق، ويعمل على خادمنا، ولا أحد يمسك بنا رهينة.</blockquote>
+        <figcaption><b data-en="IT lead" data-ar="مسؤول التقنية">مسؤول التقنية</b><span data-en="clinic group" data-ar="مجموعة عيادات">مجموعة عيادات</span></figcaption>
+      </figure>
+    </div>
+    <p class="mono dim rv" style="margin-top:20px" data-en="Placeholder quotes for this template — replace them with your own." data-ar="اقتباسات نموذجية في هذا القالب — استبدلها باقتباسات عملائك.">اقتباسات نموذجية في هذا القالب — استبدلها باقتباسات عملائك.</p>
+  </div>
+</section>
+
 <!-- ═════════ BOT ═════════ -->
 <section id="bot">
   <div class="wrap">
@@ -771,6 +869,22 @@ footer{border-top:1px solid var(--line);padding-block:clamp(38px,5vw,58px) 26px;
           <div><span data-en="Handover" data-ar="التسليم">التسليم</span><span data-en="documented, always" data-ar="موثّق دائماً">موثّق دائماً</span></div>
         </div>
       </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═════════ SECURITY ═════════ -->
+<section id="security">
+  <div class="wrap">
+    <div class="head rv">
+      <div class="eyebrow" data-en="SECURITY" data-ar="الأمان">الأمان</div>
+      <h2 class="h2" data-en="Your data never leaves your side." data-ar="بياناتك لا تغادر جهتك.">بياناتك لا تغادر جهتك.</h2>
+    </div>
+    <div class="grid g4 stg">
+      <div class="step2"><span class="n">01</span><h3 class="h3" data-en="Runs on your server" data-ar="يعمل على خادمك">يعمل على خادمك</h3><p data-en="We deploy on your machine or cloud account. We keep no copy of your database." data-ar="نُنصّب على جهازك أو حسابك السحابي، ولا نحتفظ بنسخة من قاعدة بياناتك.">نُنصّب على جهازك أو حسابك السحابي، ولا نحتفظ بنسخة من قاعدة بياناتك.</p></div>
+      <div class="step2"><span class="n">02</span><h3 class="h3" data-en="Least access" data-ar="أقل صلاحية">أقل صلاحية</h3><p data-en="Each connection gets its own key, scoped to what that step needs and nothing more." data-ar="كل ربط له مفتاحه الخاص، محصور بما تحتاجه تلك الخطوة فقط.">كل ربط له مفتاحه الخاص، محصور بما تحتاجه تلك الخطوة فقط.</p></div>
+      <div class="step2"><span class="n">03</span><h3 class="h3" data-en="Everything logged" data-ar="كل شيء مسجَّل">كل شيء مسجَّل</h3><p data-en="Every run is recorded with its input and output, so you can answer what happened and when." data-ar="كل تشغيل مسجَّل بمدخلاته ومخرجاته، فتعرف ما الذي حدث ومتى.">كل تشغيل مسجَّل بمدخلاته ومخرجاته، فتعرف ما الذي حدث ومتى.</p></div>
+      <div class="step2"><span class="n">04</span><h3 class="h3" data-en="Backups and rollback" data-ar="نسخ واسترجاع">نسخ واسترجاع</h3><p data-en="Nightly backups, and any workflow can be rolled back to the version that worked." data-ar="نسخ احتياطي ليلي، وأي مسار يمكن إرجاعه إلى النسخة التي كانت تعمل.">نسخ احتياطي ليلي، وأي مسار يمكن إرجاعه إلى النسخة التي كانت تعمل.</p></div>
     </div>
   </div>
 </section>
@@ -818,7 +932,10 @@ footer{border-top:1px solid var(--line);padding-block:clamp(38px,5vw,58px) 26px;
       <div><h4 data-en="Explore" data-ar="تصفّح">تصفّح</h4>
         <a href="#examples" data-en="Examples" data-ar="أمثلة">أمثلة</a>
         <a href="#services" data-en="Services" data-ar="الخدمات">الخدمات</a>
+        <a href="#industries" data-en="Industries" data-ar="الصناعات">الصناعات</a>
         <a href="#results" data-en="Results" data-ar="النتائج">النتائج</a>
+        <a href="#says" data-en="Clients" data-ar="آراء العملاء">آراء العملاء</a>
+        <a href="#security" data-en="Security" data-ar="الأمان">الأمان</a>
         <a href="#about" data-en="Team" data-ar="الفريق">الفريق</a></div>
       <div><h4 data-en="Contact" data-ar="تواصل">تواصل</h4>
         <a href="mailto:hello@flowline.example">hello@flowline.example</a>
