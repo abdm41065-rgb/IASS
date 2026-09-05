@@ -480,6 +480,79 @@ body.lang-ar .foot-col h4{font-size:.76rem;letter-spacing:.02em;text-transform:n
 body.lang-ar .foot-bot{font-size:.8rem;letter-spacing:0}
 .foot-mark{font-family:var(--serif);font-size:clamp(2.6rem,13vw,11rem);line-height:.85;letter-spacing:.06em;opacity:.07;margin-top:36px;user-select:none;white-space:nowrap;overflow:hidden}
 
+/* ═══════════════════════════════════════
+   CINEMATIC LAYER — grain, canvas fx, drift
+═══════════════════════════════════════ */
+#fxHero{position:absolute;inset:0;width:100%;height:100%;z-index:2;pointer-events:none;mix-blend-mode:screen;opacity:.85}
+
+/* film grain over the whole page */
+#grain{
+  position:fixed;inset:-60px;z-index:520;pointer-events:none;opacity:.075;
+  mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.82' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation:grainShift .7s steps(3) infinite;
+}
+@keyframes grainShift{
+  0%{transform:translate(0,0)}33%{transform:translate(-22px,14px)}66%{transform:translate(16px,-18px)}100%{transform:translate(0,0)}
+}
+
+/* vignette on every render */
+.scene::after{
+  content:'';position:absolute;inset:0;pointer-events:none;z-index:2;
+  background:radial-gradient(120% 96% at 50% 42%,transparent 42%,rgba(14,13,9,.42) 100%);
+}
+.scene>svg{position:absolute;inset:0;width:100%;height:100%}
+
+/* slow camera drift — each render breathes like footage */
+.h-card .scene>svg{animation:drift 26s var(--ease) infinite alternate;transform-origin:52% 46%}
+.h-card:nth-child(2n) .scene>svg{animation-duration:32s;animation-delay:-6s;transform-origin:38% 58%}
+.h-card:nth-child(3n) .scene>svg{animation-duration:29s;animation-delay:-13s;transform-origin:62% 40%}
+@keyframes drift{from{transform:scale(1.06) translate3d(0,0,0)}to{transform:scale(1.16) translate3d(-1.6%,-1.4%,0)}}
+.h-card:hover .scene>svg{animation-play-state:paused}
+.h-card .scene{transition:none}
+.h-card:hover .scene{transform:none}
+
+/* the location render drifts too */
+#location .plan svg{animation:drift 38s var(--ease) infinite alternate}
+
+@media(prefers-reduced-motion:reduce){
+  #grain{display:none}
+  .h-card .scene>svg,#location .plan svg{animation:none}
+}
+
+/* ═══════════════════════════════════════
+   SECTION RAIL
+═══════════════════════════════════════ */
+#rail{
+  position:fixed;top:50%;transform:translateY(-50%);
+  inset-inline-end:clamp(14px,2.2vw,34px);z-index:560;
+  display:flex;flex-direction:column;align-items:flex-end;
+  gap:clamp(12px,1.6vh,20px);
+  color:var(--ink);transition:color .6s var(--ease);
+}
+#rail.on-dark{color:var(--bone)}
+#rail a{
+  display:flex;align-items:center;justify-content:flex-end;gap:10px;
+  padding-block:3px;color:inherit;
+}
+#rail .lbl{
+  font-size:.6rem;letter-spacing:.22em;text-transform:uppercase;white-space:nowrap;
+  opacity:0;transform:translateX(8px);
+  transition:opacity .45s var(--ease),transform .45s var(--ease),color .4s;
+}
+[dir=rtl] #rail .lbl{transform:translateX(-8px)}
+body.lang-ar #rail .lbl{font-size:.72rem;letter-spacing:0;text-transform:none}
+#rail .tick{
+  display:block;width:16px;height:1px;background:currentColor;opacity:.34;
+  transition:width .5s var(--ease),opacity .4s,background .4s;
+}
+#rail a:hover .lbl,#rail a:focus-visible .lbl{opacity:.8;transform:translateX(0)}
+#rail a:hover .tick{width:30px;opacity:.7}
+#rail a.on .tick{width:38px;opacity:1;background:var(--clay)}
+#rail a.on .lbl{opacity:1;transform:translateX(0);color:var(--clay)}
+#rail a:focus-visible{outline:1px solid var(--clay);outline-offset:6px}
+@media(max-width:960px){#rail{display:none}}
+
 /* progress bar */
 #top-prog{position:fixed;top:0;inset-inline-start:0;height:2px;background:var(--clay);z-index:700;width:0}
 </style>
@@ -517,6 +590,20 @@ body.lang-ar .foot-bot{font-size:.8rem;letter-spacing:0}
   <linearGradient id="glowG" x1="0" y1="0" x2="0" y2="1">
     <stop offset="0" stop-color="#f0c98c"/><stop offset="1" stop-color="#c98b62"/>
   </linearGradient>
+  <linearGradient id="hazeG" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#f7e6cb" stop-opacity="0"/><stop offset="1" stop-color="#f7e6cb" stop-opacity=".6"/>
+  </linearGradient>
+  <linearGradient id="hazeCool" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#dfe8ea" stop-opacity="0"/><stop offset="1" stop-color="#dfe8ea" stop-opacity=".72"/>
+  </linearGradient>
+  <linearGradient id="sheenG" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#ffffff" stop-opacity=".30"/><stop offset=".5" stop-color="#ffffff" stop-opacity="0"/>
+  </linearGradient>
+  <linearGradient id="shaftG" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#ffe9c6" stop-opacity=".42"/><stop offset="1" stop-color="#ffe9c6" stop-opacity="0"/>
+  </linearGradient>
+  <filter id="soft" x="-40%" y="-120%" width="180%" height="360%"><feGaussianBlur stdDeviation="16"/></filter>
+  <filter id="bloom" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="30"/></filter>
   <linearGradient id="woodG" x1="0" y1="0" x2="0" y2="1">
     <stop offset="0" stop-color="#a8825d"/><stop offset="1" stop-color="#7a5c40"/>
   </linearGradient>
@@ -530,6 +617,7 @@ body.lang-ar .foot-bot{font-size:.8rem;letter-spacing:0}
       <path d="M0 470 L210 372 L410 452 L560 402 L760 470 Z" fill="#4d5a63"/>
       <path d="M900 470 L1080 396 L1290 462 L1440 418 L1600 470 Z" fill="#4d5a63"/>
     </g>
+    <rect y="376" width="1600" height="94" fill="url(#hazeG)" opacity=".8"/>
     <rect y="468" width="1600" height="200" fill="url(#seaG)"/>
     <g opacity=".3" fill="#dfe6e6">
       <rect y="500" x="120" width="300" height="2"/><rect y="536" x="620" width="420" height="2"/>
@@ -538,6 +626,9 @@ body.lang-ar .foot-bot{font-size:.8rem;letter-spacing:0}
     </g>
     <g class="pl" data-depth="28">
       <rect x="0" y="640" width="1600" height="260" fill="#25281f"/>
+      <g filter="url(#soft)" fill="#0b0d08" opacity=".55">
+        <ellipse cx="330" cy="658" rx="215" ry="18"/><ellipse cx="1110" cy="660" rx="245" ry="16"/><ellipse cx="780" cy="660" rx="130" ry="13"/>
+      </g>
       <rect x="150" y="470" width="360" height="185" fill="url(#wallG)"/>
       <rect x="150" y="470" width="360" height="16" fill="#e9e2d4"/>
       <rect x="510" y="500" width="150" height="155" fill="url(#wallShade)"/>
@@ -550,6 +641,12 @@ body.lang-ar .foot-bot{font-size:.8rem;letter-spacing:0}
       <rect x="1116" y="548" width="168" height="86" fill="url(#glassG)"/>
       <rect x="660" y="560" width="240" height="98" fill="#cdc2ae"/>
       <rect x="690" y="586" width="180" height="52" fill="url(#glassG)" opacity=".9"/>
+      <g fill="url(#sheenG)">
+        <rect x="186" y="512" width="126" height="104"/><rect x="1116" y="548" width="168" height="86"/><rect x="690" y="586" width="180" height="52"/>
+      </g>
+      <g filter="url(#bloom)" fill="#f2cf95" opacity=".5">
+        <rect x="336" y="512" width="140" height="104"/><rect x="938" y="548" width="150" height="86"/>
+      </g>
     </g>
     <g class="pl" data-depth="52">
       <rect x="300" y="672" width="1000" height="120" rx="4" fill="url(#poolG)"/>
@@ -571,11 +668,14 @@ body.lang-ar .foot-bot{font-size:.8rem;letter-spacing:0}
   <symbol id="sc-pool" viewBox="0 0 800 1000" preserveAspectRatio="xMidYMid slice">
     <rect width="800" height="1000" fill="url(#skyDay)"/>
     <rect y="300" width="800" height="120" fill="url(#seaG)" opacity=".85"/>
+    <rect y="246" width="800" height="60" fill="url(#hazeCool)" opacity=".85"/>
     <rect x="60" y="120" width="420" height="200" fill="url(#wallG)"/>
     <rect x="480" y="160" width="120" height="160" fill="url(#wallShade)"/>
     <rect x="100" y="170" width="150" height="110" fill="url(#glassG)"/>
     <rect x="290" y="170" width="150" height="110" fill="url(#glowG)" opacity=".6"/>
+    <g filter="url(#soft)" fill="#7b7261" opacity=".5"><ellipse cx="300" cy="430" rx="260" ry="16"/></g>
     <rect y="420" width="800" height="90" fill="#d9d0be"/>
+    <rect x="100" y="170" width="150" height="110" fill="url(#sheenG)"/>
     <rect x="70" y="510" width="660" height="330" rx="6" fill="url(#poolG)"/>
     <g opacity=".5" fill="#eef5f4">
       <rect x="110" y="560" width="240" height="4"/><rect x="400" y="610" width="280" height="4"/>
@@ -605,6 +705,8 @@ body.lang-ar .foot-bot{font-size:.8rem;letter-spacing:0}
     <rect x="250" y="640" width="120" height="30" rx="12" fill="#cbc0ab"/>
     <rect x="560" y="640" width="150" height="150" rx="6" fill="url(#woodG)"/>
     <rect x="150" y="820" width="500" height="8" rx="4" fill="#b0a48e"/>
+    <path d="M120 620 L360 620 L470 1000 L60 1000 Z" fill="url(#shaftG)"/>
+    <g filter="url(#bloom)"><circle cx="640" cy="240" r="58" fill="#f0c98c" opacity=".5"/></g>
     <circle cx="640" cy="240" r="40" fill="url(#glowG)" opacity=".55"/>
     <rect x="638" y="120" width="3" height="90" fill="#3a3a30"/>
   </symbol>
@@ -613,6 +715,7 @@ body.lang-ar .foot-bot{font-size:.8rem;letter-spacing:0}
   <symbol id="sc-terrace" viewBox="0 0 800 1000" preserveAspectRatio="xMidYMid slice">
     <rect width="800" height="1000" fill="url(#skyDusk)"/>
     <circle cx="560" cy="430" r="60" fill="#f6dcb4" opacity=".8"/>
+    <rect y="384" width="800" height="60" fill="url(#hazeG)" opacity=".75"/>
     <rect y="440" width="800" height="180" fill="url(#seaG)"/>
     <g opacity=".35" fill="#e2eaea"><rect x="80" y="480" width="220" height="3"/><rect x="420" y="528" width="300" height="3"/><rect x="140" y="576" width="260" height="3"/></g>
     <rect y="620" width="800" height="380" fill="#332f26"/>
@@ -623,6 +726,7 @@ body.lang-ar .foot-bot{font-size:.8rem;letter-spacing:0}
     <rect x="90" y="676" width="90" height="28" rx="12" fill="#6c6450"/>
     <rect x="200" y="676" width="90" height="28" rx="12" fill="#6c6450"/>
     <rect x="420" y="720" width="200" height="14" rx="7" fill="url(#woodG)"/>
+    <g filter="url(#bloom)"><circle cx="520" cy="690" r="34" fill="#f0c98c" opacity=".75"/></g>
     <circle cx="520" cy="690" r="16" fill="url(#glowG)" opacity=".9"/>
     <rect x="0" y="0" width="800" height="230" fill="#1d2430" opacity=".55"/>
     <rect x="60" y="0" width="680" height="120" fill="url(#wallShade)" opacity=".9"/>
@@ -633,6 +737,7 @@ body.lang-ar .foot-bot{font-size:.8rem;letter-spacing:0}
     <rect width="800" height="1000" fill="#20241f"/>
     <rect y="0" width="800" height="420" fill="#2b302a"/>
     <rect x="120" y="80" width="560" height="300" rx="4" fill="#3a3f36"/>
+    <g filter="url(#bloom)" fill="#e8b87c" opacity=".55"><rect x="150" y="110" width="80" height="240"/><rect x="270" y="110" width="80" height="240"/><rect x="390" y="110" width="80" height="240"/><rect x="510" y="110" width="80" height="240"/></g>
     <g fill="url(#glowG)" opacity=".5"><rect x="160" y="120" width="60" height="220"/><rect x="280" y="120" width="60" height="220"/><rect x="400" y="120" width="60" height="220"/><rect x="520" y="120" width="60" height="220"/></g>
     <rect y="420" width="800" height="420" fill="url(#poolG)" opacity=".65"/>
     <g opacity=".35" fill="#dff0ef"><rect x="120" y="470" width="240" height="4"/><rect x="380" y="540" width="300" height="4"/><rect x="180" y="620" width="260" height="4"/><rect x="420" y="700" width="240" height="4"/><rect x="120" y="780" width="340" height="4"/></g>
@@ -695,6 +800,7 @@ body.lang-ar .foot-bot{font-size:.8rem;letter-spacing:0}
     </g>
     <rect x="160" y="360" width="110" height="440" fill="url(#glassG)"/>
     <rect x="500" y="360" width="110" height="440" fill="url(#glowG)" opacity=".65"/>
+    <g filter="url(#soft)" fill="#6f6553" opacity=".45"><rect x="146" y="240" width="30" height="760"/><rect x="316" y="240" width="30" height="760"/><rect x="486" y="240" width="30" height="760"/><rect x="656" y="240" width="30" height="760"/></g>
     <g fill="#c1b6a1" opacity=".8"><rect x="0" y="800" width="800" height="12"/><rect x="0" y="880" width="800" height="12"/></g>
     <g fill="#3d4231"><rect x="700" y="560" width="8" height="440"/>
       <path d="M704 560c-42-22-72-6-88 20 30-8 56-4 76 12M704 560c36-26 70-18 92 6-30-12-60-10-80 8"/></g>
@@ -709,6 +815,16 @@ body.lang-ar .foot-bot{font-size:.8rem;letter-spacing:0}
   <div class="pct" id="loadPct">0%</div>
 </div>
 
+<nav id="rail" aria-label="Sections">
+  <a href="#hero"       data-tone="dark"><span class="lbl" data-en="Overview" data-ar="نظرة عامة">Overview</span><i class="tick"></i></a>
+  <a href="#vision"     data-tone="light"><span class="lbl" data-en="Vision" data-ar="الرؤية">Vision</span><i class="tick"></i></a>
+  <a href="#gallery"    data-tone="dark"><span class="lbl" data-en="Gallery" data-ar="المعرض">Gallery</span><i class="tick"></i></a>
+  <a href="#residences" data-tone="light"><span class="lbl" data-en="Residences" data-ar="الوحدات">Residences</span><i class="tick"></i></a>
+  <a href="#amenities"  data-tone="dark"><span class="lbl" data-en="Amenities" data-ar="المرافق">Amenities</span><i class="tick"></i></a>
+  <a href="#location"   data-tone="dark"><span class="lbl" data-en="Location" data-ar="الموقع">Location</span><i class="tick"></i></a>
+  <a href="#enquire"    data-tone="dark"><span class="lbl" data-en="Enquire" data-ar="تواصل">Enquire</span><i class="tick"></i></a>
+</nav>
+<div id="grain" aria-hidden="true"></div>
 <div id="cursor"></div><div id="cursorDot"></div>
 <div id="top-prog"></div>
 
@@ -733,6 +849,7 @@ body.lang-ar .foot-bot{font-size:.8rem;letter-spacing:0}
 <!-- ══════ HERO ══════ -->
 <section id="hero">
   <div class="scene" id="heroScene"><svg viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice"><use href="#sc-hero"/></svg></div>
+  <canvas id="fxHero" aria-hidden="true"></canvas>
   <div class="hero-veil"></div>
   <div class="hero-badge">
     <div class="eyebrow" data-en="Phase I — Now selling" data-ar="المرحلة الأولى — البيع متاح">Phase I — Now selling</div>
@@ -1221,12 +1338,162 @@ function sizeGallery(){
   onScroll();
 }
 
+/* ─────────── CINEMATIC CANVAS (hero) ─────────── */
+var fx=$('#fxHero'), fxCtx=fx?fx.getContext('2d'):null, fxOn=true, glints=[], motes=[], t0=performance.now();
+var VW=1600, VH=900;              /* hero viewBox, matched to the SVG */
+var fxW=0, fxH=0, sc=1, ox=0, oy=0;
+
+function fxLayout(){
+  if(!fxCtx) return;
+  var d = Math.min(window.devicePixelRatio||1, 2);
+  fxW = fx.clientWidth; fxH = fx.clientHeight;
+  fx.width = Math.round(fxW*d); fx.height = Math.round(fxH*d);
+  fxCtx.setTransform(d,0,0,d,0,0);
+  sc = Math.max(fxW/VW, fxH/VH);          /* mirrors preserveAspectRatio="slice" */
+  ox = (fxW - VW*sc)/2; oy = (fxH - VH*sc)/2;
+}
+function X(v){ return ox + v*sc }
+function Y(v){ return oy + v*sc }
+
+function fxSeed(){
+  glints=[]; motes=[];
+  /* [top, bottom, alpha, left, right] — only where water is actually visible */
+  var bands=[[470,508,0.26,470,VW],[680,786,0.55,310,1290]];
+  bands.forEach(function(b){
+    var span = b[4]-b[3];
+    var n = Math.round((b[1]-b[0])/4) + 8;
+    for(var i=0;i<n;i++){
+      glints.push({
+        vy: b[0] + Math.random()*(b[1]-b[0]),
+        vx: b[3] + Math.random()*span,
+        x0: b[3], x1: b[4],
+        len: 50 + Math.random()*Math.min(260, span*0.35),
+        sp: (0.12 + Math.random()*0.5) * (Math.random()<0.5?-1:1),
+        ph: Math.random()*Math.PI*2,
+        rate: 0.4 + Math.random()*1.1,
+        a: b[2]
+      });
+    }
+  });
+  for(var j=0;j<46;j++){
+    motes.push({vx:Math.random()*VW, vy:300+Math.random()*560, r:0.7+Math.random()*2.2,
+                sp:0.06+Math.random()*0.22, sw:8+Math.random()*30, ph:Math.random()*6.28});
+  }
+}
+
+function fxFrame(now){
+  if(!fxCtx){ return; }
+  var t = (now - t0)/1000;
+  fxCtx.clearRect(0,0,fxW,fxH);
+
+  /* sun bloom over the water, breathing slowly */
+  var pulse = 0.5 + 0.5*Math.sin(t*0.35);
+  var sx=X(1180), sy=Y(470), sr=Math.max(40, 300*sc);
+  var g = fxCtx.createRadialGradient(sx,sy,0,sx,sy,sr);
+  g.addColorStop(0,'rgba(250,222,178,'+(0.20+0.10*pulse).toFixed(3)+')');
+  g.addColorStop(0.45,'rgba(214,150,96,'+(0.07+0.04*pulse).toFixed(3)+')');
+  g.addColorStop(1,'rgba(214,150,96,0)');
+  fxCtx.fillStyle=g; fxCtx.fillRect(0,0,fxW,fxH);
+
+  /* the sun's column on the sea */
+  var col = fxCtx.createLinearGradient(0,Y(470),0,Y(668));
+  col.addColorStop(0,'rgba(248,214,166,'+(0.16+0.06*pulse).toFixed(3)+')');
+  col.addColorStop(1,'rgba(248,214,166,0)');
+  fxCtx.fillStyle=col;
+  fxCtx.fillRect(X(1080), Y(470), 200*sc, 200*sc);
+
+  /* shimmering glints */
+  fxCtx.lineWidth = Math.max(1, 1.6*sc);
+  fxCtx.lineCap='round';
+  for(var i=0;i<glints.length;i++){
+    var gl=glints[i];
+    gl.vx += gl.sp;
+    if(gl.vx > gl.x1) gl.vx = gl.x0 - gl.len;
+    if(gl.vx + gl.len < gl.x0) gl.vx = gl.x1;
+    var a = gl.a * (0.28 + 0.72*Math.pow(Math.abs(Math.sin(gl.ph + t*gl.rate)),2));
+    if(a < 0.02) continue;
+    fxCtx.strokeStyle='rgba(232,242,244,'+a.toFixed(3)+')';
+    fxCtx.beginPath();
+    var a0 = Math.max(gl.vx, gl.x0), a1 = Math.min(gl.vx+gl.len, gl.x1);
+    if(a1 - a0 < 8) continue;
+    fxCtx.moveTo(X(a0), Y(gl.vy));
+    fxCtx.lineTo(X(a1), Y(gl.vy));
+    fxCtx.stroke();
+  }
+
+  /* dust drifting through the warm air */
+  for(var k=0;k<motes.length;k++){
+    var m=motes[k];
+    m.vy -= m.sp;
+    if(m.vy < 260){ m.vy = 900; m.vx = Math.random()*VW; }
+    var mx = X(m.vx + Math.sin(t*0.3 + m.ph)*m.sw);
+    fxCtx.fillStyle='rgba(255,236,208,'+(0.10 + 0.14*Math.abs(Math.sin(t*0.7+m.ph))).toFixed(3)+')';
+    fxCtx.beginPath();
+    fxCtx.arc(mx, Y(m.vy), m.r*Math.max(sc,0.6), 0, 6.2832);
+    fxCtx.fill();
+  }
+
+  if(fxOn) requestAnimationFrame(fxFrame);
+}
+
+function fxStart(){
+  if(!fxCtx) return;
+  fxLayout(); fxSeed();
+  if(REDUCED){ fxFrame(performance.now()); return; }   /* one still frame */
+  fxOn=true; requestAnimationFrame(fxFrame);
+}
+if(fxCtx && !REDUCED){
+  /* stop burning frames once the hero has scrolled away */
+  new IntersectionObserver(function(en){
+    var vis = en[0].isIntersecting;
+    if(vis && !fxOn){ fxOn=true; t0=performance.now(); requestAnimationFrame(fxFrame); }
+    fxOn = vis;
+  }, {threshold:0}).observe($('#hero'));
+}
+
+/* ─────────── SECTION RAIL ─────────── */
+var rail=$('#rail');
+var railItems=$$('#rail a').map(function(a){
+  return {a:a, id:a.getAttribute('href').slice(1), el:document.querySelector(a.getAttribute('href')), tone:a.getAttribute('data-tone')};
+}).filter(function(r){ return r.el; });
+var railCur=null;
+function railUpdate(y){
+  if(!railItems.length) return;
+  var probe = y + window.innerHeight*0.42, found = railItems[0];
+  for(var i=0;i<railItems.length;i++){
+    if(railItems[i].el.offsetTop <= probe) found = railItems[i];
+  }
+  if(found!==railCur){
+    railCur = found;
+    railItems.forEach(function(r){ r.a.classList.toggle('on', r===found); });
+  }
+  /* the rail floats over whatever band sits behind it — read that, not the active section */
+  var mid = y + window.innerHeight/2, dark = true;
+  for(var j=0;j<toneBands.length;j++){
+    if(mid >= toneBands[j].top && mid < toneBands[j].bottom){ dark = toneBands[j].dark; break; }
+  }
+  rail.classList.toggle('on-dark', dark);
+}
+var toneBands=[];
+function measureTones(){
+  toneBands = Array.prototype.slice.call(document.body.children).filter(function(el){
+    if(!el.offsetHeight) return false;
+    var pos = getComputedStyle(el).position;
+    return pos!=='fixed' && pos!=='absolute';
+  }).map(function(el){
+    var dark = el.classList.contains('tone-dark') || el.id==='hero' || el.id==='gallery'
+            || el.classList.contains('marquee') || el.tagName==='FOOTER';
+    return {top:el.offsetTop, bottom:el.offsetTop+el.offsetHeight, dark:dark};
+  });
+}
+
 /* ─────────── SCROLL ─────────── */
 var heroScene=$('#heroScene'), plGroups=$$('.pl', heroScene), prog=$('#top-prog'), ticking=false;
 function onScroll(){
   var y = window.pageYOffset || document.documentElement.scrollTop;
 
   header.classList.toggle('solid', y > window.innerHeight*0.86);
+  railUpdate(y);
 
   var docH = document.documentElement.scrollHeight - window.innerHeight;
   prog.style.width = (docH>0 ? (y/docH*100) : 0) + '%';
@@ -1253,7 +1520,7 @@ window.addEventListener('scroll', function(){
 
 var rt;
 window.addEventListener('resize', function(){
-  clearTimeout(rt); rt=setTimeout(sizeGallery, 160);
+  clearTimeout(rt); rt=setTimeout(function(){ sizeGallery(); fxLayout(); fxSeed(); measureTones(); railCur=null; }, 160);
 });
 
 /* ─────────── FORM ─────────── */
@@ -1287,9 +1554,11 @@ $$('a[href^="#"]').forEach(function(a){
 $$('[data-wordwrap]').forEach(function(el){ words(el, el.textContent.trim()); });
 var saved=null; try{ saved = localStorage.getItem('mira-lang'); }catch(e){}
 setLang(saved==='ar' ? 'ar' : 'en');
+fxStart();
+measureTones();
 sizeGallery();
 onScroll();
-window.addEventListener('load', sizeGallery);
+window.addEventListener('load', function(){ sizeGallery(); measureTones(); railCur=null; onScroll(); });
 })();
 </script>
 </body>
