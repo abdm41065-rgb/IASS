@@ -227,6 +227,11 @@ body.menu .burger i:nth-child(3){transform:translateY(-5.75px) rotate(-45deg)}
   .qk span{display:none}
   .qk{padding:8px 9px}
 }
+/* English labels run longer than the Arabic ones, so it tightens sooner */
+@media(max-width:1700px){ body.lang-en nav.top a{padding:8px 9px} }
+@media(max-width:1450px){ body.lang-en nav.top a{padding:7px 7px;font-size:.79rem} }
+@media(max-width:1300px){ body.lang-en nav.top a{padding:6px 6px;font-size:.76rem} }
+@media(max-width:1350px){ body.lang-en .hd-cta{display:none} }
 @media(max-width:1400px){
   nav.top a{padding:8px 10px;font-size:.81rem}
   .hd-stat,.hd-div{display:none}
@@ -570,13 +575,12 @@ footer{border-top:1px solid var(--line);padding-block:clamp(38px,5vw,58px) 26px;
   </a>
   <nav class="top" id="nav">
     <a href="#examples" data-en="Examples" data-ar="أمثلة">أمثلة</a>
-    <a href="#services" data-en="Services" data-ar="الخدمات">الخدمات</a>
+    <a href="#services" data-en="Our services" data-ar="خدماتنا">خدماتنا</a>
     <a href="#industries" data-en="Industries" data-ar="الصناعات">الصناعات</a>
     <a href="#stack" data-en="Integrations" data-ar="التكاملات">التكاملات</a>
     <a href="#results" data-en="Results" data-ar="النتائج">النتائج</a>
     <a href="#says" data-en="Clients" data-ar="آراء العملاء">آراء العملاء</a>
     <a href="#bot" data-en="Try the bots" data-ar="جرّب البوتات">جرّب البوتات</a>
-    <a href="#about" data-en="Team" data-ar="الفريق">الفريق</a>
     <a href="#security" data-en="Security" data-ar="الأمان">الأمان</a>
     <a href="#faq" data-en="FAQ" data-ar="أسئلة">أسئلة</a>
     <span class="nav-sep" aria-hidden="true"></span>
@@ -851,27 +855,6 @@ footer{border-top:1px solid var(--line);padding-block:clamp(38px,5vw,58px) 26px;
 </section>
 
 
-<!-- ═════════ ABOUT ═════════ -->
-<section id="about">
-  <div class="wrap">
-    <div class="grid g2" style="gap:clamp(24px,4vw,60px);align-items:start">
-      <div class="rv">
-        <div class="eyebrow" data-en="THE TEAM" data-ar="الفريق">الفريق</div>
-        <h2 class="h2" style="margin:16px 0 18px" data-html data-en="Small on purpose. You talk to the &lt;span class='em'&gt;builder&lt;/span&gt;." data-ar="صغير عن قصد. تتحدث مع &lt;span class='em'&gt;من يبني&lt;/span&gt; فعلاً.">صغير عن قصد. تتحدث مع <span class="em">من يبني</span> فعلاً.</h2>
-        <p class="lede" data-en="No account managers between you and the work. The person who maps your process is the person who builds it and the person who answers when something breaks at 9pm." data-ar="لا مدراء حسابات بينك وبين العمل. من يرسم خريطة عملياتك هو من يبنيها، وهو من يرد حين يتعطّل شيء في التاسعة مساءً.">لا مدراء حسابات بينك وبين العمل. من يرسم خريطة عملياتك هو من يبنيها، وهو من يرد حين يتعطّل شيء في التاسعة مساءً.</p>
-      </div>
-      <div class="rv">
-        <div class="kv">
-          <div><span data-en="Team" data-ar="الفريق">الفريق</span><span data-en="4 people" data-ar="٤ أشخاص">٤ أشخاص</span></div>
-          <div><span data-en="Working hours" data-ar="ساعات العمل">ساعات العمل</span><span data-en="Sun — Thu, 9 — 18" data-ar="الأحد — الخميس، ٩ — ١٨">الأحد — الخميس، ٩ — ١٨</span></div>
-          <div><span data-en="First reply" data-ar="أول رد">أول رد</span><span data-en="under 2 hours" data-ar="أقل من ساعتين">أقل من ساعتين</span></div>
-          <div><span data-en="Languages" data-ar="اللغات">اللغات</span><span data-en="Arabic · English" data-ar="العربية · الإنجليزية">العربية · الإنجليزية</span></div>
-          <div><span data-en="Handover" data-ar="التسليم">التسليم</span><span data-en="documented, always" data-ar="موثّق دائماً">موثّق دائماً</span></div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
 
 <!-- ═════════ SECURITY ═════════ -->
 <section id="security">
@@ -935,8 +918,7 @@ footer{border-top:1px solid var(--line);padding-block:clamp(38px,5vw,58px) 26px;
         <a href="#industries" data-en="Industries" data-ar="الصناعات">الصناعات</a>
         <a href="#results" data-en="Results" data-ar="النتائج">النتائج</a>
         <a href="#says" data-en="Clients" data-ar="آراء العملاء">آراء العملاء</a>
-        <a href="#security" data-en="Security" data-ar="الأمان">الأمان</a>
-        <a href="#about" data-en="Team" data-ar="الفريق">الفريق</a></div>
+        <a href="#security" data-en="Security" data-ar="الأمان">الأمان</a></div>
       <div><h4 data-en="Contact" data-ar="تواصل">تواصل</h4>
         <a href="mailto:hello@flowline.example">hello@flowline.example</a>
         <a href="#bot" data-en="Chat with the bot" data-ar="محادثة البوت">محادثة البوت</a></div>
