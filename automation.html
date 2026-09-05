@@ -1,0 +1,1030 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Flowline — أتمتة تشتغل بدلاً عنك</title>
+<meta name="description" content="نبني لك سير عمل آلي على n8n يربط أدواتك ويشتغل على خوادمك — مع وكيل ذكي يرد على عملائك في واتساب وتيليجرام والموقع.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230a0a0b'/%3E%3Cellipse cx='16' cy='17' rx='8' ry='7.5' fill='%23f2552c'/%3E%3Ccircle cx='13' cy='16' r='1.6' fill='%230a0a0b'/%3E%3Ccircle cx='19' cy='16' r='1.6' fill='%230a0a0b'/%3E%3Cpath d='M16 9.5V6' stroke='%23f2552c' stroke-width='1.6' stroke-linecap='round'/%3E%3Ccircle cx='16' cy='5' r='1.5' fill='%23f2552c'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=Instrument+Serif:ital@0;1&family=Inter+Tight:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════
+   TOKENS
+═══════════════════════════════════════════════ */
+:root{
+  --black:#0a0a0b;
+  --ink:#101011;
+  --ink2:#161617;
+  --ink3:#1e1e20;
+  --line:rgba(255,255,255,.085);
+  --line2:rgba(255,255,255,.16);
+  --white:#f4f3f1;
+  --grey:#9e9c98;
+  --grey2:#6f6d6a;
+  --faint:#3a3937;
+
+  --flame:#f2552c;
+  --flame2:#ff7852;
+  --flame-dim:rgba(242,85,44,.13);
+  --flame-glow:rgba(242,85,44,.32);
+  --ok:#54c07f;
+
+  --disp:'Inter Tight','Helvetica Neue',Arial,sans-serif;
+  --serif:'Instrument Serif',Georgia,serif;
+  --mono:'IBM Plex Mono',ui-monospace,'Courier New',monospace;
+  --ar:'IBM Plex Sans Arabic','Inter Tight',sans-serif;
+
+  --pad:clamp(18px,5vw,64px);
+  --nav:60px;
+  --ease:cubic-bezier(.2,.85,.3,1);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  background:var(--black);color:var(--white);
+  font-family:var(--ar);font-weight:300;font-size:16px;line-height:1.7;
+  overflow-x:hidden;-webkit-font-smoothing:antialiased;
+}
+body.lang-en{font-family:var(--disp);font-weight:400}
+a{color:inherit;text-decoration:none}
+button,input{font:inherit;color:inherit}
+svg{display:block}
+img{display:block;max-width:100%}
+::selection{background:var(--flame);color:#fff}
+::-webkit-scrollbar{width:9px;height:9px}
+::-webkit-scrollbar-track{background:var(--black)}
+::-webkit-scrollbar-thumb{background:var(--ink3);border-radius:99px}
+::-webkit-scrollbar-thumb:hover{background:var(--flame)}
+
+/* faint dot field, as on the reference */
+.dots{
+  position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:radial-gradient(circle at 1px 1px,rgba(255,255,255,.05) 1px,transparent 0);
+  background-size:24px 24px;
+  mask-image:radial-gradient(130% 80% at 50% 0,#000 25%,transparent 75%);
+  -webkit-mask-image:radial-gradient(130% 80% at 50% 0,#000 25%,transparent 75%);
+}
+header,main,footer{position:relative;z-index:1}
+
+/* ═══════════════════════════════════════════════
+   TYPE
+═══════════════════════════════════════════════ */
+.h1,.h2,.h3{font-weight:700;line-height:1.06;letter-spacing:-.035em;text-wrap:balance}
+body.lang-ar .h1,body.lang-ar .h2,body.lang-ar .h3{font-family:var(--ar);letter-spacing:-.01em;line-height:1.42;padding-top:.16em}
+body.lang-en .h1,body.lang-en .h2,body.lang-en .h3{font-family:var(--disp)}
+.h1{font-size:clamp(2.3rem,6.4vw,4.9rem)}
+.h2{font-size:clamp(1.7rem,3.6vw,2.9rem)}
+.h3{font-size:clamp(1.02rem,1.5vw,1.2rem);letter-spacing:-.015em}
+.em{
+  font-family:var(--serif);font-style:italic;font-weight:400;
+  color:var(--flame);letter-spacing:-.01em;padding-inline:.06em;
+}
+body.lang-ar .em{font-family:var(--ar);font-style:normal;font-weight:700}
+.eyebrow{
+  font-family:var(--mono);font-size:.76rem;font-weight:500;
+  letter-spacing:.19em;color:var(--flame);
+}
+body.lang-ar .eyebrow,body.lang-ar .hero-chant,body.lang-ar nav.top a,body.lang-ar .tab,
+body.lang-ar .panel-side .k,body.lang-ar .kv,body.lang-ar .card .foot,body.lang-ar .step .n,
+body.lang-ar .sug button,body.lang-ar .chat-top .st,body.lang-ar .plan .price small,
+body.lang-ar .badge,body.lang-ar .foot h4,body.lang-ar .foot-bot,body.lang-ar .btn,
+body.lang-ar .mono,body.lang-ar .chip.dash,body.lang-ar .lang,body.lang-ar .panel-tabs .lbl,
+body.lang-ar .brand{font-family:var(--ar);letter-spacing:0}
+body.lang-ar .eyebrow,body.lang-ar .foot h4,body.lang-ar .badge,
+body.lang-ar .panel-tabs .lbl,body.lang-ar .panel-side .k{text-transform:none}
+.lede{font-size:clamp(1.02rem,1.35vw,1.2rem);color:var(--grey);line-height:1.8}
+.mono{font-family:var(--mono);font-size:.82rem;letter-spacing:.02em}
+.dim{color:var(--grey2)}
+
+/* ═══════════════════════════════════════════════
+   LAYOUT
+═══════════════════════════════════════════════ */
+.wrap{max-width:1180px;margin-inline:auto;padding-inline:var(--pad)}
+section{padding-block:clamp(56px,8vw,110px)}
+.hr{height:1px;background:var(--line);width:100%}
+.head{display:grid;gap:16px;max-width:66ch;margin-bottom:clamp(28px,4vw,50px)}
+.grid{display:grid;gap:clamp(14px,1.8vw,22px)}
+.g2{grid-template-columns:repeat(2,1fr)}
+.g3{grid-template-columns:repeat(3,1fr)}
+.g4{grid-template-columns:repeat(4,1fr)}
+@media(max-width:960px){.g3,.g4{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:620px){.g2,.g3,.g4{grid-template-columns:1fr}}
+
+/* ═══════════════════════════════════════════════
+   BUTTONS — monospace, as on the reference
+═══════════════════════════════════════════════ */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:9px;
+  font-family:var(--mono);font-size:.88rem;font-weight:500;letter-spacing:.01em;
+  padding:14px 26px;border-radius:11px;border:1px solid transparent;cursor:pointer;
+  transition:background .22s,border-color .22s,color .22s,transform .18s var(--ease);
+  white-space:nowrap;
+}
+.btn:active{transform:translateY(1px)}
+.btn-p{background:var(--flame);color:#fff}
+.btn-p:hover{background:var(--flame2)}
+.btn-g{border-color:var(--line2);color:var(--white);background:rgba(255,255,255,.02)}
+.btn-g:hover{border-color:rgba(255,255,255,.34);background:rgba(255,255,255,.05)}
+.btn-s{padding:10px 18px;font-size:.8rem;border-radius:9px}
+.btn svg{width:15px;height:15px;flex:none;stroke:currentColor;fill:none;stroke-width:2}
+[dir=rtl] .btn .arw{transform:scaleX(-1)}
+
+/* ═══════════════════════════════════════════════
+   HEADER
+═══════════════════════════════════════════════ */
+header{
+  position:fixed;top:0;inset-inline:0;z-index:400;height:var(--nav);
+  display:flex;align-items:center;justify-content:space-between;gap:14px;
+  padding-inline:var(--pad);
+  background:rgba(10,10,11,.78);backdrop-filter:blur(14px);
+  border-bottom:1px solid transparent;transition:border-color .35s,background .35s;
+}
+header.stuck{border-bottom-color:var(--line);background:rgba(10,10,11,.95)}
+.brand{display:flex;align-items:center;gap:9px;font-family:var(--mono);font-weight:600;font-size:.98rem;letter-spacing:-.01em}
+.brand .mk{width:22px;height:22px;flex:none}
+nav.top{display:flex;align-items:center;gap:clamp(12px,2vw,30px)}
+nav.top a{
+  font-family:var(--mono);font-size:.85rem;color:var(--grey);
+  padding:5px 0;transition:color .22s;
+}
+nav.top a:hover,nav.top a.on{color:var(--flame)}
+.hd-r{display:flex;align-items:center;gap:10px}
+.lang{
+  font-family:var(--mono);font-size:.76rem;color:var(--grey);cursor:pointer;
+  background:none;border:1px solid var(--line);border-radius:8px;padding:7px 11px;
+  transition:border-color .22s,color .22s;
+}
+.lang:hover{border-color:var(--line2);color:var(--white)}
+.burger{display:none;width:22px;height:13px;position:relative;cursor:pointer;background:none;border:0;flex:none}
+.burger i{position:absolute;inset-inline:0;height:1.5px;background:var(--white);border-radius:2px;transition:transform .38s var(--ease),opacity .25s}
+.burger i:nth-child(1){top:0}.burger i:nth-child(2){top:50%;margin-top:-.75px}.burger i:nth-child(3){bottom:0}
+body.menu .burger i:nth-child(1){transform:translateY(5.75px) rotate(45deg)}
+body.menu .burger i:nth-child(2){opacity:0}
+body.menu .burger i:nth-child(3){transform:translateY(-5.75px) rotate(-45deg)}
+@media(max-width:920px){
+  nav.top{
+    position:fixed;inset:var(--nav) 0 auto 0;flex-direction:column;align-items:stretch;gap:0;
+    background:var(--black);border-bottom:1px solid var(--line);padding:4px var(--pad) 16px;
+    clip-path:inset(0 0 100% 0);transition:clip-path .45s var(--ease);
+  }
+  body.menu nav.top{clip-path:inset(0 0 0 0)}
+  nav.top a{padding:14px 0;border-bottom:1px solid var(--line);font-size:.95rem}
+  .burger{display:block}
+  .hd-cta{display:none}
+}
+
+/* ═══════════════════════════════════════════════
+   HERO — centred, ASCII banner, glowing mascot
+═══════════════════════════════════════════════ */
+#hero{padding-top:calc(var(--nav) + clamp(26px,4vw,54px));padding-bottom:clamp(40px,6vw,86px);text-align:center;position:relative}
+.ascii{
+  font-family:var(--mono);font-size:clamp(5px,1.04vw,13px);line-height:1.15;
+  color:var(--flame);opacity:.5;white-space:pre;overflow:hidden;
+  user-select:none;pointer-events:none;text-align:center;
+  margin-bottom:-6%;
+  mask-image:linear-gradient(to bottom,#000 55%,transparent 96%);
+  -webkit-mask-image:linear-gradient(to bottom,#000 55%,transparent 96%);
+}
+.mascot{position:relative;width:clamp(84px,10vw,118px);margin:0 auto clamp(20px,3vw,30px)}
+.mascot::after{
+  content:'';position:absolute;inset:-58%;border-radius:50%;z-index:-1;
+  background:radial-gradient(circle,var(--flame-glow),transparent 66%);
+  animation:breathe 4.2s var(--ease) infinite;
+}
+@keyframes breathe{0%,100%{opacity:.75;transform:scale(1)}50%{opacity:1;transform:scale(1.09)}}
+.hero-sub{display:grid;gap:2px;margin-top:clamp(20px,2.6vw,30px)}
+.hero-sub p{font-size:clamp(.98rem,1.25vw,1.14rem);color:var(--grey);line-height:1.85}
+.hero-note{font-family:var(--serif);font-style:italic;font-size:1.12rem;color:var(--grey);margin-top:22px}
+body.lang-ar .hero-note{font-family:var(--ar);font-style:normal;font-size:1.02rem}
+.hero-chant{
+  font-family:var(--mono);font-size:clamp(.78rem,1.05vw,.95rem);color:var(--flame);
+  margin-top:12px;letter-spacing:.02em;
+}
+.hero-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:clamp(28px,4vw,44px)}
+
+/* ═══════════════════════════════════════════════
+   TAB PANEL — echoes the reference's quick-start block
+═══════════════════════════════════════════════ */
+.panel{border:1px solid var(--line);border-radius:14px;background:var(--ink);overflow:hidden}
+.panel-tabs{display:flex;align-items:center;gap:2px;padding:9px 10px;border-bottom:1px solid var(--line);overflow-x:auto;scrollbar-width:none}
+.panel-tabs::-webkit-scrollbar{display:none}
+.panel-tabs .lbl{
+  font-family:var(--mono);font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--grey2);padding:8px 12px;flex:none;
+}
+.tab{
+  font-family:var(--mono);font-size:.82rem;color:var(--grey);background:none;border:0;cursor:pointer;
+  padding:8px 14px;border-radius:8px;white-space:nowrap;flex:none;transition:color .22s,background .22s;
+}
+.tab:hover{color:var(--white);background:rgba(255,255,255,.04)}
+.tab.on{color:var(--flame);background:var(--flame-dim)}
+.panel-body{display:grid;grid-template-columns:1.35fr .85fr;gap:0}
+@media(max-width:900px){.panel-body{grid-template-columns:1fr}}
+.flow{
+  background-color:#080809;padding:14px;
+  background-image:radial-gradient(circle at 1px 1px,rgba(255,255,255,.06) 1px,transparent 0);
+  background-size:20px 20px;border-inline-end:1px solid var(--line);
+}
+@media(max-width:900px){.flow{border-inline-end:0;border-bottom:1px solid var(--line)}}
+.flow svg{width:100%;height:auto;direction:ltr}
+.flow svg text{direction:ltr;text-anchor:start}
+.nd{fill:#121213;stroke:rgba(255,255,255,.14);stroke-width:1.2}
+.nd-t{font-family:'Inter Tight','IBM Plex Sans Arabic',sans-serif;font-size:13.5px;font-weight:600;fill:#f4f3f1}
+body.lang-ar .nd-t{font-family:'IBM Plex Sans Arabic',sans-serif;font-size:12.5px;font-weight:500}
+.nd-s{font-family:'IBM Plex Mono',monospace;font-size:9.5px;fill:#6f6d6a;letter-spacing:.05em}
+.wire{fill:none;stroke:rgba(255,255,255,.2);stroke-width:1.5}
+.wire-run{fill:none;stroke:var(--flame);stroke-width:1.5;stroke-dasharray:4 8;opacity:.9;animation:run 1.1s linear infinite}
+@keyframes run{to{stroke-dashoffset:-24}}
+.port{fill:#0a0a0b;stroke:rgba(255,255,255,.3);stroke-width:1.3}
+.panel-side{padding:clamp(18px,2.4vw,26px);display:grid;gap:14px;align-content:start}
+.panel-side .k{font-family:var(--mono);font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:var(--grey2)}
+.panel-side p{font-size:.93rem;color:var(--grey);line-height:1.75}
+.kv{display:grid;gap:8px}
+.kv div{display:flex;justify-content:space-between;gap:14px;font-family:var(--mono);font-size:.78rem;padding-block:7px;border-bottom:1px solid var(--line)}
+.kv span:first-child{color:var(--grey2)}
+.kv span:last-child{color:var(--white);unicode-bidi:isolate}
+
+/* ═══════════════════════════════════════════════
+   CARDS
+═══════════════════════════════════════════════ */
+.card{
+  border:1px solid var(--line);border-radius:13px;background:var(--ink);
+  padding:clamp(20px,2.3vw,28px);
+  transition:border-color .28s,background .28s,transform .28s var(--ease);
+}
+.card:hover{border-color:var(--line2);background:var(--ink2);transform:translateY(-3px)}
+.card .ic{width:34px;height:34px;border-radius:9px;display:grid;place-items:center;background:var(--flame-dim);margin-bottom:16px}
+.card .ic svg{width:17px;height:17px;stroke:var(--flame);fill:none;stroke-width:1.9}
+.card h3{margin-bottom:9px}
+.card p{color:var(--grey);font-size:.94rem;line-height:1.75}
+.card .foot{font-family:var(--mono);font-size:.72rem;color:var(--grey2);margin-top:16px;padding-top:14px;border-top:1px solid var(--line)}
+
+/* chips */
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{
+  font-family:var(--mono);font-size:.8rem;color:var(--grey);
+  border:1px solid var(--line);border-radius:8px;padding:8px 13px;background:var(--ink);
+  transition:border-color .22s,color .22s;
+}
+.chip:hover{border-color:var(--flame);color:var(--flame)}
+.chip.dash{border-style:dashed;color:var(--grey2)}
+
+/* steps */
+.step{padding-top:22px;border-top:1px solid var(--line);position:relative}
+.step .n{font-family:var(--mono);font-size:.74rem;color:var(--flame);display:block;margin-bottom:14px}
+.step h3{margin-bottom:8px}
+.step p{color:var(--grey);font-size:.92rem}
+
+/* ═══════════════════════════════════════════════
+   CHAT
+═══════════════════════════════════════════════ */
+.chat{display:flex;flex-direction:column;background:var(--ink);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+#chat-main .chat{height:clamp(430px,58vh,540px)}
+.chat-top{display:flex;align-items:center;gap:11px;padding:13px 16px;border-bottom:1px solid var(--line);background:var(--ink2);flex:none}
+.chat-av{width:32px;height:32px;flex:none}
+.chat-top b{font-size:.93rem;font-weight:600;display:block;line-height:1.35}
+.chat-top .st{font-family:var(--mono);font-size:.66rem;display:flex;align-items:center;gap:5px;color:var(--ok)}
+.chat-top .st i{width:5px;height:5px;border-radius:50%;background:currentColor;animation:blip 1.9s infinite}
+.chat-top .st.demo{color:var(--grey2)}
+@keyframes blip{0%,100%{opacity:1}50%{opacity:.35}}
+.chat-x{margin-inline-start:auto;background:none;border:0;cursor:pointer;color:var(--grey2);padding:4px;line-height:0;transition:color .2s}
+.chat-x:hover{color:var(--white)}
+.chat-x svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2}
+.log{flex:1;overflow-y:auto;padding:18px 16px;display:flex;flex-direction:column;gap:11px}
+.msg{max-width:84%;padding:11px 15px;border-radius:14px;font-size:.93rem;line-height:1.7;white-space:pre-wrap;overflow-wrap:anywhere}
+.msg.bot{background:var(--ink3);border:1px solid var(--line);border-start-start-radius:5px;align-self:flex-start}
+.msg.me{background:var(--flame);color:#fff;border-end-end-radius:5px;align-self:flex-end}
+.msg.warn{background:rgba(242,85,44,.09);border:1px solid rgba(242,85,44,.3);color:var(--flame2);align-self:flex-start;font-size:.85rem;font-family:var(--mono);line-height:1.6}
+.dotting{display:flex;gap:4px;align-self:flex-start;padding:15px 17px;background:var(--ink3);border:1px solid var(--line);border-radius:14px;border-start-start-radius:5px}
+.dotting i{width:6px;height:6px;border-radius:50%;background:var(--grey2);animation:bob 1.25s infinite}
+.dotting i:nth-child(2){animation-delay:.16s}.dotting i:nth-child(3){animation-delay:.32s}
+@keyframes bob{0%,62%,100%{opacity:.28;transform:translateY(0)}30%{opacity:1;transform:translateY(-4px)}}
+.sug{display:flex;flex-wrap:wrap;gap:7px;padding:0 16px 12px;flex:none}
+.sug button{
+  font-family:var(--mono);font-size:.75rem;color:var(--grey);background:none;cursor:pointer;
+  border:1px solid var(--line);border-radius:99px;padding:6px 12px;transition:border-color .22s,color .22s;
+}
+.sug button:hover{border-color:var(--flame);color:var(--flame)}
+.chat-in{display:flex;gap:9px;padding:12px 14px;border-top:1px solid var(--line);background:var(--ink2);flex:none}
+.chat-in input{flex:1;min-width:0;background:var(--black);border:1px solid var(--line);border-radius:10px;padding:11px 14px;font-size:.93rem;outline:none;transition:border-color .22s}
+.chat-in input::placeholder{color:var(--grey2)}
+.chat-in input:focus{border-color:var(--flame)}
+.chat-in .send{width:44px;flex:none;background:var(--flame);border:0;border-radius:10px;cursor:pointer;display:grid;place-items:center;transition:background .22s}
+.chat-in .send:hover{background:var(--flame2)}
+.chat-in .send svg{width:17px;height:17px;stroke:#fff;fill:none;stroke-width:2}
+[dir=rtl] .chat-in .send svg{transform:scaleX(-1)}
+
+/* floating dock */
+#dock{
+  position:fixed;inset-block-end:22px;inset-inline-end:22px;z-index:500;
+  width:56px;height:56px;border-radius:50%;border:0;cursor:pointer;background:var(--flame);
+  display:grid;place-items:center;box-shadow:0 14px 32px -8px var(--flame-glow);
+  transition:transform .28s var(--ease),background .22s;
+}
+#dock:hover{transform:scale(1.08);background:var(--flame2)}
+#dock svg{grid-area:1/1;width:23px;height:23px;stroke:#fff;fill:none;stroke-width:2;transition:opacity .2s,transform .3s}
+#dock .x{opacity:0;transform:rotate(-90deg)}
+body.dock #dock .b{opacity:0;transform:rotate(90deg)}
+body.dock #dock .x{opacity:1;transform:rotate(0)}
+#dockPanel{
+  position:fixed;inset-block-end:90px;inset-inline-end:22px;z-index:499;
+  width:min(376px,calc(100vw - 44px));
+  opacity:0;transform:translateY(12px) scale(.97);pointer-events:none;
+  transition:opacity .26s var(--ease),transform .32s var(--ease);
+}
+body.dock #dockPanel{opacity:1;transform:none;pointer-events:auto}
+#dockPanel .chat{height:min(486px,calc(100vh - 150px));box-shadow:0 26px 64px -18px rgba(0,0,0,.9)}
+@media(max-width:520px){
+  #dock{width:52px;height:52px;inset-block-end:16px;inset-inline-end:16px}
+  #dockPanel{inset-block-end:78px;inset-inline:16px;width:auto}
+}
+
+/* ═══════════════════════════════════════════════
+   PRICING · FAQ · CTA · FOOTER
+═══════════════════════════════════════════════ */
+.plan{display:flex;flex-direction:column;gap:16px;position:relative}
+.plan.hi{border-color:rgba(242,85,44,.5);background:linear-gradient(180deg,var(--flame-dim),transparent 44%),var(--ink)}
+.plan .price{font-family:var(--mono);font-size:1.9rem;font-weight:500;line-height:1.1;unicode-bidi:isolate}
+.plan .price small{font-size:.76rem;color:var(--grey2);font-weight:400;display:block;margin-top:5px;letter-spacing:.02em}
+.plan ul{list-style:none;display:grid;gap:9px}
+.plan li{display:flex;gap:9px;font-size:.9rem;color:var(--grey);line-height:1.65}
+.plan li::before{
+  content:'';flex:none;width:14px;height:14px;margin-top:5px;border-radius:4px;background:var(--flame-dim);
+  background-image:url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23f2552c' stroke-width='3.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6L9 17l-5-5'/%3E%3C/svg%3E");
+  background-size:10px;background-position:center;background-repeat:no-repeat;
+}
+.plan .btn{margin-top:auto}
+.badge{
+  position:absolute;top:0;inset-inline-end:18px;transform:translateY(-50%);
+  font-family:var(--mono);font-size:.63rem;letter-spacing:.12em;text-transform:uppercase;
+  background:var(--flame);color:#fff;padding:4px 11px;border-radius:99px;
+}
+.faq{border-top:1px solid var(--line)}
+.faq:last-of-type{border-bottom:1px solid var(--line)}
+.faq-q{
+  width:100%;text-align:start;background:none;border:0;cursor:pointer;color:inherit;
+  display:flex;align-items:center;gap:16px;padding:19px 0;font-size:1rem;font-weight:600;
+  letter-spacing:-.01em;transition:color .22s;
+}
+body.lang-ar .faq-q{font-weight:500}
+.faq-q:hover{color:var(--flame)}
+.faq-q .pm{margin-inline-start:auto;flex:none;width:25px;height:25px;border:1px solid var(--line2);border-radius:7px;position:relative;transition:background .28s,border-color .28s,transform .38s var(--ease)}
+.faq-q .pm::before,.faq-q .pm::after{content:'';position:absolute;inset-inline:6px;top:50%;height:1.4px;background:currentColor;border-radius:2px}
+.faq-q .pm::after{transform:rotate(90deg);transition:transform .38s var(--ease)}
+.faq.open .pm{background:var(--flame);border-color:var(--flame);color:#fff;transform:rotate(180deg)}
+.faq.open .pm::after{transform:rotate(0)}
+.faq-a{display:grid;grid-template-rows:0fr;transition:grid-template-rows .45s var(--ease)}
+.faq.open .faq-a{grid-template-rows:1fr}
+.faq-a>div{overflow:hidden}
+.faq-a p{color:var(--grey);font-size:.93rem;padding-bottom:21px;max-width:78ch;line-height:1.8}
+.cta{
+  border:1px solid var(--line);border-radius:16px;padding:clamp(30px,5vw,64px);text-align:center;
+  background:radial-gradient(85% 130% at 50% 0,rgba(242,85,44,.14),transparent 60%),var(--ink);
+  display:grid;gap:18px;justify-items:center;
+}
+footer{border-top:1px solid var(--line);padding-block:clamp(38px,5vw,58px) 26px;margin-top:clamp(36px,5vw,72px)}
+.foot{display:grid;grid-template-columns:1.7fr 1fr 1fr 1fr;gap:clamp(18px,3vw,38px)}
+@media(max-width:860px){.foot{grid-template-columns:1fr 1fr}.foot>div:first-child{grid-column:1/-1}}
+.foot h4{font-family:var(--mono);font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:var(--grey2);margin-bottom:13px;font-weight:400}
+.foot a,.foot p{display:block;font-size:.9rem;color:var(--grey);padding-block:5px;transition:color .22s}
+.foot a:hover{color:var(--flame)}
+.foot-bot{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-top:32px;padding-top:20px;border-top:1px solid var(--line);font-family:var(--mono);font-size:.74rem;color:var(--grey2)}
+
+/* reveal */
+.rv{opacity:0;transform:translateY(18px);transition:opacity .65s var(--ease),transform .75s var(--ease)}
+.rv.in{opacity:1;transform:none}
+.stg>*{opacity:0;transform:translateY(16px);transition:opacity .55s var(--ease),transform .65s var(--ease)}
+.stg.in>*{opacity:1;transform:none}
+.stg.in>*:nth-child(2){transition-delay:.06s}
+.stg.in>*:nth-child(3){transition-delay:.12s}
+.stg.in>*:nth-child(4){transition-delay:.18s}
+.stg.in>*:nth-child(5){transition-delay:.24s}
+.stg.in>*:nth-child(6){transition-delay:.3s}
+:focus-visible{outline:2px solid var(--flame);outline-offset:3px;border-radius:4px}
+@media(prefers-reduced-motion:reduce){
+  *{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+  .rv,.stg>*{opacity:1!important;transform:none!important}
+  html{scroll-behavior:auto}
+}
+</style>
+</head>
+<body class="lang-ar">
+<div class="dots" aria-hidden="true"></div>
+
+<header id="hdr">
+  <a href="#hero" class="brand">
+    <svg class="mk" viewBox="0 0 32 32" aria-hidden="true"><ellipse cx="16" cy="18" rx="8.5" ry="8" fill="#f2552c"/><circle cx="12.8" cy="17" r="1.7" fill="#0a0a0b"/><circle cx="19.2" cy="17" r="1.7" fill="#0a0a0b"/><path d="M16 10V6.5" stroke="#f2552c" stroke-width="1.7" stroke-linecap="round"/><circle cx="16" cy="5" r="1.7" fill="#f2552c"/></svg>
+    Flowline
+  </a>
+  <nav class="top" id="nav">
+    <a href="#examples" data-en="Examples" data-ar="أمثلة">أمثلة</a>
+    <a href="#services" data-en="Services" data-ar="الخدمات">الخدمات</a>
+    <a href="#how" data-en="How it works" data-ar="كيف نشتغل">كيف نشتغل</a>
+    <a href="#bot" data-en="The bot" data-ar="البوت">البوت</a>
+    <a href="#pricing" data-en="Pricing" data-ar="الباقات">الباقات</a>
+    <a href="#faq" data-en="FAQ" data-ar="أسئلة">أسئلة</a>
+  </nav>
+  <div class="hd-r">
+    <button class="lang" id="langBtn"><span id="langLbl">EN</span></button>
+    <a href="#contact" class="btn btn-p btn-s hd-cta" data-en="Book a call" data-ar="احجز مكالمة">احجز مكالمة</a>
+    <button class="burger" id="burger" aria-label="Menu"><i></i><i></i><i></i></button>
+  </div>
+</header>
+
+<main>
+<!-- ═════════ HERO ═════════ -->
+<section id="hero">
+  <div class="ascii" aria-hidden="true">                  . . ..............:.:.::::-::::-:-:----=----=----=--=-=--=----------::-::::::::::..:............. .
+       ..............:.:::::::----=-=-=+=+=+x+xXxX+X#xXxX#X#8X8X#8X8X#8X#8X#X#8X#xX#xXXxx++x++==+===-=---:-::::::.:.............
+...........:.:.::::::::------=-===+=+X+X+X#X#x#8X8@8@#@@8@8@@8@@@@8@@@@8@@8@@@@8@@8@#8@X#8X#xX#xx++x=++==-==--:--::::::::::..:..........
+.:::::--------=--:--:-::-:-=-=-=+=+=+x+X#X#x#8X8X#@#8@#8X#8X8X#8X#8X#X#8X#X#8X8@#8X8@#8X#8X#8X#xxX+x=++===-----:-::-:------=-----:--::..
+-=-=++x+xX+x++x=++-=---::::-:---=-=+=+=+x+x#xXxXXxx++x===--:::...      ...::::-==+x+x+xXxX+xX+xX+x=++==---::-::::----=+=+x+x+xX+x=++===-
+-==+xxX#X#xX#xX+++===-::::................                                                    .................::::-==+=xXxX8X#xX#xx===-
+:-=-==+x+xx+x=++==---:--:::::..                                                                         ....:.:::---=-=+=+=+x+xx++===--:
+....::::::-::-:-:---=-====+-=--:..                                                                    .:::--====-==--=--:--:-::::::::...
+       .........:.:::-----=---::..                                                                    ..::------=--:::..........
+                   ..........                                                                              .........
+
+</div>
+  <div class="wrap">
+    <div class="mascot">
+      <svg viewBox="0 0 120 120" aria-hidden="true">
+        <path d="M60 34V20" stroke="#f2552c" stroke-width="4" stroke-linecap="round"/>
+        <circle cx="60" cy="16" r="5.5" fill="#f2552c"/>
+        <ellipse cx="60" cy="66" rx="34" ry="31" fill="#f2552c"/>
+        <ellipse cx="28" cy="64" rx="7" ry="9" fill="#f2552c"/>
+        <ellipse cx="92" cy="64" rx="7" ry="9" fill="#f2552c"/>
+        <rect x="46" y="92" width="9" height="16" rx="4.5" fill="#f2552c"/>
+        <rect x="65" y="92" width="9" height="16" rx="4.5" fill="#f2552c"/>
+        <circle cx="49" cy="62" r="5.4" fill="#0a0a0b"/><circle cx="71" cy="62" r="5.4" fill="#0a0a0b"/>
+        <circle cx="50.6" cy="60.4" r="1.7" fill="#8ff0c4"/><circle cx="72.6" cy="60.4" r="1.7" fill="#8ff0c4"/>
+      </svg>
+    </div>
+    <div class="eyebrow" data-en="BUILT ON n8n · RUNS ON YOUR STACK" data-ar="مبني على n8n · يعمل على خوادمك">مبني على n8n · يعمل على خوادمك</div>
+    <h1 class="h1" style="margin-top:20px" data-html
+        data-en="Automation that &lt;span class='em'&gt;actually&lt;/span&gt; runs your business."
+        data-ar="أتمتة &lt;span class='em'&gt;تشتغل&lt;/span&gt; بدلاً عنك.">أتمتة <span class="em">تشتغل</span> بدلاً عنك.</h1>
+    <div class="hero-sub">
+      <p data-en="Connects your tools, moves your data, answers your customers." data-ar="تربط أدواتك، وتنقل بياناتك، وترد على عملائك.">تربط أدواتك، وتنقل بياناتك، وترد على عملائك.</p>
+      <p data-en="On WhatsApp, Telegram, your website — or quietly in the background." data-ar="في واتساب وتيليجرام وموقعك — أو بصمت في الخلفية.">في واتساب وتيليجرام وموقعك — أو بصمت في الخلفية.</p>
+      <p data-en="Built on n8n and hosted on your own server. You own all of it." data-ar="مبنية على n8n ومستضافة على خادمك أنت. ملكك بالكامل.">مبنية على n8n ومستضافة على خادمك أنت. ملكك بالكامل.</p>
+    </div>
+    <p class="hero-note" data-en="The longer it runs, the less you touch it." data-ar="كلما طال تشغيلها، قلّ تدخلك فيها.">كلما طال تشغيلها، قلّ تدخلك فيها.</p>
+    <p class="hero-chant" data-en="Your data. Your server. Your workflows. Your rules." data-ar="بياناتك. خادمك. سير عملك. قواعدك.">بياناتك. خادمك. سير عملك. قواعدك.</p>
+    <div class="hero-btns">
+      <button class="btn btn-p" id="heroTry" data-en="Try the bot" data-ar="جرّب البوت">جرّب البوت</button>
+      <a href="#contact" class="btn btn-g" data-en="Book a call" data-ar="احجز مكالمة">احجز مكالمة</a>
+    </div>
+  </div>
+</section>
+
+<!-- ═════════ WORKFLOW EXAMPLES ═════════ -->
+<section id="examples">
+  <div class="wrap">
+    <div class="head rv">
+      <div class="eyebrow" data-en="WORKFLOW EXAMPLES" data-ar="أمثلة على سير العمل">أمثلة على سير العمل</div>
+      <h2 class="h2" data-en="Four flows we ship most often." data-ar="أربعة مسارات نبنيها كثيراً.">أربعة مسارات نبنيها كثيراً.</h2>
+      <p class="lede" data-en="Each one is a real n8n workflow — a trigger, a few steps, and something useful at the end. Yours gets shaped around your tools." data-ar="كل واحد منها سير عمل حقيقي على n8n — مُشغِّل، وبضع خطوات، ونتيجة مفيدة في النهاية. ونصمّم مسارك حول أدواتك أنت.">كل واحد منها سير عمل حقيقي على n8n — مُشغِّل، وبضع خطوات، ونتيجة مفيدة في النهاية. ونصمّم مسارك حول أدواتك أنت.</p>
+    </div>
+    <div class="panel rv">
+      <div class="panel-tabs" id="tabs" role="tablist">
+        <span class="lbl" data-en="FLOW" data-ar="المسار">المسار</span>
+      </div>
+      <div class="panel-body">
+        <div class="flow"><svg id="flowSvg" viewBox="0 0 726 300" role="img" aria-label="workflow diagram"></svg></div>
+        <aside class="panel-side" id="flowSide"></aside>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═════════ SERVICES ═════════ -->
+<section id="services">
+  <div class="wrap">
+    <div class="head rv">
+      <div class="eyebrow" data-en="WHAT WE AUTOMATE" data-ar="ماذا نؤتمت">ماذا نؤتمت</div>
+      <h2 class="h2" data-en="The work nobody should be doing by hand." data-ar="الأعمال التي لا يجب أن تُنجَز يدوياً.">الأعمال التي لا يجب أن تُنجَز يدوياً.</h2>
+    </div>
+    <div class="grid g3 stg">
+      <article class="card">
+        <div class="ic"><svg viewBox="0 0 24 24"><path d="M3 7h18M3 12h18M3 17h11" stroke-linecap="round"/></svg></div>
+        <h3 class="h3" data-en="Lead capture &amp; CRM" data-ar="استقبال العملاء وربط CRM">استقبال العملاء وربط CRM</h3>
+        <p data-en="Every form, DM and missed call lands in one place, enriched, assigned and followed up automatically." data-ar="كل نموذج ورسالة ومكالمة فائتة تصل إلى مكان واحد، مُثراة بالبيانات ومُسنَدة ومتابَعة تلقائياً.">كل نموذج ورسالة ومكالمة فائتة تصل إلى مكان واحد، مُثراة بالبيانات ومُسنَدة ومتابَعة تلقائياً.</p>
+        <div class="foot" data-en="forms · whatsapp · hubspot · sheets" data-ar="نماذج · واتساب · hubspot · جداول">نماذج · واتساب · hubspot · جداول</div>
+      </article>
+      <article class="card">
+        <div class="ic"><svg viewBox="0 0 24 24"><path d="M14 3v5h5M14 3H6a2 2 0 00-2 2v14a2 2 0 002 2h12a2 2 0 002-2V8z" stroke-linejoin="round"/></svg></div>
+        <h3 class="h3" data-en="Invoices &amp; documents" data-ar="الفواتير والمستندات">الفواتير والمستندات</h3>
+        <p data-en="Read the PDF, pull the numbers, file it, book it, and tell accounting — without anyone opening an attachment." data-ar="نقرأ ملف PDF، ونستخرج الأرقام، ونحفظه، ونقيّده، ونبلّغ المحاسبة — دون أن يفتح أحد أي مرفق.">نقرأ ملف PDF، ونستخرج الأرقام، ونحفظه، ونقيّده، ونبلّغ المحاسبة — دون أن يفتح أحد أي مرفق.</p>
+        <div class="foot" data-en="ocr · gpt · drive · accounting" data-ar="ocr · نماذج ذكية · درايف · محاسبة">ocr · نماذج ذكية · درايف · محاسبة</div>
+      </article>
+      <article class="card">
+        <div class="ic"><svg viewBox="0 0 24 24"><path d="M21 11.5a8.4 8.4 0 01-9 8.4 8.5 8.5 0 01-4-1L3 21l2.1-5a8.4 8.4 0 01-1-4 8.5 8.5 0 018.4-9 8.5 8.5 0 018.5 8.5z" stroke-linejoin="round"/></svg></div>
+        <h3 class="h3" data-en="AI agent on chat" data-ar="وكيل ذكي على المحادثة">وكيل ذكي على المحادثة</h3>
+        <p data-en="A bot that reads your catalogue, prices and policies, answers in Arabic or English, and hands the hard ones to a human." data-ar="بوت يقرأ كتالوجك وأسعارك وسياساتك، يرد بالعربية أو الإنجليزية، ويحوّل الحالات الصعبة إلى موظف.">بوت يقرأ كتالوجك وأسعارك وسياساتك، يرد بالعربية أو الإنجليزية، ويحوّل الحالات الصعبة إلى موظف.</p>
+        <div class="foot" data-en="whatsapp · telegram · web widget" data-ar="واتساب · تيليجرام · ودجت الموقع">واتساب · تيليجرام · ودجت الموقع</div>
+      </article>
+      <article class="card">
+        <div class="ic"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2" stroke-linecap="round"/></svg></div>
+        <h3 class="h3" data-en="Reports that send themselves" data-ar="تقارير ترسل نفسها">تقارير ترسل نفسها</h3>
+        <p data-en="Sales, stock, cash and campaign numbers pulled every morning and delivered where your team already looks." data-ar="أرقام المبيعات والمخزون والنقد والحملات تُجمَع كل صباح وتصل إلى المكان الذي يتابعه فريقك أصلاً.">أرقام المبيعات والمخزون والنقد والحملات تُجمَع كل صباح وتصل إلى المكان الذي يتابعه فريقك أصلاً.</p>
+        <div class="foot" data-en="cron · sheets · slack · email" data-ar="جدولة · جداول · slack · بريد">جدولة · جداول · slack · بريد</div>
+      </article>
+      <article class="card">
+        <div class="ic"><svg viewBox="0 0 24 24"><path d="M4 7c0-1.7 3.6-3 8-3s8 1.3 8 3-3.6 3-8 3-8-1.3-8-3zM4 7v10c0 1.7 3.6 3 8 3s8-1.3 8-3V7M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3" stroke-linejoin="round"/></svg></div>
+        <h3 class="h3" data-en="Systems that talk to each other" data-ar="أنظمة تتحدث مع بعضها">أنظمة تتحدث مع بعضها</h3>
+        <p data-en="Your store, your accounting, your inventory and your ads stop disagreeing about the same number." data-ar="متجرك ومحاسبتك ومخزونك وإعلاناتك تتوقف عن الاختلاف حول الرقم نفسه.">متجرك ومحاسبتك ومخزونك وإعلاناتك تتوقف عن الاختلاف حول الرقم نفسه.</p>
+        <div class="foot" data-en="api · webhooks · sync · queues" data-ar="api · ويب هوك · مزامنة · طوابير">api · ويب هوك · مزامنة · طوابير</div>
+      </article>
+      <article class="card">
+        <div class="ic"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke-linejoin="round"/></svg></div>
+        <h3 class="h3" data-en="Self-hosted, monitored" data-ar="استضافة ذاتية ومراقبة">استضافة ذاتية ومراقبة</h3>
+        <p data-en="n8n on your own server, backups, alerts when a run fails, and a dashboard that tells you it is all still working." data-ar="n8n على خادمك، ونسخ احتياطية، وتنبيهات عند فشل أي تشغيل، ولوحة تطمئنك أن كل شيء يعمل.">n8n على خادمك، ونسخ احتياطية، وتنبيهات عند فشل أي تشغيل، ولوحة تطمئنك أن كل شيء يعمل.</p>
+        <div class="foot" data-en="docker · backups · alerts · logs" data-ar="docker · نسخ احتياطي · تنبيهات · سجلات">docker · نسخ احتياطي · تنبيهات · سجلات</div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ═════════ INTEGRATIONS ═════════ -->
+<section id="stack" style="padding-block:clamp(30px,4vw,56px)">
+  <div class="wrap">
+    <div class="head rv" style="margin-bottom:22px">
+      <div class="eyebrow" data-en="CONNECTS TO" data-ar="نربط مع">نربط مع</div>
+    </div>
+    <div class="chips rv">
+      <span class="chip">WhatsApp</span><span class="chip">Telegram</span><span class="chip">Gmail</span>
+      <span class="chip">Google Sheets</span><span class="chip">Slack</span><span class="chip">Notion</span>
+      <span class="chip">Airtable</span><span class="chip">HubSpot</span><span class="chip">Shopify</span>
+      <span class="chip">Salla</span><span class="chip">Stripe</span><span class="chip">Postgres</span>
+      <span class="chip">OpenAI</span><span class="chip">Claude</span><span class="chip">Drive</span>
+      <span class="chip">Instagram</span><span class="chip">Calendly</span>
+      <span class="chip dash" data-en="+ 400 more" data-ar="+ ٤٠٠ غيرها">+ ٤٠٠ غيرها</span>
+    </div>
+  </div>
+</section>
+
+<!-- ═════════ HOW ═════════ -->
+<section id="how">
+  <div class="wrap">
+    <div class="head rv">
+      <div class="eyebrow" data-en="HOW IT WORKS" data-ar="كيف نشتغل">كيف نشتغل</div>
+      <h2 class="h2" data-en="Live in two weeks, not two quarters." data-ar="يعمل خلال أسبوعين، لا ربع سنة.">يعمل خلال أسبوعين، لا ربع سنة.</h2>
+    </div>
+    <div class="grid g4 stg">
+      <div class="step"><span class="n">01</span><h3 class="h3" data-en="We map the work" data-ar="نرسم خريطة العمل">نرسم خريطة العمل</h3><p data-en="One call. We list every manual step your team repeats and pick the ones worth automating first." data-ar="مكالمة واحدة. نحصر كل خطوة يدوية يكررها فريقك ونختار ما يستحق الأتمتة أولاً.">مكالمة واحدة. نحصر كل خطوة يدوية يكررها فريقك ونختار ما يستحق الأتمتة أولاً.</p></div>
+      <div class="step"><span class="n">02</span><h3 class="h3" data-en="We build it" data-ar="نبنيه">نبنيه</h3><p data-en="The workflow is built on n8n, on your server, with your accounts and your data — nothing leaves your side." data-ar="نبني سير العمل على n8n وعلى خادمك وبحساباتك وبياناتك — لا يخرج شيء من عندك.">نبني سير العمل على n8n وعلى خادمك وبحساباتك وبياناتك — لا يخرج شيء من عندك.</p></div>
+      <div class="step"><span class="n">03</span><h3 class="h3" data-en="We run it beside you" data-ar="نشغّله بجانبك">نشغّله بجانبك</h3><p data-en="A week in parallel with the manual process, so you can see it agree with reality before you trust it." data-ar="أسبوع بالتوازي مع العمل اليدوي، لترى نتائجه تطابق الواقع قبل أن تعتمد عليه.">أسبوع بالتوازي مع العمل اليدوي، لترى نتائجه تطابق الواقع قبل أن تعتمد عليه.</p></div>
+      <div class="step"><span class="n">04</span><h3 class="h3" data-en="You own it" data-ar="يصبح ملكك">يصبح ملكك</h3><p data-en="Handover with documentation and a training session. Keep us on monitoring, or take it in-house entirely." data-ar="تسليم مع توثيق وجلسة تدريب. أبقِنا للمراقبة، أو خذه بالكامل إلى فريقك.">تسليم مع توثيق وجلسة تدريب. أبقِنا للمراقبة، أو خذه بالكامل إلى فريقك.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═════════ BOT ═════════ -->
+<section id="bot">
+  <div class="wrap">
+    <div class="grid g2" style="gap:clamp(24px,4vw,54px);align-items:center">
+      <div class="rv">
+        <div class="eyebrow" data-en="THE AGENT" data-ar="الوكيل الذكي">الوكيل الذكي</div>
+        <h2 class="h2" style="margin:16px 0 18px" data-html
+            data-en="Talk to it. It is the &lt;span class='em'&gt;same&lt;/span&gt; bot we ship." data-ar="كلّمه. هو &lt;span class='em'&gt;نفس&lt;/span&gt; البوت الذي نسلّمه.">كلّمه. هو <span class="em">نفس</span> البوت الذي نسلّمه.</h2>
+        <p class="lede" data-en="Ask about pricing, timelines, what we can connect, or what happens to your data. It answers in the language you write in." data-ar="اسأل عن الأسعار أو المدة أو ما يمكن ربطه أو ما يحدث لبياناتك. يرد باللغة التي تكتب بها.">اسأل عن الأسعار أو المدة أو ما يمكن ربطه أو ما يحدث لبياناتك. يرد باللغة التي تكتب بها.</p>
+        <div class="kv" style="margin-top:26px;max-width:420px">
+          <div><span data-en="Runs on" data-ar="يعمل على">يعمل على</span><span>n8n · AI Agent</span></div>
+          <div><span data-en="Channels" data-ar="القنوات">القنوات</span><span data-en="Web · WhatsApp · Telegram" data-ar="الموقع · واتساب · تيليجرام">الموقع · واتساب · تيليجرام</span></div>
+          <div><span data-en="Languages" data-ar="اللغات">اللغات</span><span data-en="Arabic · English" data-ar="العربية · الإنجليزية">العربية · الإنجليزية</span></div>
+          <div><span data-en="Handover" data-ar="التحويل">التحويل</span><span data-en="to a human, any time" data-ar="إلى موظف، في أي وقت">إلى موظف، في أي وقت</span></div>
+        </div>
+      </div>
+      <div class="rv" id="chat-main"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═════════ PRICING ═════════ -->
+<section id="pricing">
+  <div class="wrap">
+    <div class="head rv">
+      <div class="eyebrow" data-en="PRICING" data-ar="الباقات">الباقات</div>
+      <h2 class="h2" data-en="Priced per workflow, not per seat." data-ar="السعر على سير العمل، لا على المستخدم.">السعر على سير العمل، لا على المستخدم.</h2>
+      <p class="lede" data-en="One-off build, then an optional monthly retainer for hosting, monitoring and changes." data-ar="بناء لمرة واحدة، ثم اشتراك شهري اختياري للاستضافة والمراقبة والتعديلات.">بناء لمرة واحدة، ثم اشتراك شهري اختياري للاستضافة والمراقبة والتعديلات.</p>
+    </div>
+    <div class="grid g3 stg">
+      <article class="card plan">
+        <div><div class="eyebrow" style="color:var(--grey2)" data-en="STARTER" data-ar="البداية">البداية</div>
+        <div class="price" style="margin-top:12px">$450 <small data-en="one workflow · 7 days" data-ar="سير عمل واحد · ٧ أيام">سير عمل واحد · ٧ أيام</small></div></div>
+        <ul>
+          <li data-en="One workflow, up to 8 steps" data-ar="سير عمل واحد حتى ٨ خطوات">سير عمل واحد حتى ٨ خطوات</li>
+          <li data-en="Two integrations" data-ar="ربط أداتين">ربط أداتين</li>
+          <li data-en="Deployed on your n8n" data-ar="تنصيب على n8n الخاص بك">تنصيب على n8n الخاص بك</li>
+          <li data-en="Handover documentation" data-ar="توثيق التسليم">توثيق التسليم</li>
+        </ul>
+        <a href="#contact" class="btn btn-g" data-en="Start here" data-ar="ابدأ من هنا">ابدأ من هنا</a>
+      </article>
+      <article class="card plan hi">
+        <span class="badge" data-en="Most picked" data-ar="الأكثر طلباً">الأكثر طلباً</span>
+        <div><div class="eyebrow" data-en="BUSINESS" data-ar="الأعمال">الأعمال</div>
+        <div class="price" style="margin-top:12px">$1,800 <small data-en="up to 5 workflows · 3 weeks" data-ar="حتى ٥ مسارات · ٣ أسابيع">حتى ٥ مسارات · ٣ أسابيع</small></div></div>
+        <ul>
+          <li data-en="Up to five workflows" data-ar="حتى خمسة مسارات">حتى خمسة مسارات</li>
+          <li data-en="AI agent on one channel" data-ar="وكيل ذكي على قناة واحدة">وكيل ذكي على قناة واحدة</li>
+          <li data-en="Server setup, backups, alerts" data-ar="إعداد الخادم والنسخ والتنبيهات">إعداد الخادم والنسخ والتنبيهات</li>
+          <li data-en="Team training session" data-ar="جلسة تدريب للفريق">جلسة تدريب للفريق</li>
+          <li data-en="30 days of fixes included" data-ar="٣٠ يوم إصلاحات مشمولة">٣٠ يوم إصلاحات مشمولة</li>
+        </ul>
+        <a href="#contact" class="btn btn-p" data-en="Book a call" data-ar="احجز مكالمة">احجز مكالمة</a>
+      </article>
+      <article class="card plan">
+        <div><div class="eyebrow" style="color:var(--grey2)" data-en="RETAINER" data-ar="المتابعة">المتابعة</div>
+        <div class="price" style="margin-top:12px">$400<small data-en="per month · cancel any time" data-ar="شهرياً · إلغاء في أي وقت">شهرياً · إلغاء في أي وقت</small></div></div>
+        <ul>
+          <li data-en="Hosting and monitoring" data-ar="استضافة ومراقبة">استضافة ومراقبة</li>
+          <li data-en="Failed runs fixed same day" data-ar="إصلاح التشغيلات الفاشلة في اليوم نفسه">إصلاح التشغيلات الفاشلة في اليوم نفسه</li>
+          <li data-en="Two changes a month" data-ar="تعديلان شهرياً">تعديلان شهرياً</li>
+          <li data-en="Priority WhatsApp support" data-ar="دعم واتساب ذو أولوية">دعم واتساب ذو أولوية</li>
+        </ul>
+        <a href="#contact" class="btn btn-g" data-en="Add it later" data-ar="أضفها لاحقاً">أضفها لاحقاً</a>
+      </article>
+    </div>
+    <p class="mono dim rv" style="margin-top:20px" data-en="Prices are placeholders for this template — change them in the file." data-ar="الأسعار هنا نموذجية لهذا القالب — عدّلها في الملف.">الأسعار هنا نموذجية لهذا القالب — عدّلها في الملف.</p>
+  </div>
+</section>
+
+<!-- ═════════ FAQ ═════════ -->
+<section id="faq">
+  <div class="wrap">
+    <div class="head rv">
+      <div class="eyebrow" data-en="QUESTIONS" data-ar="أسئلة متكررة">أسئلة متكررة</div>
+      <h2 class="h2" data-en="The ones we get every week." data-ar="التي تصلنا كل أسبوع.">التي تصلنا كل أسبوع.</h2>
+    </div>
+    <div class="rv">
+      <div class="faq"><button class="faq-q" aria-expanded="false"><span data-en="Do I need to know n8n?" data-ar="هل أحتاج أن أعرف n8n؟">هل أحتاج أن أعرف n8n؟</span><span class="pm" aria-hidden="true"></span></button><div class="faq-a"><div><p data-en="No. We build, host and monitor it. If you ever want to take it over, everything is documented and the workflows are plain n8n — any developer can read them." data-ar="لا. نحن نبني ونستضيف ونراقب. وإن أردت تسلّمه لاحقاً، فكل شيء موثّق والمسارات n8n قياسية يقرأها أي مطوّر.">لا. نحن نبني ونستضيف ونراقب. وإن أردت تسلّمه لاحقاً، فكل شيء موثّق والمسارات n8n قياسية يقرأها أي مطوّر.</p></div></div></div>
+      <div class="faq"><button class="faq-q" aria-expanded="false"><span data-en="Where does my data live?" data-ar="أين تُخزَّن بياناتي؟">أين تُخزَّن بياناتي؟</span><span class="pm" aria-hidden="true"></span></button><div class="faq-a"><div><p data-en="On your own server or cloud account. We deploy n8n there; we do not keep a copy. If you use an AI model, only the text needed for that step is sent to it." data-ar="على خادمك أو حسابك السحابي. نُنصّب n8n هناك ولا نحتفظ بنسخة. وإن استخدمت نموذجاً ذكياً، لا يُرسل إليه إلا النص اللازم لتلك الخطوة.">على خادمك أو حسابك السحابي. نُنصّب n8n هناك ولا نحتفظ بنسخة. وإن استخدمت نموذجاً ذكياً، لا يُرسل إليه إلا النص اللازم لتلك الخطوة.</p></div></div></div>
+      <div class="faq"><button class="faq-q" aria-expanded="false"><span data-en="What if a workflow breaks?" data-ar="ماذا لو تعطّل سير العمل؟">ماذا لو تعطّل سير العمل؟</span><span class="pm" aria-hidden="true"></span></button><div class="faq-a"><div><p data-en="Every run is logged. A failure raises an alert on WhatsApp or Slack with the exact step and payload, and on a retainer we fix it the same day." data-ar="كل تشغيل مسجَّل. أي فشل يُطلق تنبيهاً على واتساب أو Slack يحدد الخطوة والبيانات بدقة، ومع باقة المتابعة نصلحه في اليوم نفسه.">كل تشغيل مسجَّل. أي فشل يُطلق تنبيهاً على واتساب أو Slack يحدد الخطوة والبيانات بدقة، ومع باقة المتابعة نصلحه في اليوم نفسه.</p></div></div></div>
+      <div class="faq"><button class="faq-q" aria-expanded="false"><span data-en="Can the bot speak Arabic properly?" data-ar="هل يتقن البوت العربية؟">هل يتقن البوت العربية؟</span><span class="pm" aria-hidden="true"></span></button><div class="faq-a"><div><p data-en="Yes, including dialect. It is given your own wording — your catalogue, prices and policies — so it answers the way your team would, not in generic phrases." data-ar="نعم، بما في ذلك اللهجة. نغذّيه بصياغتك أنت — كتالوجك وأسعارك وسياساتك — فيرد كما يرد فريقك، لا بعبارات عامة.">نعم، بما في ذلك اللهجة. نغذّيه بصياغتك أنت — كتالوجك وأسعارك وسياساتك — فيرد كما يرد فريقك، لا بعبارات عامة.</p></div></div></div>
+      <div class="faq"><button class="faq-q" aria-expanded="false"><span data-en="How long until something works?" data-ar="كم يستغرق حتى يعمل شيء فعلاً؟">كم يستغرق حتى يعمل شيء فعلاً؟</span><span class="pm" aria-hidden="true"></span></button><div class="faq-a"><div><p data-en="A single workflow is usually live within a week. A full set with an agent and monitoring takes two to three weeks." data-ar="سير عمل واحد يعمل عادة خلال أسبوع. أما حزمة كاملة مع وكيل ذكي ومراقبة فتستغرق أسبوعين إلى ثلاثة.">سير عمل واحد يعمل عادة خلال أسبوع. أما حزمة كاملة مع وكيل ذكي ومراقبة فتستغرق أسبوعين إلى ثلاثة.</p></div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═════════ CTA ═════════ -->
+<section id="contact">
+  <div class="wrap">
+    <div class="cta rv">
+      <div class="eyebrow" data-en="NEXT STEP" data-ar="الخطوة التالية">الخطوة التالية</div>
+      <h2 class="h2" style="max-width:20ch" data-html data-en="Tell us the task you keep &lt;span class='em'&gt;redoing&lt;/span&gt;." data-ar="أخبرنا بالمهمة التي &lt;span class='em'&gt;تكررها&lt;/span&gt; دائماً.">أخبرنا بالمهمة التي <span class="em">تكررها</span> دائماً.</h2>
+      <p class="lede" style="max-width:52ch" data-en="Twenty minutes on a call is usually enough to tell you whether it is worth automating — and roughly what it costs." data-ar="عشرون دقيقة في مكالمة تكفي عادة لنخبرك إن كانت تستحق الأتمتة — وكم تكلّف تقريباً.">عشرون دقيقة في مكالمة تكفي عادة لنخبرك إن كانت تستحق الأتمتة — وكم تكلّف تقريباً.</p>
+      <div class="hero-btns" style="margin-top:8px">
+        <a href="mailto:hello@flowline.example" class="btn btn-p" data-en="Book a call" data-ar="احجز مكالمة">احجز مكالمة</a>
+        <button class="btn btn-g" id="ctaTry" data-en="Ask the bot first" data-ar="اسأل البوت أولاً">اسأل البوت أولاً</button>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="foot">
+      <div>
+        <div class="brand" style="font-size:1.05rem"><svg class="mk" viewBox="0 0 32 32" aria-hidden="true"><ellipse cx="16" cy="18" rx="8.5" ry="8" fill="#f2552c"/><circle cx="12.8" cy="17" r="1.7" fill="#0a0a0b"/><circle cx="19.2" cy="17" r="1.7" fill="#0a0a0b"/><path d="M16 10V6.5" stroke="#f2552c" stroke-width="1.7" stroke-linecap="round"/><circle cx="16" cy="5" r="1.7" fill="#f2552c"/></svg>Flowline</div>
+        <p style="max-width:34ch;margin-top:14px" data-en="Automation built on n8n, running on your own infrastructure." data-ar="أتمتة مبنية على n8n وتعمل على بنيتك التحتية أنت.">أتمتة مبنية على n8n وتعمل على بنيتك التحتية أنت.</p>
+      </div>
+      <div><h4 data-en="Explore" data-ar="تصفّح">تصفّح</h4>
+        <a href="#examples" data-en="Examples" data-ar="أمثلة">أمثلة</a>
+        <a href="#services" data-en="Services" data-ar="الخدمات">الخدمات</a>
+        <a href="#pricing" data-en="Pricing" data-ar="الباقات">الباقات</a></div>
+      <div><h4 data-en="Contact" data-ar="تواصل">تواصل</h4>
+        <a href="mailto:hello@flowline.example">hello@flowline.example</a>
+        <a href="#bot" data-en="Chat with the bot" data-ar="محادثة البوت">محادثة البوت</a></div>
+      <div><h4 data-en="Built with" data-ar="مبني بـ">مبني بـ</h4>
+        <p>n8n · Docker</p><p data-en="Your server" data-ar="خادمك أنت">خادمك أنت</p></div>
+    </div>
+    <div class="foot-bot">
+      <span data-en="© 2026 Flowline — template site, sample content." data-ar="© ٢٠٢٦ Flowline — موقع قالب بمحتوى نموذجي.">© ٢٠٢٦ Flowline — موقع قالب بمحتوى نموذجي.</span>
+      <span data-en="Not affiliated with n8n GmbH." data-ar="غير تابع لشركة n8n.">غير تابع لشركة n8n.</span>
+    </div>
+  </div>
+</footer>
+
+<button id="dock" aria-label="Chat">
+  <svg class="b" viewBox="0 0 24 24"><path d="M21 11.5a8.4 8.4 0 01-9 8.4 8.5 8.5 0 01-4-1L3 21l2.1-5a8.4 8.4 0 01-1-4 8.5 8.5 0 018.4-9 8.5 8.5 0 018.5 8.5z" stroke-linejoin="round"/></svg>
+  <svg class="x" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12" stroke-linecap="round"/></svg>
+</button>
+<div id="dockPanel"></div>
+
+<script>
+(function(){
+'use strict';
+
+/* ═══════════════════════════════════════════════
+   ① CONNECT YOUR n8n BOT HERE
+   Paste the Production URL of an n8n "Chat Trigger" node.
+   Leave it empty and the widget answers from the demo
+   script below, so the page still works before you wire it.
+   ضع هنا رابط الإنتاج لعقدة Chat Trigger في n8n.
+   اتركه فارغاً وسيرد الودجت من النص التجريبي بالأسفل.
+═══════════════════════════════════════════════ */
+var N8N_WEBHOOK_URL = "";
+/* ═══════════════════════════════════════════════ */
+
+var $=function(s,c){return (c||document).querySelector(s)};
+var $$=function(s,c){return [].slice.call((c||document).querySelectorAll(s))};
+var REDUCED=matchMedia('(prefers-reduced-motion: reduce)').matches;
+var lang='ar';
+var SID='web-'+Math.random().toString(36).slice(2,10);
+
+/* ─────────── i18n ─────────── */
+function setLang(next){
+  lang=next;
+  var ar = lang==='ar';
+  document.documentElement.lang=lang;
+  document.documentElement.dir= ar?'rtl':'ltr';
+  document.body.classList.toggle('lang-ar',ar);
+  document.body.classList.toggle('lang-en',!ar);
+  $$('[data-en]').forEach(function(el){
+    var v = ar ? el.getAttribute('data-ar') : el.getAttribute('data-en');
+    if(v===null) return;
+    if(el.hasAttribute('data-html')) el.innerHTML=v; else el.textContent=v;
+  });
+  $('#langLbl').textContent = ar ? 'EN' : 'ع';
+  $('#langBtn').setAttribute('aria-label', ar?'Switch to English':'التبديل إلى العربية');
+  document.title = ar ? 'Flowline — أتمتة تشتغل بدلاً عنك' : 'Flowline — automation that actually runs your business';
+  drawFlow();
+  chats.forEach(function(c){ c.relabel(); });
+  try{ localStorage.setItem('fl-lang',lang); }catch(e){}
+}
+function T(o){ return o[lang] || o.en }
+$('#langBtn').addEventListener('click',function(){ setLang(lang==='ar'?'en':'ar'); });
+
+/* ─────────── nav ─────────── */
+var hdr=$('#hdr');
+$('#burger').addEventListener('click',function(){ document.body.classList.toggle('menu'); });
+$$('#nav a').forEach(function(a){ a.addEventListener('click',function(){ document.body.classList.remove('menu'); }); });
+addEventListener('scroll',function(){ hdr.classList.toggle('stuck', scrollY>12); },{passive:true});
+
+/* ─────────── reveal ─────────── */
+var io=new IntersectionObserver(function(es){
+  es.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
+},{threshold:.12,rootMargin:'0px 0px -6% 0px'});
+$$('.rv,.stg').forEach(function(el){ io.observe(el); });
+
+/* ─────────── FAQ ─────────── */
+$$('.faq').forEach(function(f){
+  var q=$('.faq-q',f);
+  q.addEventListener('click',function(){
+    var open=f.classList.toggle('open');
+    q.setAttribute('aria-expanded',open?'true':'false');
+  });
+});
+
+/* ═══════════════════════════════════════════════
+   WORKFLOW DIAGRAMS
+═══════════════════════════════════════════════ */
+var K={trigger:'#f2552c', ai:'#c08bff', act:'#54c07f', logic:'#e8b84b'};
+var FLOWS=[
+ {tab:{en:'Lead capture',ar:'استقبال العملاء'},
+  desc:{en:'A form or a WhatsApp message creates one clean record, enriched and assigned, and the owner hears about it in seconds.',
+        ar:'نموذج أو رسالة واتساب تُنشئ سجلاً واحداً نظيفاً، مُثرى ومُسنَداً، ويصل إشعاره للمسؤول خلال ثوانٍ.'},
+  meta:[[{en:'Trigger',ar:'المُشغِّل'},'Webhook'],[{en:'Steps',ar:'الخطوات'},'6'],[{en:'Runs',ar:'التشغيل'},{en:'on every lead',ar:'مع كل عميل'}],[{en:'Latency',ar:'الزمن'},'~4s']],
+  nodes:[{x:16,y:118,t:{en:'Form / WhatsApp',ar:'نموذج / واتساب'},s:'webhook',k:'trigger'},
+         {x:196,y:118,t:{en:'Clean + enrich',ar:'تنظيف وإثراء'},s:'code · http',k:'logic'},
+         {x:376,y:118,t:{en:'Score the lead',ar:'تقييم العميل'},s:'ai agent',k:'ai'},
+         {x:556,y:44,t:{en:'CRM',ar:'نظام العملاء'},s:'hubspot',k:'act'},
+         {x:556,y:130,t:{en:'Sheet',ar:'جدول'},s:'sheets',k:'act'},
+         {x:556,y:216,t:{en:'Notify owner',ar:'إشعار المسؤول'},s:'whatsapp',k:'act'}],
+  links:[[0,1],[1,2],[2,3],[2,4],[2,5]]},
+
+ {tab:{en:'Invoices',ar:'الفواتير'},
+  desc:{en:'The mailbox is watched, the PDF is read, the numbers are checked against the purchase order, and only mismatches reach a person.',
+        ar:'نراقب البريد، ونقرأ ملف الفاتورة، ونطابق الأرقام مع أمر الشراء، ولا يصل الإنسان إلا ما اختلف.'},
+  meta:[[{en:'Trigger',ar:'المُشغِّل'},'Gmail'],[{en:'Steps',ar:'الخطوات'},'5'],[{en:'Runs',ar:'التشغيل'},{en:'every 10 min',ar:'كل ١٠ دقائق'}],[{en:'Accuracy',ar:'الدقة'},'~98%']],
+  nodes:[{x:16,y:118,t:{en:'New email',ar:'بريد جديد'},s:'gmail',k:'trigger'},
+         {x:196,y:118,t:{en:'Read the PDF',ar:'قراءة الفاتورة'},s:'ocr · ai',k:'ai'},
+         {x:376,y:118,t:{en:'Match the PO',ar:'مطابقة أمر الشراء'},s:'if',k:'logic'},
+         {x:556,y:60,t:{en:'Post to books',ar:'قيد محاسبي'},s:'api',k:'act'},
+         {x:556,y:186,t:{en:'Flag for review',ar:'تنبيه للمراجعة'},s:'slack',k:'act'}],
+  links:[[0,1],[1,2],[2,3],[2,4]]},
+
+ {tab:{en:'WhatsApp support',ar:'دعم واتساب'},
+  desc:{en:'The agent answers from your own catalogue and policies, remembers the conversation, and pulls in a human the moment it should.',
+        ar:'الوكيل يرد من كتالوجك وسياساتك، يتذكر سياق المحادثة، ويستدعي موظفاً في اللحظة التي يجب فيها ذلك.'},
+  meta:[[{en:'Trigger',ar:'المُشغِّل'},'WhatsApp'],[{en:'Memory',ar:'الذاكرة'},'postgres'],[{en:'Knowledge',ar:'المعرفة'},{en:'your docs',ar:'مستنداتك'}],[{en:'Handover',ar:'التحويل'},{en:'yes',ar:'نعم'}]],
+  nodes:[{x:16,y:118,t:{en:'Message in',ar:'رسالة واردة'},s:'whatsapp',k:'trigger'},
+         {x:196,y:118,t:{en:'AI agent',ar:'الوكيل الذكي'},s:'agent + memory',k:'ai'},
+         {x:376,y:44,t:{en:'Search docs',ar:'بحث في المستندات'},s:'vector db',k:'logic'},
+         {x:376,y:196,t:{en:'Check stock',ar:'فحص المخزون'},s:'api',k:'logic'},
+         {x:556,y:118,t:{en:'Reply / escalate',ar:'رد أو تحويل'},s:'whatsapp',k:'act'}],
+  links:[[0,1],[1,2],[1,3],[2,4],[3,4]]},
+
+ {tab:{en:'Daily report',ar:'التقرير اليومي'},
+  desc:{en:'Every morning the numbers are pulled from each system, reconciled, written up in plain language and delivered before the first meeting.',
+        ar:'كل صباح تُسحب الأرقام من كل نظام، وتُطابَق، وتُصاغ بلغة مفهومة، وتصل قبل أول اجتماع.'},
+  meta:[[{en:'Trigger',ar:'المُشغِّل'},'cron 07:00'],[{en:'Sources',ar:'المصادر'},'4'],[{en:'Output',ar:'المخرج'},{en:'slack + pdf',ar:'slack + pdf'}],[{en:'Runtime',ar:'مدة التشغيل'},'~40s']],
+  nodes:[{x:16,y:118,t:{en:'07:00 daily',ar:'٧:٠٠ يومياً'},s:'schedule',k:'trigger'},
+         {x:196,y:44,t:{en:'Sales',ar:'المبيعات'},s:'shopify',k:'logic'},
+         {x:196,y:130,t:{en:'Cash',ar:'النقد'},s:'bank api',k:'logic'},
+         {x:196,y:216,t:{en:'Ads',ar:'الإعلانات'},s:'meta ads',k:'logic'},
+         {x:376,y:130,t:{en:'Write it up',ar:'صياغة التقرير'},s:'ai',k:'ai'},
+         {x:556,y:130,t:{en:'Send to team',ar:'إرسال للفريق'},s:'slack · email',k:'act'}],
+  links:[[0,1],[0,2],[0,3],[1,4],[2,4],[3,4],[4,5]]}
+];
+var NW=150,NH=54,cur=0;
+var svg=$('#flowSvg'), tabsEl=$('#tabs'), sideEl=$('#flowSide');
+
+FLOWS.forEach(function(f,i){
+  var b=document.createElement('button');
+  b.className='tab'+(i===0?' on':''); b.type='button'; b.setAttribute('role','tab');
+  b.setAttribute('data-en',f.tab.en); b.setAttribute('data-ar',f.tab.ar);
+  b.textContent=f.tab.ar;
+  b.addEventListener('click',function(){ cur=i; $$('.tab',tabsEl).forEach(function(t,j){t.classList.toggle('on',j===i)}); drawFlow(); });
+  tabsEl.appendChild(b);
+});
+
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function drawFlow(){
+  var f=FLOWS[cur], out='';
+  f.links.forEach(function(l){
+    var a=f.nodes[l[0]], b=f.nodes[l[1]];
+    var x1=a.x+NW, y1=a.y+NH/2, x2=b.x, y2=b.y+NH/2, mx=(x1+x2)/2;
+    var d='M'+x1+' '+y1+'C'+mx+' '+y1+' '+mx+' '+y2+' '+x2+' '+y2;
+    out+='<path class="wire" d="'+d+'"/><path class="wire-run" d="'+d+'"/>';
+  });
+  f.nodes.forEach(function(n){
+    var c=K[n.k];
+    out+='<g>'
+      +'<rect class="nd" x="'+n.x+'" y="'+n.y+'" width="'+NW+'" height="'+NH+'" rx="9"/>'
+      +'<rect x="'+(n.x+1)+'" y="'+(n.y+10)+'" width="4" height="'+(NH-20)+'" rx="2" fill="'+c+'"/>'
+      +'<text class="nd-t" x="'+(n.x+14)+'" y="'+(n.y+23)+'">'+esc(T(n.t))+'</text>'
+      +'<text class="nd-s" x="'+(n.x+14)+'" y="'+(n.y+39)+'">'+esc(n.s)+'</text>'
+      +'<circle class="port" cx="'+n.x+'" cy="'+(n.y+NH/2)+'" r="4"/>'
+      +'<circle class="port" cx="'+(n.x+NW)+'" cy="'+(n.y+NH/2)+'" r="4"/>'
+      +'</g>';
+  });
+  svg.innerHTML=out;
+  sideEl.innerHTML='<div class="k">'+(lang==='ar'?'ماذا يفعل':'WHAT IT DOES')+'</div>'
+    +'<p>'+esc(T(f.desc))+'</p>'
+    +'<div class="kv">'+f.meta.map(function(m){
+        var v = typeof m[1]==='string' ? m[1] : T(m[1]);
+        return '<div><span>'+esc(T(m[0]))+'</span><span>'+esc(v)+'</span></div>';
+      }).join('')+'</div>';
+}
+
+/* ═══════════════════════════════════════════════
+   CHAT — demo script until N8N_WEBHOOK_URL is set
+═══════════════════════════════════════════════ */
+var SCRIPT=[
+ {k:/(سعر|أسعار|تكلف|كم يكلف|كام|price|cost|how much|budget)/i,
+  a:{ar:'الباقات ثلاث:\n\n• البداية — 450$ لسير عمل واحد، جاهز خلال ٧ أيام.\n• الأعمال — 1,800$ حتى خمسة مسارات مع وكيل ذكي، خلال ٣ أسابيع.\n• المتابعة — 400$ شهرياً للاستضافة والمراقبة والتعديلات.\n\nأي واحدة أقرب لحالتك؟',
+      en:'Three packages:\n\n• Starter — $450 for one workflow, live in 7 days.\n• Business — $1,800 for up to five workflows plus an agent, in 3 weeks.\n• Retainer — $400/month for hosting, monitoring and changes.\n\nWhich one sounds closest to your case?'}},
+ {k:/(كم يستغرق|مدة|وقت|متى|how long|timeline|when|duration)/i,
+  a:{ar:'سير عمل واحد يعمل عادة خلال أسبوع من مكالمة البداية. الحزمة الكاملة مع وكيل ذكي ومراقبة تستغرق أسبوعين إلى ثلاثة.',
+      en:'A single workflow is usually live within a week of the kickoff call. A full set with an agent and monitoring takes two to three weeks.'}},
+ {k:/(بيانات|خصوصية|أمان|سيرفر|خادم|استضاف|data|privacy|secure|server|host|gdpr)/i,
+  a:{ar:'كل شيء يعمل على خادمك أنت — نُنصّب n8n هناك ولا نحتفظ بنسخة من بياناتك. وإن استُخدم نموذج ذكي، لا يُرسل إليه إلا النص اللازم لتلك الخطوة تحديداً.',
+      en:'Everything runs on your own server — we deploy n8n there and keep no copy of your data. If an AI model is used, only the text that step needs is sent to it.'}},
+ {k:/(واتساب|whatsapp|تيليجرام|telegram|قناة|channel)/i,
+  a:{ar:'نعم — نربط البوت بواتساب الأعمال وتيليجرام وودجت الموقع، بنفس الوكيل ونفس الذاكرة، فيتذكر العميل عبر القنوات.',
+      en:'Yes — the bot connects to WhatsApp Business, Telegram and the website widget, with the same agent and the same memory, so it remembers a customer across channels.'}},
+ {k:/(ربط|تكامل|أدوات|integrat|connect|tools|shopify|salla|hubspot|sheets|crm)/i,
+  a:{ar:'نربط مع أكثر من ٤٠٠ أداة عبر n8n — واتساب، جداول جوجل، Slack، Notion، HubSpot، Shopify، سلة، Stripe، قواعد البيانات، وأي API يملك توثيقاً. ما الأدوات التي تستخدمها؟',
+      en:'Over 400 tools through n8n — WhatsApp, Google Sheets, Slack, Notion, HubSpot, Shopify, Salla, Stripe, databases, and any API with docs. Which tools are you on?'}},
+ {k:/(n8n|أتمتة|automat|workflow|سير عمل)/i,
+  a:{ar:'n8n منصة أتمتة مفتوحة المصدر — تبني فيها سير العمل كعُقد متصلة، وتستضيفها بنفسك. نحن نصمّم المسار ونبنيه ونشغّله على خادمك، وتبقى ملكيته لك بالكامل.',
+      en:'n8n is an open-source automation platform — you build workflows as connected nodes and host it yourself. We design, build and run the flow on your server, and you keep full ownership.'}},
+ {k:/(مرحبا|السلام|أهلا|هلا|hi|hello|hey|salam)/i,
+  a:{ar:'أهلاً بك 👋 أنا وكيل Flowline. اسألني عن الأسعار أو المدة أو ما يمكن ربطه — أو صف لي مهمة تكررها يدوياً وسأخبرك إن كانت تستحق الأتمتة.',
+      en:'Hi 👋 I am the Flowline agent. Ask me about pricing, timelines or what we can connect — or describe a task you keep doing by hand and I will tell you whether it is worth automating.'}},
+ {k:/(شكرا|مشكور|thanks|thank you)/i,
+  a:{ar:'العفو 🙏 إن أحببت، احجز مكالمة عشرين دقيقة ونرسم لك المسار على الشاشة مباشرة.',
+      en:'Any time 🙏 If you like, book a twenty-minute call and we will sketch the flow with you on screen.'}}
+];
+var FALLBACK={
+  ar:'سؤال جيد — هذه نسخة تجريبية من الوكيل، وردودها محدودة حتى يُربط بـ n8n.\n\nجرّب أن تسألني عن: الأسعار · المدة · الأدوات التي نربطها · أمان البيانات · واتساب.',
+  en:'Good question — this is the demo version of the agent, with limited answers until it is wired to n8n.\n\nTry asking about: pricing · timelines · integrations · data security · WhatsApp.'};
+var SUGS=[{ar:'كم تكلف الأتمتة؟',en:'How much does it cost?'},
+          {ar:'كم يستغرق التنفيذ؟',en:'How long does it take?'},
+          {ar:'أين تُخزَّن بياناتي؟',en:'Where does my data live?'},
+          {ar:'هل تربطون واتساب؟',en:'Do you connect WhatsApp?'}];
+
+function reply(text){
+  for(var i=0;i<SCRIPT.length;i++) if(SCRIPT[i].k.test(text)) return T(SCRIPT[i].a);
+  return T(FALLBACK);
+}
+
+var chats=[];
+function makeChat(host,withClose){
+  var el=document.createElement('div');
+  el.className='chat';
+  el.innerHTML=
+   '<div class="chat-top">'
+   +'<svg class="chat-av" viewBox="0 0 32 32"><rect width="32" height="32" rx="9" fill="#1e1e20"/><ellipse cx="16" cy="18" rx="7.5" ry="7" fill="#f2552c"/><circle cx="13.2" cy="17.2" r="1.5" fill="#0a0a0b"/><circle cx="18.8" cy="17.2" r="1.5" fill="#0a0a0b"/><path d="M16 11V8" stroke="#f2552c" stroke-width="1.6" stroke-linecap="round"/><circle cx="16" cy="6.8" r="1.5" fill="#f2552c"/></svg>'
+   +'<div><b class="nm"></b><span class="st"><i></i><em class="sx"></em></span></div>'
+   +(withClose?'<button class="chat-x" aria-label="Close"><svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12" stroke-linecap="round"/></svg></button>':'')
+   +'</div>'
+   +'<div class="log" role="log" aria-live="polite"></div>'
+   +'<div class="sug"></div>'
+   +'<div class="chat-in"><input type="text" autocomplete="off"><button class="send" aria-label="Send"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>';
+  host.appendChild(el);
+
+  var log=$('.log',el), input=$('input',el), sug=$('.sug',el),
+      st=$('.st',el), sx=$('.sx',el), nm=$('.nm',el), busy=false, greeted=false;
+
+  function add(cls,txt){
+    var d=document.createElement('div'); d.className='msg '+cls; d.textContent=txt;
+    log.appendChild(d); log.scrollTop=log.scrollHeight; return d;
+  }
+  function dots(){
+    var d=document.createElement('div'); d.className='dotting';
+    d.innerHTML='<i></i><i></i><i></i>'; log.appendChild(d); log.scrollTop=log.scrollHeight; return d;
+  }
+  function send(txt){
+    txt=(txt||'').trim(); if(!txt||busy) return;
+    add('me',txt); input.value=''; busy=true; sug.innerHTML='';
+    var d=dots();
+    if(N8N_WEBHOOK_URL){
+      fetch(N8N_WEBHOOK_URL,{
+        method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({chatInput:txt,sessionId:SID,action:'sendMessage',lang:lang})
+      })
+      .then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
+      .then(function(j){
+        d.remove(); busy=false;
+        add('bot', j.output || j.text || j.message || T(FALLBACK));
+      })
+      .catch(function(err){
+        d.remove(); busy=false;
+        add('warn', (lang==='ar'?'تعذّر الوصول إلى n8n — ':'Could not reach n8n — ')+err.message);
+      });
+    } else {
+      setTimeout(function(){
+        d.remove(); busy=false; add('bot',reply(txt)); fillSugs(); log.scrollTop=log.scrollHeight;
+      }, 460+Math.random()*420);
+    }
+  }
+  function fillSugs(){
+    sug.innerHTML='';
+    SUGS.forEach(function(s){
+      var b=document.createElement('button'); b.type='button'; b.textContent=T(s);
+      b.addEventListener('click',function(){ send(T(s)); });
+      sug.appendChild(b);
+    });
+  }
+  $('.send',el).addEventListener('click',function(){ send(input.value); });
+  input.addEventListener('keydown',function(e){ if(e.key==='Enter') send(input.value); });
+  if(withClose) $('.chat-x',el).addEventListener('click',function(){ document.body.classList.remove('dock'); });
+
+  var api={
+    el:el,
+    focus:function(){ input.focus(); },
+    greet:function(){
+      if(greeted) return; greeted=true;
+      add('bot', lang==='ar'
+        ? 'أهلاً 👋 أنا وكيل Flowline. اسألني عن الأسعار أو المدة أو ما يمكن ربطه بأدواتك.'
+        : 'Hi 👋 I am the Flowline agent. Ask me about pricing, timelines, or what we can connect to your tools.');
+      fillSugs();
+    },
+    relabel:function(){
+      nm.textContent = lang==='ar' ? 'وكيل Flowline' : 'Flowline agent';
+      input.placeholder = lang==='ar' ? 'اكتب سؤالك…' : 'Ask something…';
+      sx.textContent = N8N_WEBHOOK_URL
+        ? (lang==='ar'?'متصل بـ n8n':'connected to n8n')
+        : (lang==='ar'?'وضع تجريبي':'demo mode');
+      st.classList.toggle('demo', !N8N_WEBHOOK_URL);
+      if(sug.children.length) fillSugs();
+    }
+  };
+  api.relabel();
+  chats.push(api);
+  return api;
+}
+
+var mainChat=makeChat($('#chat-main'),false);
+var dockChat=makeChat($('#dockPanel'),true);
+new IntersectionObserver(function(es){
+  if(es[0].isIntersecting){ mainChat.greet(); }
+},{threshold:.3}).observe($('#chat-main'));
+
+$('#dock').addEventListener('click',function(){
+  var open=document.body.classList.toggle('dock');
+  if(open){ dockChat.greet(); setTimeout(dockChat.focus,320); }
+});
+function toBot(){
+  $('#bot').scrollIntoView({behavior:REDUCED?'auto':'smooth',block:'center'});
+  mainChat.greet();
+  setTimeout(function(){ mainChat.focus(); }, REDUCED?0:700);
+}
+$('#heroTry').addEventListener('click',toBot);
+$('#ctaTry').addEventListener('click',toBot);
+addEventListener('keydown',function(e){ if(e.key==='Escape') document.body.classList.remove('dock','menu'); });
+
+/* ─────────── init ─────────── */
+var saved=null; try{ saved=localStorage.getItem('fl-lang'); }catch(e){}
+setLang(saved==='en'?'en':'ar');
+})();
+</script>
+</body>
+</html>
