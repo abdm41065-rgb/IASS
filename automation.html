@@ -403,7 +403,10 @@ body.lang-ar .say figcaption span{font-family:var(--ar);font-size:.82rem}
    CHAT
 ═══════════════════════════════════════════════ */
 .chat{display:flex;flex-direction:column;background:var(--ink);border:1px solid var(--line);border-radius:14px;overflow:hidden}
-#chat-main .chat{height:clamp(460px,62vh,580px)}
+/* the inline panel follows its transcript instead of holding a fixed box,
+   so an empty conversation is short and a long one caps and scrolls */
+#chat-main .chat{height:auto}
+#chat-main .log{flex:1 1 auto;min-height:92px;max-height:clamp(280px,44vh,420px)}
 .chat-top{display:flex;align-items:center;gap:11px;padding:13px 16px;border-bottom:1px solid var(--line);background:var(--ink2);flex:none}
 .chat-av{width:32px;height:32px;flex:none}
 .chat-top b{font-size:.93rem;font-weight:600;display:block;line-height:1.35}
