@@ -173,27 +173,31 @@ body.lang-ar .hd-stat{font-family:var(--ar);font-size:.78rem}
 .lang-seg button.on{color:#fff;background:var(--acc)}
 .brand{display:flex;align-items:center;gap:9px;font-family:var(--mono);font-weight:600;font-size:.98rem;letter-spacing:-.01em}
 .brand .mk{width:25px;height:21px;flex:none}
-nav.top{display:flex;align-items:center;gap:clamp(12px,2vw,30px)}
+nav.top{
+  display:flex;align-items:center;gap:2px;
+  background:rgba(255,255,255,.035);
+  border:1px solid var(--line);
+  border-radius:999px;
+  padding:4px 6px;
+  backdrop-filter:blur(10px);
+}
 nav.top a{
   position:relative;font-family:var(--mono);font-size:.85rem;color:var(--grey);
-  padding:5px 0;transition:color .22s;
+  padding:8px 13px;border-radius:999px;white-space:nowrap;
+  transition:color .22s,background .22s;
 }
-nav.top a::after{
-  content:'';position:absolute;bottom:-2px;inset-inline-start:0;height:1.5px;width:0;
-  background:var(--acc);border-radius:2px;transition:width .32s var(--ease);
-}
-nav.top a:hover{color:var(--white)}
-nav.top a:hover::after{width:100%}
-nav.top a.on{color:var(--acc)}
-nav.top a.on::after{width:100%}
+nav.top a:hover{color:var(--white);background:rgba(255,255,255,.055)}
+nav.top a.on{color:#fff;background:var(--acc)}
 
 /* quick links — icon + label, the reference's nav pattern */
-.nav-sep{width:1px;height:15px;background:var(--line);flex:none;margin-inline:3px}
+.nav-sep{width:1px;height:16px;background:var(--line);flex:none;margin-inline:5px}
 .qk{
   display:inline-flex;align-items:center;gap:6px;flex:none;
   font-family:var(--mono);font-size:.85rem;color:var(--grey);
-  background:none;border:0;padding:5px 0;cursor:pointer;transition:color .22s;
+  background:none;border:0;padding:8px 12px;border-radius:999px;
+  cursor:pointer;transition:color .22s,background .22s;
 }
+.qk:hover{background:rgba(255,255,255,.055)}
 body.lang-ar .qk{font-family:var(--ar)}
 .qk svg{width:14px;height:14px;flex:none;stroke:currentColor;fill:none;stroke-width:1.8;opacity:.7;transition:opacity .22s}
 .qk svg.fill{fill:currentColor;stroke:none}
@@ -201,7 +205,7 @@ body.lang-ar .qk{font-family:var(--ar)}
 .qk:hover svg{opacity:1}
 @media(max-width:920px){
   .nav-sep{display:none}
-  .qk{width:100%;justify-content:flex-start;padding:14px 0;border-bottom:1px solid var(--line);font-size:.95rem}
+  .qk{width:100%;justify-content:flex-start;padding:14px 0;border-radius:0;border-bottom:1px solid var(--line);font-size:.95rem}
   .qk svg{width:16px;height:16px}
 }
 .hd-r{display:flex;align-items:center;gap:10px}
@@ -220,11 +224,13 @@ body.menu .burger i:nth-child(3){transform:translateY(-5.75px) rotate(-45deg)}
 @media(max-width:920px){
   nav.top{
     position:fixed;inset:var(--nav) 0 auto 0;flex-direction:column;align-items:stretch;gap:0;
-    background:var(--black);border-bottom:1px solid var(--line);padding:4px var(--pad) 16px;
+    background:var(--black);border:0;border-bottom:1px solid var(--line);border-radius:0;
+    padding:4px var(--pad) 16px;backdrop-filter:none;
     clip-path:inset(0 0 100% 0);transition:clip-path .45s var(--ease);
   }
   body.menu nav.top{clip-path:inset(0 0 0 0)}
-  nav.top a{padding:14px 0;border-bottom:1px solid var(--line);font-size:.95rem}
+  nav.top a{padding:14px 0;border-radius:0;border-bottom:1px solid var(--line);font-size:.95rem}
+  nav.top a.on{background:none;color:var(--acc)}
   .burger{display:block}
   .hd-cta{display:none}
 }
