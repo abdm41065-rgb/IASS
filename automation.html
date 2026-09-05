@@ -281,7 +281,7 @@ body.lang-ar .nd-t{font-family:'IBM Plex Sans Arabic',sans-serif;font-size:12.5p
    CHAT
 ═══════════════════════════════════════════════ */
 .chat{display:flex;flex-direction:column;background:var(--ink);border:1px solid var(--line);border-radius:14px;overflow:hidden}
-#chat-main .chat{height:clamp(430px,58vh,540px)}
+#chat-main .chat{height:clamp(460px,62vh,580px)}
 .chat-top{display:flex;align-items:center;gap:11px;padding:13px 16px;border-bottom:1px solid var(--line);background:var(--ink2);flex:none}
 .chat-av{width:32px;height:32px;flex:none}
 .chat-top b{font-size:.93rem;font-weight:600;display:block;line-height:1.35}
@@ -316,6 +316,25 @@ body.lang-ar .nd-t{font-family:'IBM Plex Sans Arabic',sans-serif;font-size:12.5p
 .chat-in .send svg{width:17px;height:17px;stroke:#fff;fill:none;stroke-width:2}
 [dir=rtl] .chat-in .send svg{transform:scaleX(-1)}
 
+/* playground */
+.play{display:grid;grid-template-columns:.85fr 1.15fr;gap:clamp(14px,1.8vw,22px);align-items:start}
+@media(max-width:900px){.play{grid-template-columns:1fr}}
+.bot-list{display:grid;gap:9px}
+.bot-opt{
+  text-align:start;background:var(--ink);border:1px solid var(--line);border-radius:12px;
+  padding:15px 17px;cursor:pointer;color:inherit;display:grid;gap:5px;
+  transition:border-color .24s,background .24s,transform .24s var(--ease);
+}
+.bot-opt:hover{border-color:var(--line2);background:var(--ink2)}
+.bot-opt.on{border-color:var(--acc);background:linear-gradient(180deg,var(--acc-dim),transparent 70%),var(--ink)}
+.bot-opt b{font-size:.98rem;font-weight:600;display:flex;align-items:center;gap:9px}
+body.lang-ar .bot-opt b{font-weight:500}
+.bot-opt b i{width:7px;height:7px;border-radius:50%;background:var(--grey2);flex:none;transition:background .24s}
+.bot-opt.on b i{background:var(--acc)}
+.bot-opt p{font-size:.87rem;color:var(--grey);line-height:1.6}
+.bot-opt .ch{font-family:var(--mono);font-size:.68rem;color:var(--grey2);letter-spacing:.04em}
+body.lang-ar .bot-opt .ch{font-family:var(--ar);letter-spacing:0;font-size:.78rem}
+
 /* floating dock */
 #dock{
   position:fixed;inset-block-end:22px;inset-inline-end:22px;z-index:500;
@@ -344,23 +363,6 @@ body.dock #dockPanel{opacity:1;transform:none;pointer-events:auto}
 /* ═══════════════════════════════════════════════
    PRICING · FAQ · CTA · FOOTER
 ═══════════════════════════════════════════════ */
-.plan{display:flex;flex-direction:column;gap:16px;position:relative}
-.plan.hi{border-color:rgba(47,134,255,.5);background:linear-gradient(180deg,var(--acc-dim),transparent 44%),var(--ink)}
-.plan .price{font-family:var(--mono);font-size:1.9rem;font-weight:500;line-height:1.1;unicode-bidi:isolate}
-.plan .price small{font-size:.76rem;color:var(--grey2);font-weight:400;display:block;margin-top:5px;letter-spacing:.02em}
-.plan ul{list-style:none;display:grid;gap:9px}
-.plan li{display:flex;gap:9px;font-size:.9rem;color:var(--grey);line-height:1.65}
-.plan li::before{
-  content:'';flex:none;width:14px;height:14px;margin-top:5px;border-radius:4px;background:var(--acc-dim);
-  background-image:url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%232f86ff' stroke-width='3.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6L9 17l-5-5'/%3E%3C/svg%3E");
-  background-size:10px;background-position:center;background-repeat:no-repeat;
-}
-.plan .btn{margin-top:auto}
-.badge{
-  position:absolute;top:0;inset-inline-end:18px;transform:translateY(-50%);
-  font-family:var(--mono);font-size:.63rem;letter-spacing:.12em;text-transform:uppercase;
-  background:var(--acc);color:#fff;padding:4px 11px;border-radius:99px;
-}
 .faq{border-top:1px solid var(--line)}
 .faq:last-of-type{border-bottom:1px solid var(--line)}
 .faq-q{
@@ -423,8 +425,7 @@ footer{border-top:1px solid var(--line);padding-block:clamp(38px,5vw,58px) 26px;
     <a href="#examples" data-en="Examples" data-ar="أمثلة">أمثلة</a>
     <a href="#services" data-en="Services" data-ar="الخدمات">الخدمات</a>
     <a href="#how" data-en="How it works" data-ar="كيف نشتغل">كيف نشتغل</a>
-    <a href="#bot" data-en="The bot" data-ar="البوت">البوت</a>
-    <a href="#pricing" data-en="Pricing" data-ar="الباقات">الباقات</a>
+    <a href="#bot" data-en="Try the bots" data-ar="جرّب البوتات">جرّب البوتات</a>
     <a href="#faq" data-en="FAQ" data-ar="أسئلة">أسئلة</a>
   </nav>
   <div class="hd-r">
@@ -465,7 +466,7 @@ footer{border-top:1px solid var(--line);padding-block:clamp(38px,5vw,58px) 26px;
     <p class="hero-note" data-en="The longer it runs, the less you touch it." data-ar="كلما طال تشغيلها، قلّ تدخلك فيها.">كلما طال تشغيلها، قلّ تدخلك فيها.</p>
     <p class="hero-chant" data-en="Your data. Your server. Your workflows. Your rules." data-ar="بياناتك. خادمك. سير عملك. قواعدك.">بياناتك. خادمك. سير عملك. قواعدك.</p>
     <div class="hero-btns">
-      <button class="btn btn-p" id="heroTry" data-en="Try the bot" data-ar="جرّب البوت">جرّب البوت</button>
+      <button class="btn btn-p" id="heroTry" data-en="Try the bots" data-ar="جرّب البوتات">جرّب البوتات</button>
       <a href="#contact" class="btn btn-g" data-en="Book a call" data-ar="احجز مكالمة">احجز مكالمة</a>
     </div>
   </div>
@@ -576,72 +577,18 @@ footer{border-top:1px solid var(--line);padding-block:clamp(38px,5vw,58px) 26px;
 <!-- ═════════ BOT ═════════ -->
 <section id="bot">
   <div class="wrap">
-    <div class="grid g2" style="gap:clamp(24px,4vw,54px);align-items:center">
-      <div class="rv">
-        <div class="eyebrow" data-en="THE AGENT" data-ar="الوكيل الذكي">الوكيل الذكي</div>
-        <h2 class="h2" style="margin:16px 0 18px" data-html
-            data-en="Talk to it. It is the &lt;span class='em'&gt;same&lt;/span&gt; bot we ship." data-ar="كلّمه. هو &lt;span class='em'&gt;نفس&lt;/span&gt; البوت الذي نسلّمه.">كلّمه. هو <span class="em">نفس</span> البوت الذي نسلّمه.</h2>
-        <p class="lede" data-en="Ask about pricing, timelines, what we can connect, or what happens to your data. It answers in the language you write in." data-ar="اسأل عن الأسعار أو المدة أو ما يمكن ربطه أو ما يحدث لبياناتك. يرد باللغة التي تكتب بها.">اسأل عن الأسعار أو المدة أو ما يمكن ربطه أو ما يحدث لبياناتك. يرد باللغة التي تكتب بها.</p>
-        <div class="kv" style="margin-top:26px;max-width:420px">
-          <div><span data-en="Runs on" data-ar="يعمل على">يعمل على</span><span>n8n · AI Agent</span></div>
-          <div><span data-en="Channels" data-ar="القنوات">القنوات</span><span data-en="Web · WhatsApp · Telegram" data-ar="الموقع · واتساب · تيليجرام">الموقع · واتساب · تيليجرام</span></div>
-          <div><span data-en="Languages" data-ar="اللغات">اللغات</span><span data-en="Arabic · English" data-ar="العربية · الإنجليزية">العربية · الإنجليزية</span></div>
-          <div><span data-en="Handover" data-ar="التحويل">التحويل</span><span data-en="to a human, any time" data-ar="إلى موظف، في أي وقت">إلى موظف، في أي وقت</span></div>
-        </div>
-      </div>
-      <div class="rv" id="chat-main"></div>
+    <div class="head rv">
+      <div class="eyebrow" data-en="BOT PLAYGROUND" data-ar="مختبر البوتات">مختبر البوتات</div>
+      <h2 class="h2" data-html data-en="Five bots. &lt;span class='em'&gt;Try&lt;/span&gt; every one." data-ar="خمسة بوتات. &lt;span class='em'&gt;جرّبها&lt;/span&gt; كلها.">خمسة بوتات. <span class="em">جرّبها</span> كلها.</h2>
+      <p class="lede" data-en="Pick a job on the left and talk to the bot that does it. Same engine, different knowledge and tools — which is exactly how yours would be built." data-ar="اختر مهمة من القائمة وكلّم البوت الذي ينفذها. المحرك واحد، والمعرفة والأدوات تختلف — وهكذا تماماً سيُبنى بوتك.">اختر مهمة من القائمة وكلّم البوت الذي ينفذها. المحرك واحد، والمعرفة والأدوات تختلف — وهكذا تماماً سيُبنى بوتك.</p>
+    </div>
+    <div class="play rv">
+      <div class="bot-list" id="botList" role="tablist"></div>
+      <div id="chat-main"></div>
     </div>
   </div>
 </section>
 
-<!-- ═════════ PRICING ═════════ -->
-<section id="pricing">
-  <div class="wrap">
-    <div class="head rv">
-      <div class="eyebrow" data-en="PRICING" data-ar="الباقات">الباقات</div>
-      <h2 class="h2" data-en="Priced per workflow, not per seat." data-ar="السعر على سير العمل، لا على المستخدم.">السعر على سير العمل، لا على المستخدم.</h2>
-      <p class="lede" data-en="One-off build, then an optional monthly retainer for hosting, monitoring and changes." data-ar="بناء لمرة واحدة، ثم اشتراك شهري اختياري للاستضافة والمراقبة والتعديلات.">بناء لمرة واحدة، ثم اشتراك شهري اختياري للاستضافة والمراقبة والتعديلات.</p>
-    </div>
-    <div class="grid g3 stg">
-      <article class="card plan">
-        <div><div class="eyebrow" style="color:var(--grey2)" data-en="STARTER" data-ar="البداية">البداية</div>
-        <div class="price" style="margin-top:12px">$450 <small data-en="one workflow · 7 days" data-ar="سير عمل واحد · ٧ أيام">سير عمل واحد · ٧ أيام</small></div></div>
-        <ul>
-          <li data-en="One workflow, up to 8 steps" data-ar="سير عمل واحد حتى ٨ خطوات">سير عمل واحد حتى ٨ خطوات</li>
-          <li data-en="Two integrations" data-ar="ربط أداتين">ربط أداتين</li>
-          <li data-en="Deployed on your n8n" data-ar="تنصيب على n8n الخاص بك">تنصيب على n8n الخاص بك</li>
-          <li data-en="Handover documentation" data-ar="توثيق التسليم">توثيق التسليم</li>
-        </ul>
-        <a href="#contact" class="btn btn-g" data-en="Start here" data-ar="ابدأ من هنا">ابدأ من هنا</a>
-      </article>
-      <article class="card plan hi">
-        <span class="badge" data-en="Most picked" data-ar="الأكثر طلباً">الأكثر طلباً</span>
-        <div><div class="eyebrow" data-en="BUSINESS" data-ar="الأعمال">الأعمال</div>
-        <div class="price" style="margin-top:12px">$1,800 <small data-en="up to 5 workflows · 3 weeks" data-ar="حتى ٥ مسارات · ٣ أسابيع">حتى ٥ مسارات · ٣ أسابيع</small></div></div>
-        <ul>
-          <li data-en="Up to five workflows" data-ar="حتى خمسة مسارات">حتى خمسة مسارات</li>
-          <li data-en="AI agent on one channel" data-ar="وكيل ذكي على قناة واحدة">وكيل ذكي على قناة واحدة</li>
-          <li data-en="Server setup, backups, alerts" data-ar="إعداد الخادم والنسخ والتنبيهات">إعداد الخادم والنسخ والتنبيهات</li>
-          <li data-en="Team training session" data-ar="جلسة تدريب للفريق">جلسة تدريب للفريق</li>
-          <li data-en="30 days of fixes included" data-ar="٣٠ يوم إصلاحات مشمولة">٣٠ يوم إصلاحات مشمولة</li>
-        </ul>
-        <a href="#contact" class="btn btn-p" data-en="Book a call" data-ar="احجز مكالمة">احجز مكالمة</a>
-      </article>
-      <article class="card plan">
-        <div><div class="eyebrow" style="color:var(--grey2)" data-en="RETAINER" data-ar="المتابعة">المتابعة</div>
-        <div class="price" style="margin-top:12px">$400<small data-en="per month · cancel any time" data-ar="شهرياً · إلغاء في أي وقت">شهرياً · إلغاء في أي وقت</small></div></div>
-        <ul>
-          <li data-en="Hosting and monitoring" data-ar="استضافة ومراقبة">استضافة ومراقبة</li>
-          <li data-en="Failed runs fixed same day" data-ar="إصلاح التشغيلات الفاشلة في اليوم نفسه">إصلاح التشغيلات الفاشلة في اليوم نفسه</li>
-          <li data-en="Two changes a month" data-ar="تعديلان شهرياً">تعديلان شهرياً</li>
-          <li data-en="Priority WhatsApp support" data-ar="دعم واتساب ذو أولوية">دعم واتساب ذو أولوية</li>
-        </ul>
-        <a href="#contact" class="btn btn-g" data-en="Add it later" data-ar="أضفها لاحقاً">أضفها لاحقاً</a>
-      </article>
-    </div>
-    <p class="mono dim rv" style="margin-top:20px" data-en="Prices are placeholders for this template — change them in the file." data-ar="الأسعار هنا نموذجية لهذا القالب — عدّلها في الملف.">الأسعار هنا نموذجية لهذا القالب — عدّلها في الملف.</p>
-  </div>
-</section>
 
 <!-- ═════════ FAQ ═════════ -->
 <section id="faq">
@@ -685,8 +632,7 @@ footer{border-top:1px solid var(--line);padding-block:clamp(38px,5vw,58px) 26px;
       </div>
       <div><h4 data-en="Explore" data-ar="تصفّح">تصفّح</h4>
         <a href="#examples" data-en="Examples" data-ar="أمثلة">أمثلة</a>
-        <a href="#services" data-en="Services" data-ar="الخدمات">الخدمات</a>
-        <a href="#pricing" data-en="Pricing" data-ar="الباقات">الباقات</a></div>
+        <a href="#services" data-en="Services" data-ar="الخدمات">الخدمات</a></div>
       <div><h4 data-en="Contact" data-ar="تواصل">تواصل</h4>
         <a href="mailto:hello@flowline.example">hello@flowline.example</a>
         <a href="#bot" data-en="Chat with the bot" data-ar="محادثة البوت">محادثة البوت</a></div>
@@ -745,6 +691,7 @@ function setLang(next){
   document.title = ar ? 'Flowline — أتمتة تشتغل بدلاً عنك' : 'Flowline — automation that actually runs your business';
   drawFlow();
   chats.forEach(function(c){ c.relabel(); });
+  if(typeof paintBots==='function') paintBots();
   try{ localStorage.setItem('fl-lang',lang); }catch(e){}
 }
 function T(o){ return o[lang] || o.en }
@@ -865,49 +812,143 @@ function drawFlow(){
 }
 
 /* ═══════════════════════════════════════════════
-   CHAT — demo script until N8N_WEBHOOK_URL is set
+   THE BOTS
+   Each entry is one bot you can sell. Give it its own
+   `webhook` (an n8n Chat Trigger production URL) and that
+   bot goes live on its own; leave it empty and it answers
+   from the demo script below.
+   لكل بوت رابط webhook خاص به. املأه ليعمل حقيقياً،
+   واتركه فارغاً ليرد من النص التجريبي.
 ═══════════════════════════════════════════════ */
-var SCRIPT=[
- {k:/(سعر|أسعار|تكلف|كم يكلف|كام|price|cost|how much|budget)/i,
-  a:{ar:'الباقات ثلاث:\n\n• البداية — 450$ لسير عمل واحد، جاهز خلال ٧ أيام.\n• الأعمال — 1,800$ حتى خمسة مسارات مع وكيل ذكي، خلال ٣ أسابيع.\n• المتابعة — 400$ شهرياً للاستضافة والمراقبة والتعديلات.\n\nأي واحدة أقرب لحالتك؟',
-      en:'Three packages:\n\n• Starter — $450 for one workflow, live in 7 days.\n• Business — $1,800 for up to five workflows plus an agent, in 3 weeks.\n• Retainer — $400/month for hosting, monitoring and changes.\n\nWhich one sounds closest to your case?'}},
- {k:/(كم يستغرق|مدة|وقت|متى|how long|timeline|when|duration)/i,
-  a:{ar:'سير عمل واحد يعمل عادة خلال أسبوع من مكالمة البداية. الحزمة الكاملة مع وكيل ذكي ومراقبة تستغرق أسبوعين إلى ثلاثة.',
-      en:'A single workflow is usually live within a week of the kickoff call. A full set with an agent and monitoring takes two to three weeks.'}},
- {k:/(بيانات|خصوصية|أمان|سيرفر|خادم|استضاف|data|privacy|secure|server|host|gdpr)/i,
-  a:{ar:'كل شيء يعمل على خادمك أنت — نُنصّب n8n هناك ولا نحتفظ بنسخة من بياناتك. وإن استُخدم نموذج ذكي، لا يُرسل إليه إلا النص اللازم لتلك الخطوة تحديداً.',
-      en:'Everything runs on your own server — we deploy n8n there and keep no copy of your data. If an AI model is used, only the text that step needs is sent to it.'}},
- {k:/(واتساب|whatsapp|تيليجرام|telegram|قناة|channel)/i,
-  a:{ar:'نعم — نربط البوت بواتساب الأعمال وتيليجرام وودجت الموقع، بنفس الوكيل ونفس الذاكرة، فيتذكر العميل عبر القنوات.',
-      en:'Yes — the bot connects to WhatsApp Business, Telegram and the website widget, with the same agent and the same memory, so it remembers a customer across channels.'}},
- {k:/(ربط|تكامل|أدوات|integrat|connect|tools|shopify|salla|hubspot|sheets|crm)/i,
-  a:{ar:'نربط مع أكثر من ٤٠٠ أداة عبر n8n — واتساب، جداول جوجل، Slack، Notion، HubSpot، Shopify، سلة، Stripe، قواعد البيانات، وأي API يملك توثيقاً. ما الأدوات التي تستخدمها؟',
-      en:'Over 400 tools through n8n — WhatsApp, Google Sheets, Slack, Notion, HubSpot, Shopify, Salla, Stripe, databases, and any API with docs. Which tools are you on?'}},
- {k:/(n8n|أتمتة|automat|workflow|سير عمل)/i,
-  a:{ar:'n8n منصة أتمتة مفتوحة المصدر — تبني فيها سير العمل كعُقد متصلة، وتستضيفها بنفسك. نحن نصمّم المسار ونبنيه ونشغّله على خادمك، وتبقى ملكيته لك بالكامل.',
-      en:'n8n is an open-source automation platform — you build workflows as connected nodes and host it yourself. We design, build and run the flow on your server, and you keep full ownership.'}},
- {k:/(مرحبا|السلام|أهلا|هلا|hi|hello|hey|salam)/i,
-  a:{ar:'أهلاً بك 👋 أنا وكيل Flowline. اسألني عن الأسعار أو المدة أو ما يمكن ربطه — أو صف لي مهمة تكررها يدوياً وسأخبرك إن كانت تستحق الأتمتة.',
-      en:'Hi 👋 I am the Flowline agent. Ask me about pricing, timelines or what we can connect — or describe a task you keep doing by hand and I will tell you whether it is worth automating.'}},
- {k:/(شكرا|مشكور|thanks|thank you)/i,
-  a:{ar:'العفو 🙏 إن أحببت، احجز مكالمة عشرين دقيقة ونرسم لك المسار على الشاشة مباشرة.',
-      en:'Any time 🙏 If you like, book a twenty-minute call and we will sketch the flow with you on screen.'}}
-];
-var FALLBACK={
-  ar:'سؤال جيد — هذه نسخة تجريبية من الوكيل، وردودها محدودة حتى يُربط بـ n8n.\n\nجرّب أن تسألني عن: الأسعار · المدة · الأدوات التي نربطها · أمان البيانات · واتساب.',
-  en:'Good question — this is the demo version of the agent, with limited answers until it is wired to n8n.\n\nTry asking about: pricing · timelines · integrations · data security · WhatsApp.'};
-var SUGS=[{ar:'كم تكلف الأتمتة؟',en:'How much does it cost?'},
-          {ar:'كم يستغرق التنفيذ؟',en:'How long does it take?'},
-          {ar:'أين تُخزَّن بياناتي؟',en:'Where does my data live?'},
-          {ar:'هل تربطون واتساب؟',en:'Do you connect WhatsApp?'}];
+var BOTS=[
+{id:'support', webhook:'',
+ name:{ar:'دعم العملاء',en:'Customer support'},
+ desc:{ar:'يجيب من مستنداتك وسياساتك، ويحوّل الحالة لموظف عند اللزوم.',en:'Answers from your own docs and policies, and hands over to a human when it should.'},
+ ch:{ar:'واتساب · الموقع',en:'whatsapp · web'},
+ greet:{ar:'أهلاً 👋 أنا بوت الدعم. اسألني عن حالة طلبك، أو سياسة الإرجاع، أو أوقات العمل.',
+        en:'Hi 👋 I am the support bot. Ask me about an order, the return policy, or opening hours.'},
+ sugs:[{ar:'أين طلبي؟',en:'Where is my order?'},{ar:'ما سياسة الإرجاع؟',en:'What is the return policy?'},
+       {ar:'ما أوقات العمل؟',en:'What are your hours?'},{ar:'أريد التحدث مع موظف',en:'I want a human'}],
+ script:[
+  {k:/(طلب|أين|شحن|توصيل|order|where|track|ship|deliver)/i,
+   a:{ar:'أعطني رقم الطلب وسأتتبعه فوراً.\n\nمثال حقيقي: الطلب ‎#48210 خرج من المستودع أمس، ووصل مركز التوزيع اليوم 09:14، والتسليم المتوقع غداً بين 10 و2.',
+      en:'Give me the order number and I will track it.\n\nA real example: order #48210 left the warehouse yesterday, reached the hub today at 09:14, expected delivery tomorrow between 10 and 2.'}},
+  {k:/(إرجاع|استرجاع|استبدال|return|refund|exchange)/i,
+   a:{ar:'الإرجاع خلال ١٤ يوماً بشرط أن يكون المنتج بحالته الأصلية. أستطيع فتح طلب إرجاع لك الآن — أعطني رقم الطلب فقط.',
+      en:'Returns within 14 days if the item is unused. I can open the return for you now — just give me the order number.'}},
+  {k:/(وقت|دوام|ساعات|متى تفتح|hours|open|working)/i,
+   a:{ar:'الأحد إلى الخميس، ٩ صباحاً حتى ٦ مساءً. وأنا متاح ٢٤ ساعة — والرسائل خارج الدوام تصل الفريق أول الصباح.',
+      en:'Sunday to Thursday, 9am to 6pm. I am here around the clock, and anything outside those hours reaches the team first thing.'}},
+  {k:/(موظف|إنسان|بشري|human|agent|person|someone)/i,
+   a:{ar:'بالتأكيد — حوّلت المحادثة لفريق الدعم مع كامل سياقها، فلن تعيد شرح شيء. متوسط الرد ٤ دقائق ضمن الدوام.',
+      en:'Of course — I have passed the conversation to the support team with its full context, so you will not repeat yourself. Average reply is 4 minutes in working hours.'}}],
+ fb:{ar:'هذا سؤال يخرج عن معرفتي في هذه النسخة التجريبية. البوت الحقيقي يقرأ مستنداتك فيجيب عنه.\n\nجرّب: أين طلبي · سياسة الإرجاع · أوقات العمل · أريد موظفاً',
+     en:'That is outside my knowledge in this demo. The real bot reads your documents and would answer it.\n\nTry: where is my order · return policy · opening hours · talk to a human'}},
 
-function reply(text){
-  for(var i=0;i<SCRIPT.length;i++) if(SCRIPT[i].k.test(text)) return T(SCRIPT[i].a);
-  return T(FALLBACK);
+{id:'sales', webhook:'',
+ name:{ar:'مبيعات واستقبال عملاء',en:'Sales & leads'},
+ desc:{ar:'يؤهّل العميل، يجمع بياناته في الـ CRM، ويحجز موعداً لفريقك.',en:'Qualifies the lead, files it in your CRM, and books a slot with your team.'},
+ ch:{ar:'الموقع · إنستجرام',en:'web · instagram'},
+ greet:{ar:'أهلاً 👋 أنا بوت المبيعات. أخبرني عن نشاطك وما الذي تريد أتمتته، وسأخبرك إن كنا مناسبين لك.',
+        en:'Hi 👋 I am the sales bot. Tell me about your business and what you want automated, and I will tell you if we are a fit.'},
+ sugs:[{ar:'ماذا تقدمون بالضبط؟',en:'What exactly do you offer?'},{ar:'أريد عرض سعر',en:'I need a quote'},
+       {ar:'كم يستغرق التنفيذ؟',en:'How long does it take?'},{ar:'احجز لي موعداً',en:'Book me a slot'}],
+ script:[
+  {k:/(سعر|تكلف|عرض|كم يكلف|price|cost|quote|how much|budget)/i,
+   a:{ar:'السعر يعتمد على عدد المسارات والأدوات المطلوب ربطها وحجم البيانات — فلا يوجد رقم ثابت.\n\nأخبرني بالمهمة التي تريد أتمتتها وعدد الأدوات، وأعطيك تقديراً في المكالمة نفسها.',
+      en:'It depends on how many workflows, which tools we connect and the data volume — there is no flat number.\n\nTell me the task you want automated and how many tools are involved, and you get an estimate on the call itself.'}},
+  {k:/(تقدمون|خدمات|ماذا|offer|what do you|services)/i,
+   a:{ar:'نبني سير عمل آلي على n8n: استقبال العملاء، معالجة الفواتير، بوتات المحادثة، التقارير اليومية، ومزامنة الأنظمة. كل شيء يعمل على خادمك أنت.',
+      en:'We build automation on n8n: lead capture, invoice processing, chat bots, daily reports and system sync. All of it runs on your own server.'}},
+  {k:/(كم يستغرق|مدة|وقت|متى|how long|timeline|when)/i,
+   a:{ar:'سير عمل واحد يعمل خلال أسبوع من مكالمة البداية. الحزمة الكاملة مع بوت ومراقبة تستغرق أسبوعين إلى ثلاثة.',
+      en:'One workflow is live within a week of the kickoff call. A full set with a bot and monitoring takes two to three weeks.'}},
+  {k:/(احجز|موعد|مكالمة|book|call|meeting|schedule)/i,
+   a:{ar:'تمام — المتاح هذا الأسبوع: الثلاثاء ١١:٠٠، الأربعاء ١٤:٣٠، الخميس ٠٩:٣٠.\n\nأي وقت يناسبك؟ سأرسل الدعوة على بريدك وأسجّلك في الـ CRM مباشرة.',
+      en:'Sure — open this week: Tuesday 11:00, Wednesday 14:30, Thursday 09:30.\n\nWhich suits you? I will send the invite to your email and file you in the CRM.'}}],
+ fb:{ar:'لم ألتقط ذلك تماماً. صف لي المهمة التي تكررها يدوياً كل أسبوع، وسأخبرك إن كانت تستحق الأتمتة.',
+     en:'I did not quite catch that. Describe the task you repeat by hand every week and I will tell you whether it is worth automating.'}},
+
+{id:'booking', webhook:'',
+ name:{ar:'حجز المواعيد',en:'Appointments'},
+ desc:{ar:'يعرض الأوقات المتاحة من تقويمك، يؤكد الحجز، ويرسل التذكير.',en:'Reads your calendar for open slots, confirms the booking and sends the reminder.'},
+ ch:{ar:'واتساب · الموقع',en:'whatsapp · web'},
+ greet:{ar:'أهلاً 👋 أنا بوت الحجوزات. أستطيع عرض الأوقات المتاحة، أو تعديل موعدك، أو إلغاءه.',
+        en:'Hi 👋 I am the booking bot. I can show you open slots, move your appointment, or cancel it.'},
+ sugs:[{ar:'ما الأوقات المتاحة؟',en:'What slots are open?'},{ar:'أريد موعداً غداً',en:'Something tomorrow'},
+       {ar:'كيف ألغي موعدي؟',en:'How do I cancel?'},{ar:'أين موقعكم؟',en:'Where are you?'}],
+ script:[
+  {k:/(متاح|أوقات|مواعيد|available|slots|times|open)/i,
+   a:{ar:'المتاح خلال ٤٨ ساعة:\n\n• غداً — ١٠:٠٠ · ١١:٣٠ · ١٦:٠٠\n• بعد غد — ٠٩:٣٠ · ١٣:٠٠\n\nاكتب الوقت الذي تريده وسأثبّته.',
+      en:'Open in the next 48 hours:\n\n• Tomorrow — 10:00 · 11:30 · 16:00\n• Day after — 09:30 · 13:00\n\nName the one you want and I will hold it.'}},
+  {k:/(غدا|غداً|بكرة|tomorrow)/i,
+   a:{ar:'غداً متاح: ١٠:٠٠ · ١١:٣٠ · ١٦:٠٠. أثبّت لك أحدها؟ سأرسل تأكيداً وتذكيراً قبل الموعد بساعة.',
+      en:'Tomorrow I have 10:00, 11:30 and 16:00. Shall I hold one? You get a confirmation and a reminder an hour before.'}},
+  {k:/(ألغي|إلغاء|تعديل|أجّل|cancel|resched|move|change)/i,
+   a:{ar:'أعطني رقم الجوال المسجّل وسأجد الموعد. الإلغاء مجاني حتى ٤ ساعات قبل الموعد، وبعدها يحتاج موافقة الفريق.',
+      en:'Give me the phone number on the booking and I will find it. Free to cancel up to 4 hours before; after that it needs the team to approve.'}},
+  {k:/(موقع|عنوان|أين|فرع|where|location|address|branch)/i,
+   a:{ar:'الفرع الرئيسي في وسط المدينة، ومواقف السيارات أسفل المبنى. أرسل لك الموقع على الخريطة مع التأكيد.',
+      en:'The main branch is downtown with parking under the building. I send the map pin with your confirmation.'}}],
+ fb:{ar:'لم أفهم ذلك. جرّب: الأوقات المتاحة · موعد غداً · إلغاء موعد · موقعكم',
+     en:'I did not follow. Try: available slots · something tomorrow · cancel a booking · your location'}},
+
+{id:'shop', webhook:'',
+ name:{ar:'متجر إلكتروني',en:'E-commerce'},
+ desc:{ar:'يتحقق من المخزون والمقاسات، يقترح البدائل، ويكمل الطلب داخل المحادثة.',en:'Checks stock and sizes, suggests alternatives, and finishes the order inside the chat.'},
+ ch:{ar:'واتساب · إنستجرام',en:'whatsapp · instagram'},
+ greet:{ar:'أهلاً 👋 أنا بوت المتجر. اسألني عن توفر منتج، أو مقاس، أو الشحن — وأستطيع إتمام الطلب هنا.',
+        en:'Hi 👋 I am the store bot. Ask about stock, sizes or shipping — and I can finish the order right here.'},
+ sugs:[{ar:'هل المنتج متوفر؟',en:'Is it in stock?'},{ar:'ما المقاسات المتاحة؟',en:'Which sizes?'},
+       {ar:'كم يستغرق الشحن؟',en:'How long is shipping?'},{ar:'هل يوجد خصم؟',en:'Any discount?'}],
+ script:[
+  {k:/(متوفر|مخزون|توفر|stock|available|have it)/i,
+   a:{ar:'أتحقق من المخزون مباشرة من نظامك. مثال: الصنف متوفر — ٧ قطع في المستودع الرئيسي، وقطعتان في فرع الشمال.\n\nأحجز لك واحدة؟',
+      en:'I check stock live from your system. Example: in stock — 7 units in the main warehouse and 2 in the north branch.\n\nShall I hold one for you?'}},
+  {k:/(مقاس|حجم|لون|size|colour|color|variant)/i,
+   a:{ar:'المتاح الآن: S · M · L بالأسود، وM · L بالأزرق. مقاس XL نفد وسيصل الأسبوع القادم — أُشعرك عند وصوله؟',
+      en:'Right now: S · M · L in black, M · L in blue. XL is out and lands next week — want me to ping you when it does?'}},
+  {k:/(شحن|توصيل|متى يصل|shipping|deliver|arrive)/i,
+   a:{ar:'داخل المدينة يوم عمل واحد، وبقية المناطق ٢ إلى ٤ أيام. الشحن مجاني فوق حد معيّن يحدده متجرك.',
+      en:'Same city is one working day, elsewhere 2 to 4 days. Free above the threshold your store sets.'}},
+  {k:/(خصم|كوبون|عرض|discount|coupon|promo|offer)/i,
+   a:{ar:'يوجد كوبون فعّال لأول طلب. أستطيع تطبيقه على سلتك مباشرة قبل الدفع — أطبّقه الآن؟',
+      en:'There is an active first-order coupon. I can apply it to your cart before checkout — shall I?'}}],
+ fb:{ar:'لم أجد ذلك في الكتالوج التجريبي. البوت الحقيقي يقرأ كتالوجك كاملاً.\n\nجرّب: توفر منتج · المقاسات · الشحن · خصم',
+     en:'That is not in the demo catalogue. The real bot reads your full catalogue.\n\nTry: stock · sizes · shipping · discount'}},
+
+{id:'internal', webhook:'',
+ name:{ar:'مساعد الفريق الداخلي',en:'Internal assistant'},
+ desc:{ar:'يجيب موظفيك عن الإجازات والسياسات والأرقام، من أنظمتكم مباشرة.',en:'Answers your own staff on leave, policy and numbers, straight from your systems.'},
+ ch:{ar:'Slack · تيليجرام',en:'slack · telegram'},
+ greet:{ar:'أهلاً 👋 أنا مساعد الفريق. اسألني عن رصيد إجازاتك، أو سياسة المصاريف، أو أرقام أمس.',
+        en:'Hi 👋 I am the team assistant. Ask about your leave balance, the expense policy, or yesterday numbers.'},
+ sugs:[{ar:'كم رصيد إجازاتي؟',en:'My leave balance?'},{ar:'سياسة المصاريف؟',en:'Expense policy?'},
+       {ar:'مبيعات أمس؟',en:'Yesterday sales?'},{ar:'مخزون صنف معيّن',en:'Check stock of an item'}],
+ script:[
+  {k:/(إجاز|رصيد|عطلة|leave|vacation|holiday|pto)/i,
+   a:{ar:'رصيدك ١٢ يوماً من أصل ٢١، وطلب واحد قيد الموافقة (٣ أيام في الشهر القادم). أقدّم لك طلباً جديداً؟',
+      en:'You have 12 days left of 21, and one request pending approval (3 days next month). Want me to file a new one?'}},
+  {k:/(مصاريف|مصروف|سياسة|بدل|expense|policy|reimburse)/i,
+   a:{ar:'المصاريف تحت حد معيّن تُعتمد تلقائياً بإيصال، وما فوقه يحتاج موافقة المدير. أرسل صورة الإيصال هنا وأنا أقيّده وأرفعه للاعتماد.',
+      en:'Anything under the threshold is auto-approved with a receipt; above it needs your manager. Send the receipt photo here and I will file it and route it for approval.'}},
+  {k:/(مبيعات|أرقام|تقرير|أمس|sales|numbers|report|yesterday|revenue)/i,
+   a:{ar:'أمس: ٤١ طلباً، بمتوسط سلة أعلى من الأسبوع الماضي بـ ٦٪، وأفضل قناة كانت إنستجرام. أرسل لك التفصيل على Slack؟',
+      en:'Yesterday: 41 orders, average basket 6% above last week, best channel Instagram. Want the breakdown in Slack?'}},
+  {k:/(مخزون|صنف|كمية|stock|inventory|item|sku)/i,
+   a:{ar:'أعطني اسم الصنف أو الـ SKU وأجلب الكمية من كل مستودع، وأنبّهك إن كانت تحت حد إعادة الطلب.',
+      en:'Give me the item name or SKU and I will pull the quantity per warehouse, and flag it if it is under the reorder point.'}}],
+ fb:{ar:'ليس ضمن ما أعرفه في هذه النسخة. البوت الحقيقي يُربط بأنظمة الموارد البشرية والمخزون عندكم.\n\nجرّب: رصيد الإجازات · سياسة المصاريف · مبيعات أمس · مخزون صنف',
+     en:'Not in this demo. The real one connects to your HR and inventory systems.\n\nTry: leave balance · expense policy · yesterday sales · stock of an item'}}
+];
+
+function replyFrom(bot,text){
+  for(var i=0;i<bot.script.length;i++) if(bot.script[i].k.test(text)) return T(bot.script[i].a);
+  return T(bot.fb);
 }
 
 var chats=[];
-function makeChat(host,withClose){
+function makeChat(host,withClose,bot){
   var el=document.createElement('div');
   el.className='chat';
   el.innerHTML=
@@ -924,6 +965,7 @@ function makeChat(host,withClose){
   var log=$('.log',el), input=$('input',el), sug=$('.sug',el),
       st=$('.st',el), sx=$('.sx',el), nm=$('.nm',el), busy=false, greeted=false;
 
+  function hook(){ return bot.webhook || N8N_WEBHOOK_URL; }
   function add(cls,txt){
     var d=document.createElement('div'); d.className='msg '+cls; d.textContent=txt;
     log.appendChild(d); log.scrollTop=log.scrollHeight; return d;
@@ -932,37 +974,30 @@ function makeChat(host,withClose){
     var d=document.createElement('div'); d.className='dotting';
     d.innerHTML='<i></i><i></i><i></i>'; log.appendChild(d); log.scrollTop=log.scrollHeight; return d;
   }
+  function fillSugs(){
+    sug.innerHTML='';
+    bot.sugs.forEach(function(x){
+      var b=document.createElement('button'); b.type='button'; b.textContent=T(x);
+      b.addEventListener('click',function(){ send(T(x)); });
+      sug.appendChild(b);
+    });
+  }
   function send(txt){
     txt=(txt||'').trim(); if(!txt||busy) return;
     add('me',txt); input.value=''; busy=true; sug.innerHTML='';
-    var d=dots();
-    if(N8N_WEBHOOK_URL){
-      fetch(N8N_WEBHOOK_URL,{
-        method:'POST',headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({chatInput:txt,sessionId:SID,action:'sendMessage',lang:lang})
-      })
+    var d=dots(), url=hook();
+    if(url){
+      fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({chatInput:txt,sessionId:SID+'-'+bot.id,action:'sendMessage',bot:bot.id,lang:lang})})
       .then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
-      .then(function(j){
-        d.remove(); busy=false;
-        add('bot', j.output || j.text || j.message || T(FALLBACK));
-      })
-      .catch(function(err){
-        d.remove(); busy=false;
-        add('warn', (lang==='ar'?'تعذّر الوصول إلى n8n — ':'Could not reach n8n — ')+err.message);
-      });
+      .then(function(j){ d.remove(); busy=false; add('bot', j.output||j.text||j.message||T(bot.fb)); fillSugs(); log.scrollTop=log.scrollHeight; })
+      .catch(function(err){ d.remove(); busy=false;
+        add('warn',(lang==='ar'?'تعذّر الوصول إلى n8n — ':'Could not reach n8n — ')+err.message); fillSugs(); });
     } else {
       setTimeout(function(){
-        d.remove(); busy=false; add('bot',reply(txt)); fillSugs(); log.scrollTop=log.scrollHeight;
+        d.remove(); busy=false; add('bot',replyFrom(bot,txt)); fillSugs(); log.scrollTop=log.scrollHeight;
       }, 460+Math.random()*420);
     }
-  }
-  function fillSugs(){
-    sug.innerHTML='';
-    SUGS.forEach(function(s){
-      var b=document.createElement('button'); b.type='button'; b.textContent=T(s);
-      b.addEventListener('click',function(){ send(T(s)); });
-      sug.appendChild(b);
-    });
   }
   $('.send',el).addEventListener('click',function(){ send(input.value); });
   input.addEventListener('keydown',function(e){ if(e.key==='Enter') send(input.value); });
@@ -971,20 +1006,19 @@ function makeChat(host,withClose){
   var api={
     el:el,
     focus:function(){ input.focus(); },
-    greet:function(){
-      if(greeted) return; greeted=true;
-      add('bot', lang==='ar'
-        ? 'أهلاً 👋 أنا وكيل Flowline. اسألني عن الأسعار أو المدة أو ما يمكن ربطه بأدواتك.'
-        : 'Hi 👋 I am the Flowline agent. Ask me about pricing, timelines, or what we can connect to your tools.');
-      fillSugs();
+    greet:function(){ if(greeted) return; greeted=true; add('bot',T(bot.greet)); fillSugs(); },
+    setBot:function(next){
+      bot=next; greeted=true; busy=false;
+      log.innerHTML=''; input.value='';
+      api.relabel(); add('bot',T(bot.greet)); fillSugs();
     },
     relabel:function(){
-      nm.textContent = lang==='ar' ? 'وكيل Flowline' : 'Flowline agent';
+      nm.textContent = T(bot.name);
       input.placeholder = lang==='ar' ? 'اكتب سؤالك…' : 'Ask something…';
-      sx.textContent = N8N_WEBHOOK_URL
+      sx.textContent = hook()
         ? (lang==='ar'?'متصل بـ n8n':'connected to n8n')
         : (lang==='ar'?'وضع تجريبي':'demo mode');
-      st.classList.toggle('demo', !N8N_WEBHOOK_URL);
+      st.classList.toggle('demo', !hook());
       if(sug.children.length) fillSugs();
     }
   };
@@ -993,8 +1027,29 @@ function makeChat(host,withClose){
   return api;
 }
 
-var mainChat=makeChat($('#chat-main'),false);
-var dockChat=makeChat($('#dockPanel'),true);
+var mainChat=makeChat($('#chat-main'),false,BOTS[0]);
+var dockChat=makeChat($('#dockPanel'),true,BOTS[0]);
+
+var botList=$('#botList'), curBot=0;
+BOTS.forEach(function(b,i){
+  var o=document.createElement('button');
+  o.type='button'; o.className='bot-opt'+(i===0?' on':''); o.setAttribute('role','tab');
+  o.innerHTML='<b><i></i><span class="bn"></span></b><p class="bd"></p><span class="ch"></span>';
+  o.addEventListener('click',function(){
+    if(curBot===i) return;
+    curBot=i;
+    $$('.bot-opt',botList).forEach(function(x,j){ x.classList.toggle('on',j===i); });
+    mainChat.setBot(b);
+  });
+  botList.appendChild(o);
+});
+function paintBots(){
+  $$('.bot-opt',botList).forEach(function(o,i){
+    $('.bn',o).textContent=T(BOTS[i].name);
+    $('.bd',o).textContent=T(BOTS[i].desc);
+    $('.ch',o).textContent=T(BOTS[i].ch);
+  });
+}
 new IntersectionObserver(function(es){
   if(es[0].isIntersecting){ mainChat.greet(); }
 },{threshold:.3}).observe($('#chat-main'));
@@ -1014,6 +1069,7 @@ addEventListener('keydown',function(e){ if(e.key==='Escape') document.body.class
 
 /* ─────────── init ─────────── */
 var saved=null; try{ saved=localStorage.getItem('fl-lang'); }catch(e){}
+paintBots();
 setLang(saved==='en'?'en':'ar');
 })();
 </script>
