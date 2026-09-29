@@ -13,7 +13,7 @@ def demo_llm(brand: dict) -> MockLLM:
     return MockLLM({
         "analyst": lambda p, im: {"summary": "تحليل تجريبي", "palette": brand["palette"][:2], "hook": "لقطة افتتاحية", "mood": "فخم"},
         "gatekeeper": lambda p, im: {"score": 85, "reasons": ["تجريبي"], "adaptations": ["توحيد الألوان"]},
-        "researcher": lambda p, im: {"ideas": ideas},
+        "researcher": lambda p, im: {"ideas": ideas} if "عدد الأفكار" in p else {**ideas[2], "concept": ideas[2]["concept"] + " (محسّنة)"},
         "evaluator": lambda p, im: {"evaluations": [
             {"idea_id": i, "scores": {k: s for k in brand["weights"]}, "risks": ["مخاطرة تجريبية"], "improvements": ["تحسين"]}
             for i, s in zip(ids, sc)]},

@@ -144,5 +144,52 @@ class D(unittest.TestCase):
             YouTubeDiscovery()
 
 
+
+class S(unittest.TestCase):
+    ITEMS = [
+        {"webVideoUrl": "https://tiktok.com/@a/1", "text": "عطر", "diggCount": 9000, "commentCount": 500, "shareCount": 700,
+         "playCount": 40000, "authorMeta": {"fans": 1000}, "createTimeISO": "2026-09-20T00:00:00Z",
+         "hashtags": [{"name": "Perfume"}], "videoMeta": {"coverUrl": "http://c/1.jpg"}},
+        {"webVideoUrl": "https://tiktok.com/@b/2", "text": "ضعيف", "diggCount": 10, "commentCount": 0, "shareCount": 0,
+         "playCount": 90000, "videoMeta": {"coverUrl": "http://c/2.jpg"}},
+        {"webVideoUrl": "https://tiktok.com/@c/3", "text": "بلا غلاف", "diggCount": 99999, "playCount": 10},
+        "garbage"]
+
+    def test_tiktok_ranking_and_robustness(self):
+        from studio.social import ApifyDiscovery
+        d = tempfile.mkdtemp()
+        calls = []
+        a = ApifyDiscovery("T", lambda u, b: calls.append((u, b)) or self.ITEMS, lambda u: b"JPG")
+        f = a.search("tiktok", ["#perfume", "luxury"], top=5, out_dir=d)
+        self.assertEqual(f[0].url, "https://tiktok.com/@a/1")
+        self.assertEqual(len(f), 2)                                   # بلا غلاف يُستبعد، والعنصر غير الصالح لا يكسر
+        self.assertEqual(calls[0][1]["hashtags"], ["perfume", "luxury"])
+        self.assertIn("clockworks~tiktok-scraper", calls[0][0])
+        self.assertTrue(os.path.exists(f[0].ref.frames[0]))
+
+    def test_instagram_mapping(self):
+        from studio.social import to_post
+        p, c = to_post("instagram", {"url": "u", "caption": "c", "likesCount": 5, "commentsCount": 2,
+                                     "videoViewCount": 100, "displayUrl": "d", "type": "Video", "hashtags": ["A"]})
+        self.assertEqual((p.likes, p.comments, p.views, p.format, p.tags, c), (5, 2, 100, "reel", ["a"], "d"))
+
+    def test_missing_token(self):
+        from studio.social import ApifyDiscovery
+        os.environ.pop("APIFY_TOKEN", None)
+        with self.assertRaises(RuntimeError):
+            ApifyDiscovery()
+
+    def test_web_social(self):
+        from studio.social import ApifyDiscovery
+        from studio.web import create_app
+        d = tempfile.mkdtemp()
+        app = create_app(f"{ROOT}/brand/brand.yaml", f"{d}/w.db",
+                         social_factory=lambda: ApifyDiscovery("T", lambda u, b: self.ITEMS, lambda u: PNG))
+        r = app.test_client().post("/run", data={"tiktok": "perfume", "demo": "on", "ideas": "4"},
+                                   content_type="multipart/form-data")
+        self.assertEqual(r.status_code, 200, r.get_data(as_text=True)[:300])
+        self.assertIn("منشورات محللة: 2", r.get_data(as_text=True))
+
+
 if __name__ == "__main__":
     unittest.main()

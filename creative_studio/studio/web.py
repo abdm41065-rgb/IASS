@@ -18,6 +18,8 @@ pre{{white-space:pre-wrap;background:#17171d;padding:1rem;border-radius:8px}}a{{
 FORM = """<form method=post action=/run enctype=multipart/form-data>
 <label>الرفرنسات (صور/فيديو)<br><input type=file name=refs multiple></label>
 <label>أو دعه يجلبها تلقائياً من YouTube: كلمات بحث مفصولة بفاصلة<br><input name=discover placeholder="luxury perfume ad, عطور فاخرة اعلان" style="width:100%"></label>
+<label>هاشتاغات تيك توك<br><input name=tiktok placeholder="perfume, luxury" style="width:100%"></label>
+<label>هاشتاغات إنستغرام<br><input name=instagram placeholder="perfume, luxury" style="width:100%"></label>
 <label>الدولة <input name=region placeholder="SA / IQ / US" size=6></label>
 <label>بيانات المنصات (CSV أو JSON) — اختياري<br><input type=file name=posts></label>
 <label>المنصة لملف البيانات <input name=platform value=instagram></label>
@@ -26,11 +28,13 @@ FORM = """<form method=post action=/run enctype=multipart/form-data>
 <button>شغّل الفريق</button></form>"""
 
 
-def create_app(brand_path="brand/brand.yaml", db="library.db", llm_factory=None, discovery_factory=None):
+def create_app(brand_path="brand/brand.yaml", db="library.db", llm_factory=None, discovery_factory=None, social_factory=None):
     app = Flask(__name__)
     app.config["MAX_CONTENT_LENGTH"] = 500 * 1024 * 1024
     if discovery_factory is None:
         from .discovery import YouTubeDiscovery as discovery_factory
+    if social_factory is None:
+        from .social import ApifyDiscovery as social_factory
     has_key = bool(os.environ.get("ANTHROPIC_API_KEY"))
 
     @app.get("/")
@@ -53,6 +57,14 @@ def create_app(brand_path="brand/brand.yaml", db="library.db", llm_factory=None,
             posts = load_sources([{"path": str(path), "platform": request.form.get("platform", "")}])
         demo = "demo" in request.form or not has_key
         extra, q = [], request.form.get("discover", "").strip()
+        for plat in ("tiktok", "instagram"):
+            tags = [x for x in request.form.get(plat, "").split(",") if x.strip()]
+            if tags:
+                try:
+                    fs = social_factory().search(plat, tags, out_dir=str(tmp / "discovered"))
+                except Exception as e:
+                    return PAGE.format(body=f"<p>❌ فشل {plat}: {html.escape(str(e))}</p><a href=/>رجوع</a>"), 400
+                extra += [f.ref for f in fs]; posts = posts + [f.post for f in fs]
         if q:
             try:
                 from .discovery import YouTubeDiscovery

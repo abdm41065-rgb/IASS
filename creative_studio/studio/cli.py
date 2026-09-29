@@ -14,6 +14,8 @@ def main(argv=None):
     r = sub.add_parser("run", help="تشغيل الفريق كاملاً")
     r.add_argument("refs", nargs="*", help="صور/فيديوهات/مجلدات (اختياري مع --discover)")
     r.add_argument("--discover", help="كلمات بحث مفصولة بفاصلة لجلب أفضل الرفرنسات تلقائياً من YouTube")
+    r.add_argument("--tiktok", help="هاشتاغات تيك توك مفصولة بفاصلة (يحتاج APIFY_TOKEN)")
+    r.add_argument("--instagram", help="هاشتاغات إنستغرام مفصولة بفاصلة (يحتاج APIFY_TOKEN)")
     r.add_argument("--top", type=int, default=10, help="عدد الرفرنسات المكتشفة")
     r.add_argument("--region", default="", help="مثل SA أو IQ أو US")
     r.add_argument("--sources", help="ملف YAML لمصادر التفاعل")
@@ -42,6 +44,14 @@ def main(argv=None):
             print(f"  {f.score}  {f.title[:60]}  {f.url}")
         extra = [f.ref for f in found]
         posts += [f.post for f in found]
+    for plat in ("tiktok", "instagram"):
+        if getattr(a, plat):
+            from .social import ApifyDiscovery
+            found = ApifyDiscovery().search(plat, getattr(a, plat).split(","), top=a.top)
+            for f in found:
+                print(f"  {plat} {f.score}  {f.title[:50]}  {f.url}")
+            extra += [f.ref for f in found]
+            posts += [f.post for f in found]
     if not a.refs and not extra:
         sys.exit('لا توجد رفرنسات: مرّر ملفات أو استعمل --discover')
     res = Studio(ClaudeLLM(), load_brand(a.brand), Library(a.db)).run(a.refs, posts, a.ideas, extra_refs=extra)
