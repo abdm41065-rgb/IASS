@@ -1,0 +1,3 @@
+sources:
+  - {path: samples/posts.csv, platform: instagram}
+  # - {url: "https://api.example.com/v1/tiktok/top", platform: tiktok, token_env: TIKTOK_API_TOKEN}

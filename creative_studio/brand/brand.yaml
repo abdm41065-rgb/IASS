@@ -1,0 +1,20 @@
+# هويتنا البصرية ومعيار الجودة — عدّل هذا الملف ليطابق علامتك
+name: "اسم العلامة"
+voice: "واثق، دافئ، مختصر، بدون مبالغة"
+audience: "شباب 18-34 في الخليج والعراق"
+language: "ar"
+palette: ["#0B0B0F", "#D4AF37", "#F5F0E6"]   # ألوان العلامة
+palette_tolerance: 60          # أقصى مسافة لونية مقبولة (RGB) لأقرب لون بالهوية
+fonts: ["Cairo", "Tajawal"]
+banned_words: ["مجاني تماماً", "مضمون 100%", "اضغط هنا فوراً"]
+banned_topics: ["سياسة", "أديان", "مقارنة مباشرة بمنافس"]
+must_have: ["شعار واضح", "دعوة لإجراء CTA"]
+min_gate_score: 70             # أقل درجة لقبول الرفرنس
+quality_bar: "إضاءة نظيفة، تكوين متوازن، نص مقروء، لا صور منخفضة الدقة"
+weights:                       # أوزان تقييم الأفكار (المجموع = 1)
+  brand_fit: 0.30
+  engagement_potential: 0.30
+  originality: 0.20
+  feasibility: 0.10
+  timing: 0.10
+thresholds: {approve: 75, revise: 60}
