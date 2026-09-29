@@ -99,6 +99,30 @@ class BrowserDiscovery:
             ctx.close()
         return self._rank(platform, rows, top, out_dir)
 
+    def crawl(self, platform: str, urls: list[str], per_profile: int = 15, top: int = 30,
+              out_dir: str = "discovered") -> list[Found]:
+        """يزور روابط ريلز مباشرة، ولصفحات الحسابات يجمع آخر منشوراتها ثم يقرأها."""
+        from playwright.sync_api import sync_playwright
+        rows = []
+        with sync_playwright() as p:
+            ctx = p.chromium.launch_persistent_context(str(self.profile), headless=False)
+            page = ctx.new_page()
+            for u in urls:
+                targets = [u]
+                if not re.search(LINK[platform], u):               # صفحة حساب: نجمع روابط منشوراتها
+                    page.goto(u); self._pause(); page.mouse.wheel(0, 2500); self._pause()
+                    targets = ["https://www." + platform + ".com" + l
+                               for l in dict.fromkeys(re.findall(LINK[platform], page.content()))][:per_profile]
+                for t in targets:
+                    try:
+                        page.goto(t); self._pause()
+                        og = lambda n: page.get_attribute(f'meta[property="og:{n}"]', "content") or ""
+                        rows.append(parse_instagram(og("description"), og("image"), t))
+                    except Exception as e:
+                        print(f"  تخطي {t}: {e}", file=sys.stderr)
+            ctx.close()
+        return self._rank(platform, rows, top, out_dir)
+
     def _rank(self, platform, rows, top, out_dir) -> list[Found]:
         rows = [(p, c) for p, c in rows if p.url and c]
         normalize([p for p, _ in rows])

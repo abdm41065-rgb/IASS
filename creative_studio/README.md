@@ -59,6 +59,14 @@ python -m studio.cli run --browser --tiktok "perfume" --instagram "perfume" --to
 ```
 يعمل على جهازك فقط، ولا يخزّن كلمة المرور. تنبيه: الأتمتة على حسابك تخالف شروط المنصتين وقد تقيّد الحساب؛ استخدم حساباً ثانوياً. لم يُجرَّب على المواقع الحقيقية (المحللات مختبرة بعينات فقط).
 
+## جلب محتوى صفحات كاملة من قائمة روابط
+```bash
+# refs/instagram_links.txt فيه ريلزات وصفحات حسابات (سطر لكل رابط)
+python -m studio.cli run refs/*.png --sources refs/sources.yaml --urls refs/instagram_links.txt --top 30          # عبر Apify
+python -m studio.cli run refs/*.png --browser --urls refs/instagram_links.txt --top 30                             # أو متصفحك المحلي
+```
+رابط حساب = يجلب آخر منشوراته؛ رابط ريل = يجلب الريل نفسه. `refs/screenshots_metrics.csv` فيه أرقام التفاعل الظاهرة بلقطاتك.
+
 ## مصادر الـ 500+ (تنبيه مهم)
 لا يوجد scraping مباشر لإنستغرام/تيك توك/فيسبوك (يخالف شروطها وغالباً يُحظر). الموصلات المدعومة:
 ملفات CSV/JSON مصدّرة، أو `HttpConnector` لأي API رسمي/وسيط بمفتاحك (Meta Content Library،

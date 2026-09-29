@@ -58,7 +58,9 @@ class ApifyDiscovery:
                out_dir: str = "discovered") -> list[Found]:
         tags = [h.strip().lstrip("#").replace(" ", "") for h in hashtags if h.strip()]
         url = f"https://api.apify.com/v2/acts/{self.actors[platform]}/run-sync-get-dataset-items?token={self.token}"
-        items = self.post(url, ACTORS[platform][1](tags, per_tag))
+        return self._rank_items(platform, self.post(url, ACTORS[platform][1](tags, per_tag)), top, out_dir)
+
+    def _rank_items(self, platform, items, top, out_dir) -> list[Found]:
         rows = [to_post(platform, i) for i in items if isinstance(i, dict)]
         rows = [(p, c) for p, c in rows if p.url]
         normalize([p for p, _ in rows])                            # تطبيع التفاعل داخل المنصة
@@ -78,3 +80,18 @@ class ApifyDiscovery:
             found.append(Found(Reference(path=str(d), kind="image", notes=notes, frames=[str(d / "cover.jpg")]),
                                p, round(p.engagement, 3), p.caption[:60], p.url))
         return found[:top]
+
+
+def read_urls(path: str) -> list[str]:
+    return [l.split("?")[0].strip() for l in open(path, encoding="utf-8") if l.strip().startswith("http")]
+
+
+def search_urls(self, urls: list[str], per_url: int = 30, top: int = 30, out_dir: str = "discovered") -> list[Found]:
+    """روابط ريلز أو صفحات حسابات كاملة (يجلب آخر per_url منشور لكل صفحة) عبر actor إنستغرام العام."""
+    actor = os.environ.get("APIFY_INSTAGRAM_URLS_ACTOR", "apify~instagram-scraper")
+    url = f"https://api.apify.com/v2/acts/{actor}/run-sync-get-dataset-items?token={self.token}"
+    items = self.post(url, {"directUrls": urls, "resultsType": "posts", "resultsLimit": per_url})
+    return self._rank_items("instagram", items, top, out_dir)
+
+
+ApifyDiscovery.search_urls = search_urls

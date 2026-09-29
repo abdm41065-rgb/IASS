@@ -17,6 +17,7 @@ def main(argv=None):
     r.add_argument("--tiktok", help="هاشتاغات تيك توك مفصولة بفاصلة (يحتاج APIFY_TOKEN)")
     r.add_argument("--instagram", help="هاشتاغات إنستغرام مفصولة بفاصلة (يحتاج APIFY_TOKEN)")
     r.add_argument("--browser", action="store_true", help="استعمل متصفحك المحلي (بعد login) بدل Apify لتيك توك/إنستغرام")
+    r.add_argument("--urls", help="ملف روابط إنستغرام (ريلز أو صفحات حسابات) لجلب محتواها كمصادر")
     r.add_argument("--top", type=int, default=10, help="عدد الرفرنسات المكتشفة")
     r.add_argument("--region", default="", help="مثل SA أو IQ أو US")
     r.add_argument("--sources", help="ملف YAML لمصادر التفاعل")
@@ -44,6 +45,19 @@ def main(argv=None):
         for f in found:
             print(f"  {f.score}  {f.title[:60]}  {f.url}")
         extra = [f.ref for f in found]
+        posts += [f.post for f in found]
+    if a.urls:
+        from .social import read_urls
+        urls = read_urls(a.urls)
+        if a.browser:
+            from .browser import BrowserDiscovery
+            found = BrowserDiscovery().crawl("instagram", urls, top=a.top)
+        else:
+            from .social import ApifyDiscovery
+            found = ApifyDiscovery().search_urls(urls, top=a.top)
+        for f in found:
+            print(f"  {f.score}  {f.title[:50]}  {f.url}")
+        extra += [f.ref for f in found]
         posts += [f.post for f in found]
     for plat in ("tiktok", "instagram"):
         if getattr(a, plat):

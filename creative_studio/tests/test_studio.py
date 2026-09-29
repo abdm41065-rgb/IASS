@@ -221,5 +221,24 @@ class B(unittest.TestCase):
         self.assertEqual([x.url for x in f], ["u1"])
 
 
+
+class U(unittest.TestCase):
+    def test_urls_via_apify_and_read_urls(self):
+        from studio.social import ApifyDiscovery, read_urls
+        urls = read_urls(f"{ROOT}/refs/instagram_links.txt")
+        self.assertEqual(len(urls), 17); self.assertTrue(all("?" not in u for u in urls))
+        calls = []
+        items = [{"url": "https://instagram.com/reel/x/", "caption": "c", "likesCount": 50, "commentsCount": 2,
+                  "displayUrl": "http://d/1.jpg", "type": "Video"}]
+        a = ApifyDiscovery("T", lambda u, b: calls.append(b) or items, lambda u: b"J")
+        f = a.search_urls(urls, out_dir=tempfile.mkdtemp())
+        self.assertEqual(calls[0]["directUrls"], urls); self.assertEqual(len(f), 1)
+
+    def test_screenshot_metrics_load(self):
+        posts = load_sources([{"path": f"{ROOT}/refs/screenshots_metrics.csv"}])
+        self.assertEqual(len(posts), 4)
+        self.assertEqual(max(posts, key=lambda p: p.likes).likes, 799)
+
+
 if __name__ == "__main__":
     unittest.main()
