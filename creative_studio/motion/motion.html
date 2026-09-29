@@ -1,0 +1,80 @@
+<!doctype html><html lang="ar" dir="rtl"><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0B0B0F;--gold:#D4AF37;--ivory:#F5F0E6}
+*{margin:0;box-sizing:border-box}
+html,body{width:100%;height:100%;background:#000;overflow:hidden;font-family:Cairo,sans-serif}
+#stage{position:absolute;left:0;top:0;width:1080px;height:1920px;transform-origin:0 0;background:radial-gradient(ellipse at 50% 38%,#1a1710 0%,var(--bg) 62%);overflow:hidden}
+.abs{position:absolute;left:0;right:0;text-align:center}
+svg{position:absolute;left:190px;top:470px;width:700px;height:700px;overflow:visible}
+.outline{fill:none;stroke:var(--gold);stroke-width:3;stroke-linejoin:round;stroke-dasharray:1400;stroke-dashoffset:1400}
+.facet{fill:none;stroke:var(--gold);stroke-width:1.6;opacity:.75;stroke-dasharray:600;stroke-dashoffset:600}
+.fill{fill:url(#g);opacity:0}
+.spark{position:absolute;width:90px;height:90px;opacity:0;transform:scale(0) rotate(0)}
+.spark::before,.spark::after{content:"";position:absolute;left:50%;top:50%;background:linear-gradient(var(--ivory),transparent 0,var(--ivory) 50%,transparent);transform:translate(-50%,-50%)}
+.spark::before{width:3px;height:100%}.spark::after{width:100%;height:3px}
+.line{position:absolute;left:50%;height:2px;width:0;background:var(--gold);transform:translateX(-50%)}
+.mask{overflow:hidden}
+.title{font-weight:800;font-size:118px;color:var(--ivory);line-height:1.25;transform:translateY(130%)}
+.chip{font-weight:300;font-size:64px;color:var(--ivory);opacity:0;transform:translateY(40px);letter-spacing:2px}
+.chip b{color:var(--gold);font-weight:600}
+.logo{font-weight:800;font-size:96px;color:var(--gold);letter-spacing:6px;opacity:0;transform:scale(.92)}
+.cta{display:inline-block;margin-top:70px;padding:30px 84px;border:3px solid var(--gold);border-radius:100px;color:var(--bg);background:var(--gold);font-weight:800;font-size:58px;opacity:0;transform:translateY(40px)}
+.handle{font-weight:300;font-size:48px;color:var(--ivory);opacity:0}
+.scene{opacity:1}
+/* الجدول الزمني: يبدأ عند إضافة .go */
+.go .outline{animation:draw 2.6s cubic-bezier(.6,0,.2,1) .3s forwards}
+.go .facet{animation:drawf 1.8s ease-out 1.4s forwards}
+.go .fill{animation:fadein 1.2s ease 2.6s forwards}
+.go #gemwrap{animation:float 12s ease-in-out infinite}
+.go .s1{animation:spark 1.3s ease-out 3.6s forwards}.go .s2{animation:spark 1.3s ease-out 4.0s forwards}.go .s3{animation:spark 1.3s ease-out 4.5s forwards}
+.go .t1{animation:up 1s cubic-bezier(.2,.8,.2,1) 4.2s forwards}.go .t2{animation:up 1s cubic-bezier(.2,.8,.2,1) 4.5s forwards}
+.go .l1{animation:wide 1.2s ease 4.9s forwards}
+.go #gemwrap{transform-origin:50% 50%}
+.go .c1{animation:chip .9s ease 6.6s forwards}.go .c2{animation:chip .9s ease 7.5s forwards}.go .c3{animation:chip .9s ease 8.4s forwards}
+.go .titlegrp{animation:fadeout .6s ease 6.2s forwards}
+.go .chips{animation:fadeout .6s ease 9.3s forwards}
+.go .gemscene{animation:gemshift 1s ease-in-out 6.0s forwards,gemfinal 1.2s ease 9.3s forwards}
+.go .logo{animation:logo 1s ease 9.8s forwards}.go .cta{animation:up2 .9s ease 10.5s forwards}.go .handle{animation:fadein .9s ease 11.1s forwards}
+@keyframes draw{to{stroke-dashoffset:0}}@keyframes drawf{to{stroke-dashoffset:0}}
+@keyframes fadein{to{opacity:1}}@keyframes fadeout{to{opacity:0}}
+@keyframes up{to{transform:translateY(0)}}@keyframes up2{to{opacity:1;transform:translateY(0)}}
+@keyframes wide{to{width:520px}}
+@keyframes chip{to{opacity:1;transform:translateY(0)}}
+@keyframes logo{to{opacity:1;transform:scale(1)}}
+@keyframes spark{0%{opacity:0;transform:scale(0) rotate(0)}40%{opacity:1;transform:scale(1) rotate(45deg)}100%{opacity:0;transform:scale(.4) rotate(90deg)}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-16px)}}
+@keyframes gemshift{to{transform:translateY(-330px) scale(.55)}}
+@keyframes gemfinal{from{transform:translateY(-330px) scale(.55)}to{transform:translateY(-360px) scale(.5)}}
+</style>
+<div id="stage">
+ <div class="gemscene abs" style="top:0;height:100%"><div id="gemwrap" style="position:absolute;inset:0">
+  <svg viewBox="0 0 400 400"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+   <stop offset="0" stop-color="#F5F0E6" stop-opacity=".9"/><stop offset=".5" stop-color="#D4AF37" stop-opacity=".45"/><stop offset="1" stop-color="#8a6d1c" stop-opacity=".5"/></linearGradient></defs>
+   <polygon class="fill" points="90,120 310,120 370,190 200,370 30,190"/>
+   <polygon class="outline" points="90,120 310,120 370,190 200,370 30,190"/>
+   <polyline class="facet" points="30,190 370,190"/>
+   <polyline class="facet" points="90,120 130,190 200,370 270,190 310,120"/>
+   <polyline class="facet" points="130,190 200,120 270,190"/>
+   <polyline class="facet" points="200,120 200,190"/>
+  </svg>
+  <div class="spark s1" style="left:270px;top:500px"></div><div class="spark s2" style="left:800px;top:640px"></div><div class="spark s3" style="left:560px;top:420px"></div>
+ </div></div>
+ <div class="titlegrp">
+  <div class="abs mask" style="top:1290px;height:170px"><div class="title t1">يُرسَم قبل</div></div>
+  <div class="abs mask" style="top:1420px;height:170px"><div class="title t2" style="color:var(--gold)">أن يُلبَس</div></div>
+  <div class="line l1" style="top:1640px"></div>
+ </div>
+ <div class="chips">
+  <div class="abs chip c1" style="top:1300px"><b>01</b> &nbsp;تصميم حصري</div>
+  <div class="abs chip c2" style="top:1440px"><b>02</b> &nbsp;لمعان لا يخفت</div>
+  <div class="abs chip c3" style="top:1580px"><b>03</b> &nbsp;لحظتك الخاصة</div>
+ </div>
+ <div class="abs logo" style="top:880px">اسم العلامة</div>
+ <div class="abs" style="top:1060px"><span class="cta">احجزي موعدك</span></div>
+ <div class="abs handle" style="top:1360px">@brand.handle</div>
+</div>
+<script>
+const fit=()=>{const s=innerWidth/1080;document.getElementById('stage').style.transform=`scale(${s})`};fit();
+document.fonts.load('800 100px Cairo').then(()=>document.fonts.ready).then(()=>{window.__start=performance.now();document.getElementById('stage').classList.add('go');window.__go=true});
+</script></html>
