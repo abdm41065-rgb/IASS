@@ -8,6 +8,7 @@ class Reference:
     path: str
     kind: str  # image | video
     notes: str = ""
+    frames: list[str] = field(default_factory=list)   # إطارات جاهزة (مثلاً من الاكتشاف التلقائي)
 
     @property
     def id(self) -> str:

@@ -23,6 +23,8 @@ def collect(paths: list[str]) -> list[Reference]:
 
 def frames_for(ref: Reference, n: int = 8, workdir: str | None = None) -> list[str]:
     """يرجع مسارات الصور التي يراها المحلل. للفيديو: n إطار موزعة بالتساوي."""
+    if ref.frames:
+        return ref.frames
     if ref.kind == "image":
         return [ref.path]
     if not shutil.which("ffmpeg"):

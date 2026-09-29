@@ -16,8 +16,9 @@ class Studio:
         self.evaluator = IdeaEvaluator(llm, brand, library)
         self.strategist = StrategyBuilder(llm, brand)
 
-    def run(self, ref_paths: list[str], posts: list[Post], n_ideas: int = 20, max_revisions: int = 1) -> dict:
-        refs = media.collect(ref_paths)
+    def run(self, ref_paths: list[str], posts: list[Post], n_ideas: int = 20, max_revisions: int = 1,
+            extra_refs: list | None = None) -> dict:
+        refs = media.collect(ref_paths) + list(extra_refs or [])
         if not refs:
             raise ValueError("لم يتم العثور على صور أو فيديوهات في المسارات المعطاة")
         accepted, rejected = [], []

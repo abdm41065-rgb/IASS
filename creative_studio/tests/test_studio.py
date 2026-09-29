@@ -97,5 +97,52 @@ class W(unittest.TestCase):
         self.assertEqual(c.get("/report/..%2f..%2fetc").status_code, 404)
 
 
+
+def fake_youtube(url):
+    import urllib.parse as up
+    path = up.urlparse(url).path.split("/")[-1]
+    if path == "search":
+        return {"items": [{"id": {"videoId": v}} for v in ("v1", "v2", "v3")]}
+    if path == "videos":
+        st = lambda l, c, w: {"likeCount": l, "commentCount": c, "viewCount": w}
+        mk = lambda i, s: {"id": i, "statistics": s, "snippet": {"title": f"T{i}", "channelId": "c", "publishedAt": "2026-09-01T00:00:00Z", "tags": ["Luxury"]}}
+        return {"items": [mk("v1", st(9000, 800, 50000)), mk("v2", st(100, 2, 90000)), mk("v3", st(5000, 300, 40000))]}
+    if path == "channels":
+        return {"items": [{"id": "c", "statistics": {"subscriberCount": "100000"}}]}
+    if path == "commentThreads":
+        if "videoId=v3" in url:
+            raise RuntimeError("comments disabled")
+        return {"items": [{"snippet": {"topLevelComment": {"snippet": {"textDisplay": "تصوير خرافي", "likeCount": 500}}}}]}
+
+
+class D(unittest.TestCase):
+    def test_discovery_ranks_and_downloads(self):
+        from studio.discovery import YouTubeDiscovery
+        d = tempfile.mkdtemp()
+        y = YouTubeDiscovery("k", fake_youtube, lambda u: b"JPG")
+        found = y.search(["q"], top=2, out_dir=d)
+        self.assertEqual([f.url for f in found][0], "https://youtu.be/v1")      # الأعلى تفاعلاً وتعليقات
+        self.assertNotIn("v2", [f.url[-2:] for f in found][0])
+        self.assertEqual(len(found[0].ref.frames), 4)
+        self.assertIn("تصوير خرافي", found[0].ref.notes)
+
+    def test_pipeline_with_discovered(self):
+        from studio.discovery import YouTubeDiscovery
+        from studio.web import create_app
+        d = tempfile.mkdtemp()
+        app = create_app(f"{ROOT}/brand/brand.yaml", f"{d}/w.db",
+                         discovery_factory=lambda: YouTubeDiscovery("k", fake_youtube, lambda u: PNG))
+        r = app.test_client().post("/run", data={"discover": "عطور", "demo": "on", "ideas": "4"},
+                                   content_type="multipart/form-data")
+        self.assertEqual(r.status_code, 200, r.get_data(as_text=True)[:300])
+        self.assertIn("منشورات محللة: 3", r.get_data(as_text=True))
+
+    def test_missing_key(self):
+        from studio.discovery import YouTubeDiscovery
+        os.environ.pop("YOUTUBE_API_KEY", None)
+        with self.assertRaises(RuntimeError):
+            YouTubeDiscovery()
+
+
 if __name__ == "__main__":
     unittest.main()

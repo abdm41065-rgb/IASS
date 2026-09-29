@@ -16,7 +16,9 @@ pre{{white-space:pre-wrap;background:#17171d;padding:1rem;border-radius:8px}}a{{
 <h1>Creative Studio</h1>{body}</html>"""
 
 FORM = """<form method=post action=/run enctype=multipart/form-data>
-<label>الرفرنسات (صور/فيديو)<br><input type=file name=refs multiple required></label>
+<label>الرفرنسات (صور/فيديو)<br><input type=file name=refs multiple></label>
+<label>أو دعه يجلبها تلقائياً من YouTube: كلمات بحث مفصولة بفاصلة<br><input name=discover placeholder="luxury perfume ad, عطور فاخرة اعلان" style="width:100%"></label>
+<label>الدولة <input name=region placeholder="SA / IQ / US" size=6></label>
 <label>بيانات المنصات (CSV أو JSON) — اختياري<br><input type=file name=posts></label>
 <label>المنصة لملف البيانات <input name=platform value=instagram></label>
 <label>عدد الأفكار <input type=number name=ideas value=20 min=1 max=60></label>
@@ -24,9 +26,11 @@ FORM = """<form method=post action=/run enctype=multipart/form-data>
 <button>شغّل الفريق</button></form>"""
 
 
-def create_app(brand_path="brand/brand.yaml", db="library.db", llm_factory=None):
+def create_app(brand_path="brand/brand.yaml", db="library.db", llm_factory=None, discovery_factory=None):
     app = Flask(__name__)
     app.config["MAX_CONTENT_LENGTH"] = 500 * 1024 * 1024
+    if discovery_factory is None:
+        from .discovery import YouTubeDiscovery as discovery_factory
     has_key = bool(os.environ.get("ANTHROPIC_API_KEY"))
 
     @app.get("/")
@@ -48,6 +52,16 @@ def create_app(brand_path="brand/brand.yaml", db="library.db", llm_factory=None)
             pf.save(path)
             posts = load_sources([{"path": str(path), "platform": request.form.get("platform", "")}])
         demo = "demo" in request.form or not has_key
+        extra, q = [], request.form.get("discover", "").strip()
+        if q:
+            try:
+                from .discovery import YouTubeDiscovery
+                found = discovery_factory().search([x.strip() for x in q.split(",") if x.strip()],
+                                                   region=request.form.get("region", "").strip().upper(),
+                                                   out_dir=str(tmp / "discovered"))
+            except Exception as e:
+                return PAGE.format(body=f"<p>❌ فشل الاكتشاف: {html.escape(str(e))}</p><a href=/>رجوع</a>"), 400
+            extra, posts = [f.ref for f in found], posts + [f.post for f in found]
         if llm_factory:
             llm = llm_factory(brand)
         elif demo:
@@ -57,7 +71,7 @@ def create_app(brand_path="brand/brand.yaml", db="library.db", llm_factory=None)
             llm = ClaudeLLM()
         try:
             res = Studio(llm, brand, Library(db), log=lambda s: None).run(
-                [str(tmp)], posts, int(request.form.get("ideas", 20)))
+                [str(tmp)], posts, int(request.form.get("ideas", 20)), extra_refs=extra)
             md = to_markdown(res)
         except Exception as e:                                     # نعرض السبب للمستخدم بدل صفحة 500
             return PAGE.format(body=f"<p>❌ {html.escape(str(e))}</p><a href=/>رجوع</a>"), 500
