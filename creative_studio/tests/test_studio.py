@@ -191,5 +191,35 @@ class S(unittest.TestCase):
         self.assertIn("منشورات محللة: 2", r.get_data(as_text=True))
 
 
+
+class B(unittest.TestCase):
+    def test_num(self):
+        from studio.browser import num
+        self.assertEqual((num("1,234"), num("1.2K"), num("3M"), num("x")), (1234, 1200, 3000000, 0))
+
+    def test_parse_instagram(self):
+        from studio.browser import parse_instagram
+        p, img = parse_instagram('12K likes, 340 comments - user on September 1, 2026: "عطر #luxury جديد"', "im", "https://www.instagram.com/reel/abc/")
+        self.assertEqual((p.likes, p.comments, p.format, p.tags, img), (12000, 340, "reel", ["luxury"], "im"))
+        self.assertEqual(p.caption, "عطر #luxury جديد")
+
+    def test_parse_tiktok(self):
+        from studio.browser import parse_tiktok
+        j = {"__DEFAULT_SCOPE__": {"webapp.video-detail": {"itemInfo": {"itemStruct": {
+            "desc": "d", "createTime": "1790000000", "stats": {"diggCount": 5, "playCount": 90},
+            "authorStats": {"followerCount": 7}, "textExtra": [{"hashtagName": "Perfume"}],
+            "video": {"cover": "cv"}}}}}}
+        p, c = parse_tiktok(j, "u")
+        self.assertEqual((p.likes, p.views, p.followers, p.tags, c), (5, 90, 7, ["perfume"], "cv"))
+        self.assertEqual(parse_tiktok({}, "u")[0].likes, 0)          # صفحة بهيكل مختلف لا تكسر
+
+    def test_rank_drops_no_cover(self):
+        from studio.browser import BrowserDiscovery, parse_instagram
+        rows = [parse_instagram("100 likes, 5 comments - u on d: \"a\"", "im", "u1"),
+                parse_instagram("1 likes, 0 comments - u on d: \"b\"", "", "u2")]
+        f = BrowserDiscovery(lambda u: b"J")._rank("instagram", rows, 5, tempfile.mkdtemp())
+        self.assertEqual([x.url for x in f], ["u1"])
+
+
 if __name__ == "__main__":
     unittest.main()

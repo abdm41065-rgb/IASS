@@ -51,6 +51,14 @@ python -m studio.cli run --tiktok "perfume,luxury" --instagram "perfume,عطور
 ```
 ملاحظات: هذا وسيط طرف ثالث يسحب البيانات العامة (قد يخالف شروط المنصتين، والمسؤولية عليك)، وحقول ناتج الـ actors غير مُتحقَّق منها على الشبكة الحقيقية. تحليل الغلاف فقط (صورة واحدة) وبدون نص التعليقات. البدائل الرسمية: Instagram Graph API و TikTok Research API.
 
+## المتصفح المحلي (تسجّل دخولك بنفسك)
+```bash
+pip install playwright && playwright install chromium
+python -m studio.browser login instagram      # يفتح نافذة: سجّل دخولك ثم Enter (كرر لـ tiktok)
+python -m studio.cli run --browser --tiktok "perfume" --instagram "perfume" --top 10
+```
+يعمل على جهازك فقط، ولا يخزّن كلمة المرور. تنبيه: الأتمتة على حسابك تخالف شروط المنصتين وقد تقيّد الحساب؛ استخدم حساباً ثانوياً. لم يُجرَّب على المواقع الحقيقية (المحللات مختبرة بعينات فقط).
+
 ## مصادر الـ 500+ (تنبيه مهم)
 لا يوجد scraping مباشر لإنستغرام/تيك توك/فيسبوك (يخالف شروطها وغالباً يُحظر). الموصلات المدعومة:
 ملفات CSV/JSON مصدّرة، أو `HttpConnector` لأي API رسمي/وسيط بمفتاحك (Meta Content Library،
