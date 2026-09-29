@@ -78,5 +78,24 @@ class T(unittest.TestCase):
         self.assertEqual(parse_json('نص ```json\n{"a":1}\n``` '), {"a": 1})
 
 
+
+class W(unittest.TestCase):
+    def test_web_demo_flow(self):
+        import io
+        from studio.web import create_app
+        d = tempfile.mkdtemp()
+        app = create_app(f"{ROOT}/brand/brand.yaml", f"{d}/w.db")
+        c = app.test_client()
+        self.assertEqual(c.get("/").status_code, 200)
+        r = c.post("/run", data={"refs": (io.BytesIO(PNG), "x.png"), "demo": "on", "ideas": "4"},
+                   content_type="multipart/form-data")
+        self.assertEqual(r.status_code, 200)
+        body = r.get_data(as_text=True)
+        self.assertIn("الاستراتيجية", body)
+        job = body.split("/report/")[1].split(">")[0]
+        self.assertEqual(c.get(f"/report/{job}").status_code, 200)
+        self.assertEqual(c.get("/report/..%2f..%2fetc").status_code, 404)
+
+
 if __name__ == "__main__":
     unittest.main()
