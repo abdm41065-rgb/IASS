@@ -4,7 +4,7 @@ from pathlib import Path
 from playwright.sync_api import sync_playwright
 
 ROOT = Path(__file__).resolve().parent.parent
-URL = (ROOT / "index.html").as_uri()
+URL = os.environ.get("SMOKE_URL") or (ROOT / "index.html").as_uri()
 EXE = next((x for x in ("/opt/pw-browsers/chromium",) if os.path.isfile(x)), None)
 errors, fails = [], []
 
@@ -77,7 +77,7 @@ with sync_playwright() as p:
     # مؤقت + وضع ليلي + جوال
     pg.evaluate("location.hash='#/study'"); pg.click("#main >> text=ابدأ"); pg.wait_for_timeout(1300)
     check("⏱️" in pg.inner_text("#mini"), "mini timer shows while running")
-    pg.click("#theme"); check(pg.evaluate("document.body.classList.contains('dark')"), "dark mode")
+    pg.click("#theme"); check(pg.evaluate("document.documentElement.getAttribute('data-theme')==='dark'"), "dark mode")
     pg.set_viewport_size({"width": 390, "height": 800}); pg.click("#burger")
     check(pg.evaluate("document.body.classList.contains('nav-open')"), "mobile nav opens")
     pg.screenshot(path=str(ROOT / "tests" / "mobile.png"))

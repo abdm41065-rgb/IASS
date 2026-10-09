@@ -2,8 +2,10 @@
 (function () {
   const SP = window.SP, h = SP.h;
   const NAV = ['home', 'classes', 'teachers', 'students', 'notes', 'files', 'handouts', 'stickers', 'share', 'study', 'cards', 'quizzes', 'tasks', 'progress', 'settings'];
-  SP.applyTheme = () => { document.body.classList.toggle('dark', !!SP.state.dark); document.documentElement.style.setProperty('--fs', (SP.state.fontSize || 16) + 'px'); };
+  SP.applyTheme = () => { const r = document.documentElement; if (SP.state.dark == null) r.removeAttribute('data-theme'); else r.setAttribute('data-theme', SP.state.dark ? 'dark' : 'light'); document.documentElement.style.setProperty('--fs', (SP.state.fontSize || 16) + 'px'); };
+  SP.isDark = () => (SP.state.dark == null ? matchMedia('(prefers-color-scheme: dark)').matches : SP.state.dark);
   SP.setTheme = (d) => { SP.state.dark = d; SP.save(); SP.applyTheme(); };
+  SP.toggleTheme = () => SP.setTheme(!SP.isDark());
   SP.fillWho = () => { const w = document.getElementById('who'); w.replaceChildren(...SP.state.users.map((u) => h('option', { value: u.id, selected: u.id === SP.state.me }, (u.role === 'teacher' ? '👨‍🏫 ' : '🎓 ') + u.name))); };
   const navEl = document.getElementById('nav'), main = document.getElementById('main');
 
@@ -17,7 +19,7 @@
   };
   window.addEventListener('hashchange', SP.route);
   document.getElementById('who').addEventListener('change', (e) => { SP.state.me = e.target.value; SP.save(); SP.route(); });
-  document.getElementById('theme').addEventListener('click', () => SP.setTheme(!SP.state.dark));
+  document.getElementById('theme').addEventListener('click', () => SP.toggleTheme());
   document.getElementById('burger').addEventListener('click', () => document.body.classList.toggle('nav-open'));
   document.getElementById('gsearch').addEventListener('keydown', (e) => { if (e.key === 'Enter' && e.target.value.trim()) SP.go('search/' + encodeURIComponent(e.target.value.trim())); });
   const mini = document.getElementById('mini');

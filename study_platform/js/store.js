@@ -12,7 +12,7 @@
     const t = SP.today();
     const q1 = SP.uid(), d1 = SP.uid();
     return {
-      v: 1, me: 's1', dark: false, fontSize: 16,
+      v: 1, me: 's1', dark: null, fontSize: 16,
       users: [
         { id: 't1', name: 'المعلم أحمد', role: 'teacher' },
         { id: 's1', name: 'علي', role: 'student' },
