@@ -1,7 +1,14 @@
 /* الموجّه والهيكل العام */
 (function () {
   const SP = window.SP, h = SP.h;
-  const NAV = ['home', 'desk', 'classes', 'teachers', 'students', 'notes', 'files', 'handouts', 'stickers', 'share', 'study', 'cards', 'quizzes', 'tasks', 'progress', 'settings'];
+  const HUBS = [
+    ['home', 'الرئيسية', ['home', 'tasks', 'progress']],
+    ['desk', 'دراسة', ['desk', 'quizzes', 'cards', 'study']],
+    ['notes', 'مكتبتي', ['notes', 'files', 'handouts', 'stickers']],
+    ['classes', 'الصفوف', ['classes', 'share', 'teachers', 'students']],
+    ['settings', 'الإعدادات', ['settings']],
+  ];
+  const ICON_FOR = { home: 'home', desk: 'desk', notes: 'files', classes: 'classes', settings: 'settings' };
   SP.applyTheme = () => { const r = document.documentElement; if (SP.state.dark == null) r.removeAttribute('data-theme'); else r.setAttribute('data-theme', SP.state.dark ? 'dark' : 'light'); document.documentElement.style.setProperty('--fs', (SP.state.fontSize || 16) + 'px'); };
   SP.isDark = () => (SP.state.dark == null ? matchMedia('(prefers-color-scheme: dark)').matches : SP.state.dark);
   SP.setTheme = (d) => { SP.state.dark = d; SP.save(); SP.applyTheme(); };
@@ -31,9 +38,11 @@
   SP.route = () => {
     SP.cleanups.splice(0).forEach((f) => f());
     const parts = location.hash.replace(/^#\/?/, '').split('/').filter(Boolean), key = SP.views[parts[0]] ? parts[0] : 'home', v = SP.views[key];
-    navEl.replaceChildren(...NAV.map((k) => h('a', { href: '#/' + k, class: k === key ? 'on' : '' }, icon(k), SP.views[k].label)));
+    const hub = HUBS.find((x) => x[2].includes(key));
+    navEl.replaceChildren(...HUBS.map(([k, label]) => h('a', { href: '#/' + k, class: hub && hub[0] === k ? 'on' : '', 'aria-current': hub && hub[0] === k ? 'page' : null }, icon(ICON_FOR[k]), label)));
+    const sub = hub && hub[2].length > 1 ? h('nav', { class: 'tabs subnav', 'aria-label': 'أقسام ' + hub[1] }, hub[2].map((k) => h('a', { class: 'tab' + (k === key ? ' on' : ''), href: '#/' + k, 'aria-current': k === key ? 'page' : null }, SP.views[k].label))) : null;
     document.title = v.label + ' · منصة الدراسة';
-    try { main.replaceChildren(v.render(parts.slice(1))); } catch (e) { console.error(e); main.replaceChildren(SP.empty('حدث خطأ غير متوقع في هذه الصفحة.')); }
+    try { main.replaceChildren(...[sub, v.render(parts.slice(1))].filter(Boolean)); } catch (e) { console.error(e); main.replaceChildren(SP.empty('حدث خطأ غير متوقع في هذه الصفحة.')); }
     document.body.classList.remove('nav-open'); window.scrollTo(0, 0); SP.emit('route');
   };
   window.addEventListener('hashchange', SP.route);

@@ -155,69 +155,148 @@
     mine.forEach((m) => (m.read = true)); SP.save(); updateBell();
   });
 
-  /* ---------- الشخصية «سند» ---------- */
-  const OWL = `<svg viewBox="0 0 120 120" aria-hidden="true"><g class="m-body">
-    <path class="wing wl" d="M22 70c-10 6-12 22-4 30 6-4 10-14 10-26z" fill="#163A70"/><path class="wing wr" d="M98 70c10 6 12 22 4 30-6-4-10-14-10-26z" fill="#163A70"/>
-    <path d="M28 44 33 22 46 38z M92 44 87 22 74 38z" fill="#1F4E99"/>
-    <ellipse cx="60" cy="72" rx="38" ry="40" fill="#1F4E99"/><ellipse cx="60" cy="88" rx="22" ry="20" fill="#E4ECF7"/>
-    <path d="M50 84h20M48 92h24M52 100h16" stroke="#9DB8E0" stroke-width="2" stroke-linecap="round" fill="none"/>
-    <circle cx="44" cy="60" r="15" fill="#fff"/><circle cx="76" cy="60" r="15" fill="#fff"/>
-    <g class="pupils"><circle cx="45" cy="61" r="6.5" fill="#14213D"/><circle cx="77" cy="61" r="6.5" fill="#14213D"/><circle cx="47" cy="58.5" r="2" fill="#fff"/><circle cx="79" cy="58.5" r="2" fill="#fff"/></g>
-    <g class="lids"><rect x="28" y="44" width="32" height="32" rx="16" fill="#1F4E99"/><rect x="60" y="44" width="32" height="32" rx="16" fill="#1F4E99"/></g>
-    <circle cx="33" cy="74" r="4" fill="#F7A8B8" opacity=".55"/><circle cx="87" cy="74" r="4" fill="#F7A8B8" opacity=".55"/>
-    <path d="M55 71h10l-5 8z" fill="#F2B233"/>
-    <path d="M30 30 60 18 90 30 60 42z" fill="#14213D"/><path d="M60 30v-2M84 32v14" stroke="#F2B233" stroke-width="2.5" stroke-linecap="round"/><circle cx="84" cy="47" r="3" fill="#F2B233"/>
-  </g></svg>`;
+  /* ---------- الشخصية: 6 أشكال + ألوان + إكسسوارات ---------- */
+  const KINDS = { owl: 'بومة', cat: 'قطة', robot: 'روبوت', bear: 'دب', fox: 'ثعلب', penguin: 'بطريق' };
+  const KIND_COLOR = { owl: '#1F4E99', cat: '#6B7280', robot: '#0F766E', bear: '#7C5A3C', fox: '#C2410C', penguin: '#1F2937' };
+  const MCOLORS = ['#1F4E99', '#0F766E', '#2E7D32', '#C2410C', '#B91C1C', '#7B3FA0', '#7C5A3C', '#6B7280', '#1F2937', '#D4A017'];
+  const ACCS = { cap: 'قبعة تخرّج', crown: 'تاج', headphones: 'سماعات', glasses: 'نظارة', bow: 'فيونكة', none: 'بدون' };
+  const shade = (hex, f) => { const n = parseInt(hex.slice(1), 16), c = [n >> 16, (n >> 8) & 255, n & 255].map((v) => Math.round(f < 0 ? v * (1 + f) : v + (255 - v) * f)); return '#' + c.map((v) => v.toString(16).padStart(2, '0')).join(''); };
+  function svgFor(cfg) {
+    const k = KINDS[cfg.kind] ? cfg.kind : 'owl', C = cfg.color || KIND_COLOR[k], D = shade(C, -0.3), L = k === 'fox' || k === 'penguin' ? '#FFFFFF' : shade(C, 0.82), P = '#14213D';
+    const arms = (rx = 9, ry = 15, fill = D) => `<ellipse class="wing wl" cx="23" cy="80" rx="${rx}" ry="${ry}" fill="${fill}"/><ellipse class="wing wr" cx="97" cy="80" rx="${rx}" ry="${ry}" fill="${fill}"/>`;
+    const eyes = `<circle cx="44" cy="60" r="15" fill="#fff"/><circle cx="76" cy="60" r="15" fill="#fff"/><g class="pupils"><circle cx="45" cy="61" r="6.5" fill="${P}"/><circle cx="77" cy="61" r="6.5" fill="${P}"/><circle cx="47" cy="58.5" r="2" fill="#fff"/><circle cx="79" cy="58.5" r="2" fill="#fff"/></g><g class="lids"><rect x="28" y="44" width="32" height="32" rx="16" fill="${C}"/><rect x="60" y="44" width="32" height="32" rx="16" fill="${C}"/></g>`;
+    const cheeks = `<circle cx="33" cy="76" r="4" fill="#F7A8B8" opacity=".6"/><circle cx="87" cy="76" r="4" fill="#F7A8B8" opacity=".6"/>`;
+    const B = {
+      owl: `<path class="wing wl" d="M22 70c-10 6-12 22-4 30 6-4 10-14 10-26z" fill="${D}"/><path class="wing wr" d="M98 70c10 6 12 22 4 30-6-4-10-14-10-26z" fill="${D}"/><path d="M28 44 33 22 46 38z M92 44 87 22 74 38z" fill="${C}"/><ellipse cx="60" cy="72" rx="38" ry="40" fill="${C}"/><ellipse cx="60" cy="88" rx="22" ry="20" fill="${L}"/><path d="M50 84h20M48 92h24M52 100h16" stroke="${shade(C, 0.5)}" stroke-width="2" stroke-linecap="round" fill="none"/>${eyes}${cheeks}<path d="M55 71h10l-5 8z" fill="#F2B233"/>`,
+      cat: `${arms()}<path d="M26 50 30 18 52 36z M94 50 90 18 68 36z" fill="${C}"/><path d="M31 40 33 26 44 36z M89 40 87 26 76 36z" fill="#F7A8B8"/><ellipse cx="60" cy="72" rx="38" ry="40" fill="${C}"/><ellipse cx="60" cy="92" rx="20" ry="16" fill="${L}"/>${eyes}${cheeks}<path d="M56 72h8l-4 5z" fill="#E66A8A"/><path d="M60 77c-2 4-7 4-8 1M60 77c2 4 7 4 8 1" stroke="${P}" stroke-width="1.8" fill="none" stroke-linecap="round"/><path d="M30 74h-14M30 79l-13 3M90 74h14M90 79l13 3" stroke="${P}" stroke-width="1.4" opacity=".55" stroke-linecap="round"/>`,
+      robot: `<path d="M60 30V16" stroke="${D}" stroke-width="3"/><circle cx="60" cy="14" r="5" fill="#F2B233"/>${arms(8, 14)}<rect x="22" y="30" width="76" height="80" rx="18" fill="${C}"/><rect x="28" y="42" width="64" height="40" rx="12" fill="${L}"/>${eyes}<rect x="46" y="90" width="28" height="8" rx="3" fill="${D}"/><path d="M52 90v8M60 90v8M68 90v8" stroke="${L}" stroke-width="1.5"/><circle cx="30" cy="100" r="2.5" fill="${D}"/><circle cx="90" cy="100" r="2.5" fill="${D}"/>`,
+      bear: `<circle cx="30" cy="36" r="12" fill="${C}"/><circle cx="90" cy="36" r="12" fill="${C}"/><circle cx="30" cy="36" r="6" fill="${L}"/><circle cx="90" cy="36" r="6" fill="${L}"/>${arms(10, 15)}<ellipse cx="60" cy="72" rx="38" ry="40" fill="${C}"/><ellipse cx="60" cy="94" rx="20" ry="15" fill="${L}"/>${eyes}<ellipse cx="60" cy="78" rx="12" ry="9" fill="${L}"/><ellipse cx="60" cy="74" rx="5" ry="3.5" fill="${P}"/><path d="M60 78v4M56 83c2 2 6 2 8 0" stroke="${P}" stroke-width="1.6" fill="none" stroke-linecap="round"/>${cheeks}`,
+      fox: `<path d="M24 52 26 14 52 36z M96 52 94 14 68 36z" fill="${C}"/><path d="M30 42 31 26 43 36z M90 42 89 26 77 36z" fill="${P}" opacity=".6"/>${arms()}<ellipse cx="60" cy="72" rx="38" ry="40" fill="${C}"/><path d="M22 72c10 4 22 6 38 22 16-16 28-18 38-22-2 22-18 38-38 38S24 94 22 72z" fill="#fff"/>${eyes}<ellipse cx="60" cy="80" rx="5" ry="3.5" fill="${P}"/>${cheeks}`,
+      penguin: `<path class="wing wl" d="M24 66c-10 10-10 26-2 32 6-6 8-18 8-30z" fill="${C}"/><path class="wing wr" d="M96 66c10 10 10 26 2 32-6-6-8-18-8-30z" fill="${C}"/><ellipse cx="60" cy="70" rx="38" ry="42" fill="${C}"/><ellipse cx="60" cy="80" rx="27" ry="32" fill="#fff"/>${eyes}<path d="M54 74h12l-6 8z" fill="#F2A33A"/><ellipse cx="48" cy="111" rx="9" ry="4" fill="#F2A33A"/><ellipse cx="72" cy="111" rx="9" ry="4" fill="#F2A33A"/>${cheeks}`,
+    };
+    const A = {
+      cap: `<path d="M30 30 60 18 90 30 60 42z" fill="${P}"/><path d="M84 32v14" stroke="#F2B233" stroke-width="2.5" stroke-linecap="round"/><circle cx="84" cy="47" r="3" fill="#F2B233"/>`,
+      crown: `<path d="M38 34 42 14 52 26 60 10 68 26 78 14 82 34z" fill="#F2B233" stroke="#C98A00" stroke-width="1.5"/><circle cx="60" cy="24" r="2.5" fill="#B91C1C"/>`,
+      headphones: `<path d="M26 60c0-26 16-40 34-40s34 14 34 40" stroke="${P}" stroke-width="5" fill="none"/><rect x="16" y="54" width="14" height="22" rx="6" fill="${P}"/><rect x="90" y="54" width="14" height="22" rx="6" fill="${P}"/>`,
+      glasses: `<circle cx="44" cy="60" r="16" stroke="${P}" stroke-width="3" fill="none"/><circle cx="76" cy="60" r="16" stroke="${P}" stroke-width="3" fill="none"/><path d="M58 58h4" stroke="${P}" stroke-width="3"/>`,
+      bow: `<path d="M78 30 92 22 92 40z M78 30 64 22 64 40z" fill="#E66A8A"/><circle cx="78" cy="31" r="4" fill="#C2185B"/>`, none: '',
+    };
+    const kind = B[k];
+    return `<svg viewBox="0 0 120 120" aria-hidden="true" data-kind="${k}"><g class="m-body">${kind}${A[cfg.acc] != null ? A[cfg.acc] : A.cap}</g></svg>`;
+  }
+  const cfgs = () => (S().mascot = S().mascot || {});
+  const cfg = () => (cfgs()[SP.state.me] = Object.assign({ kind: 'owl', color: '', acc: 'cap', name: 'سند' }, cfgs()[SP.state.me] || {}));
+  const mname = () => cfg().name || 'سند';
+
   const MOODS = {
     happy: ['😊', ['تمام!', 'ممتاز 👌', 'أحسنت!']], celebrate: ['🎉', ['رائع جداً! 🏆', 'إنجاز يستحق الاحتفال 🎉', 'نجم! ⭐']], encourage: ['💪', ['لا بأس، نحاول مرة ثانية 💪', 'كل خطأ درس جديد 🌱', 'قريب جداً، استمر!']],
     thinking: ['🤔', ['دعني أفكر…', 'أقرأ الآن… 📖']], write: ['✍️', ['حفظت ملاحظتك ✍️', 'فكرة جميلة 💡']], file: ['📁', ['وصل الملف 📁', 'أضفته لملفاتك ✅']],
-    send: ['📨', ['وصلت الأمانة 📨', 'تم الإرسال ✈️']], wave: ['👋', ['أهلاً! أنا سند 🦉', 'مرحباً بعودتك 👋']], inbox: ['📬', ['وصلك ملف جديد 📬']],
+    send: ['📨', ['وصلت الأمانة 📨', 'تم الإرسال ✈️']], wave: ['👋', ['أهلاً! 👋', 'مرحباً بعودتك 👋']], inbox: ['📬', ['وصلك ملف جديد 📬']],
+    giggle: ['😆', ['هههه، تدغدغني! 😆', 'نعم؟ أنا هنا 👀', 'هلا! 😄']], love: ['❤️', ['وأنا أحبك كمان ❤️', 'أنت أفضل طالب 🥰']],
+    dizzy: ['😵‍💫', ['دوّختني! 😵‍💫', 'الدنيا تلف… 🌀']], angry: ['😤', ['كفى نقراً! 😤', 'خلاص خلاص، أنا صاحي 😠']],
+    lifted: ['😮', ['وااو! إلى أين؟ 😮', 'أنا أطير! 🕊️']], landed: ['😌', ['هبوط آمن 🛬', 'مكان جميل هنا 😌']], sleepy: ['💤', ['زززز… 💤']], scroll: ['🎢', ['وااو بسرعة! 🎢']],
   };
   const root = h('div', { class: 'mascot', id: 'sanad' }), bubble = h('div', { class: 'm-bubble', role: 'status', hidden: true });
-  const fig = h('button', { class: 'm-fig', 'aria-label': 'افتح المساعد سند', title: 'سند: مساعدك' }); fig.innerHTML = OWL;
-  root.append(bubble, fig); document.body.append(root);
-  let bubbleT = 0;
+  const fig = h('button', { class: 'm-fig', title: 'انقر، انقر مرتين أو أكثر، أو اسحبني' });
+  const chatBtn = h('button', { class: 'm-chat', 'aria-label': 'افتح المحادثة' }, h('span', { 'aria-hidden': 'true' }, '💬'));
+  root.append(bubble, h('div', { class: 'm-row' }, fig, chatBtn)); document.body.append(root);
+  let bubbleT = 0, panelOpen = false;
   const say = (text, ms = 4200) => { if (panelOpen) return; bubble.textContent = text; bubble.hidden = false; clearTimeout(bubbleT); bubbleT = setTimeout(() => (bubble.hidden = true), ms); };
   const anim = (cls, ms = 1400) => { if (reduced) return; root.classList.remove(cls); void root.offsetWidth; root.classList.add(cls); setTimeout(() => root.classList.remove(cls), ms); };
-  const burst = (emo) => { if (reduced) return; for (let i = 0; i < 6; i++) { const e = h('span', { class: 'm-pop', style: `--dx:${Math.round(Math.random() * 120 - 60)}px;--d:${i * 70}ms` }, emo); root.append(e); setTimeout(() => e.remove(), 1600); } };
+  const burst = (emo, n = 6) => { if (reduced) return; for (let i = 0; i < n; i++) { const e = h('span', { class: 'm-pop', style: `--dx:${Math.round(Math.random() * 120 - 60)}px;--d:${i * 70}ms` }, emo); root.append(e); setTimeout(() => e.remove(), 1600); } };
   SP.react = (mood) => {
     const m = MOODS[mood] || MOODS.happy, line = m[1][Math.floor(Math.random() * m[1].length)];
-    root.dataset.mood = mood; say(line);
-    if (mood === 'celebrate') { anim('jump'); burst(m[0]); } else if (mood === 'thinking') anim('think', 2600); else if (mood === 'wave' || mood === 'send' || mood === 'inbox') anim('wave'); else anim('nod', 900);
+    root.dataset.mood = mood; say(line); wake(false);
+    const A = { celebrate: ['jump', 1400], love: ['love', 1200], dizzy: ['spin', 1300], angry: ['shake', 900], thinking: ['think', 2600], landed: ['land', 600], scroll: ['spin', 1300], wave: ['wave', 1400], send: ['wave', 1400], inbox: ['wave', 1400], giggle: ['nod', 900] }[mood] || ['nod', 900];
+    anim(A[0], A[1]); if (mood === 'celebrate' || mood === 'love') burst(m[0]); if (mood === 'dizzy' || mood === 'angry') burst(m[0], 3);
   };
   (SP.listeners.react = SP.listeners.react || []).push(SP.react);
-  /* رمش العين وحركات خفيفة كل فترة */
-  const blink = () => { root.classList.add('blink'); setTimeout(() => root.classList.remove('blink'), 160); setTimeout(blink, 2500 + Math.random() * 3500); };
+  const paint = () => {
+    const c = cfg(); fig.innerHTML = svgFor(c);
+    fig.setAttribute('aria-label', `${mname()} (${KINDS[c.kind] || 'بومة'}): انقر للتفاعل`); chatBtn.setAttribute('aria-label', 'تكلّم مع ' + mname());
+    const p = c.pos; root.style.left = (p ? p.x : 16) + 'px'; root.style.bottom = `calc(${p ? p.y : 16}px + env(safe-area-inset-bottom, 0px))`;
+    const f = document.querySelector('.m-panel .m-face'), t = document.querySelector('.m-panel header b'); if (f) f.innerHTML = svgFor(c); if (t) t.textContent = mname();
+  };
+
+  /* النقرات: واحدة، اثنتان، ثلاث، خمس فأكثر — والسحب (رفع وإنزال) */
+  let taps = 0, tapT = 0, down = null, dragging = false, lastAct = Date.now(), asleep = false;
+  const reactTaps = (n) => SP.react(n === 1 ? 'giggle' : n === 2 ? 'love' : n <= 4 ? 'dizzy' : 'angry');
+  const clampPos = (x, y) => ({ x: Math.round(Math.max(4, Math.min(innerWidth - 90, x))), y: Math.round(Math.max(4, Math.min(innerHeight - 110, y))) });
+  fig.addEventListener('pointerdown', (e) => { if (e.button) return; const p = cfg().pos || { x: 16, y: 16 }; down = { x: e.clientX, y: e.clientY, px: p.x, py: p.y, last: e.clientY }; dragging = false; fig.setPointerCapture(e.pointerId); });
+  fig.addEventListener('pointermove', (e) => {
+    if (!down) return; const dx = e.clientX - down.x, dy = e.clientY - down.y;
+    if (!dragging && Math.hypot(dx, dy) > 8) { dragging = true; root.classList.add('lifted'); SP.react('lifted'); }
+    if (!dragging) return;
+    const c = cfg(); c.pos = clampPos(down.px + dx, down.py - dy); root.style.left = c.pos.x + 'px'; root.style.bottom = c.pos.y + 'px';
+    root.dataset.look = e.clientY < down.last - 2 ? 'up' : e.clientY > down.last + 2 ? 'down' : root.dataset.look; down.last = e.clientY;
+  });
+  const up = () => {
+    if (!down) return; const was = dragging; down = null; dragging = false; delete root.dataset.look;
+    if (was) { root.classList.remove('lifted'); SP.save(); SP.react('landed'); return; }
+    taps++; clearTimeout(tapT); tapT = setTimeout(() => { reactTaps(taps); taps = 0; }, 360);
+  };
+  fig.addEventListener('pointerup', up); fig.addEventListener('pointercancel', up);
+  fig.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); reactTaps(1); } });
+  chatBtn.addEventListener('click', () => toggle());
+  addEventListener('resize', () => { const c = cfg(); if (c.pos) { c.pos = clampPos(c.pos.x, c.pos.y); paint(); } });
+
+  /* التمرير لأعلى وأسفل: العينان تتبعان الاتجاه، والتمرير السريع يدوّخه */
+  let lastY = scrollY, lastT = performance.now(), lookT = 0, dizzyAt = 0;
+  addEventListener('scroll', () => {
+    const now = performance.now(), dy = scrollY - lastY, v = Math.abs(dy) / Math.max(1, now - lastT) * 1000; lastY = scrollY; lastT = now;
+    if (!dy) return; root.dataset.look = dy < 0 ? 'up' : 'down'; clearTimeout(lookT); lookT = setTimeout(() => delete root.dataset.look, 700);
+    if (v > 4000 && now - dizzyAt > 15000) { dizzyAt = now; SP.react('scroll'); }
+  }, { passive: true });
+
+  /* رمش، ونوم بعد الخمول، ونصيحة كل فترة */
+  const blink = () => { if (!asleep) { root.classList.add('blink'); setTimeout(() => root.classList.remove('blink'), 160); } setTimeout(blink, 2500 + Math.random() * 3500); };
   if (!reduced) setTimeout(blink, 1800);
+  const wake = (greet) => { lastAct = Date.now(); if (asleep) { asleep = false; root.classList.remove('sleep'); if (greet) say('صحيت! ☀️'); } };
+  ['pointerdown', 'keydown'].forEach((t) => addEventListener(t, () => wake(true), { passive: true }));
+  setInterval(() => { if (!asleep && !panelOpen && Date.now() - lastAct > 180000) { asleep = true; root.classList.add('sleep'); root.dataset.mood = 'sleepy'; say('زززز… 💤', 6000); } }, 30000);
   const tip = () => {
-    if (document.hidden || panelOpen) return;
+    if (document.hidden || panelOpen || asleep) return;
     const uid = SP.state.me, t = SP.today(), due = S().decks.filter((d) => d.ownerId === uid).flatMap((d) => d.cards).filter((c) => (c.due || t) <= t).length;
     const tasks = S().tasks.filter((x) => x.userId === uid && !x.done && x.due && x.due <= t).length, min = SP.studyMin(uid, t), goal = S().goalMin || 60;
-    const tips = [due && `عندك ${due} بطاقة للمراجعة اليوم 🃏`, tasks && `${tasks} مهمة موعدها اليوم ✅`, min < goal && `باقي ${goal - min} دقيقة على هدفك اليوم ⏱️`, min >= goal && 'حققت هدف اليوم! 🌟', 'جرّب: افتح درساً في «دراسة» وظلّل المهم 🖍️', 'اسألني أي سؤال عن دروسك 💬', 'استراحة قصيرة تساعد على التركيز ☕', 'أستطيع كتابة أسئلة من أي ملف 📄❓'].filter(Boolean);
+    const tips = [due && `عندك ${due} بطاقة للمراجعة اليوم 🃏`, tasks && `${tasks} مهمة موعدها اليوم ✅`, min < goal && `باقي ${goal - min} دقيقة على هدفك اليوم ⏱️`, min >= goal && 'حققت هدف اليوم! 🌟', 'جرّب: افتح درساً في «دراسة» وظلّل المهم 🖍️', 'اسألني أي سؤال عن دروسك 💬', 'استراحة قصيرة تساعد على التركيز ☕', 'أستطيع كتابة أسئلة من أي ملف 📄❓', 'تقدر تغيّر شكلي من زر 💬 ثم «شكلي» 🎨'].filter(Boolean);
     say(tips[Math.floor(Math.random() * tips.length)], 5500); anim(Math.random() < 0.5 ? 'wave' : 'nod');
   };
   setInterval(tip, 75000);
-  setTimeout(() => { const n = inbox().filter((m) => m.to === SP.state.me && !m.read).length; n ? SP.react('inbox') : SP.react('wave'); }, 1200);
+  setTimeout(() => { const n = inbox().filter((m) => m.to === SP.state.me && !m.read).length; n ? SP.react('inbox') : (say(`أهلاً! أنا ${mname()} ${({ owl: '🦉', cat: '🐱', robot: '🤖', bear: '🐻', fox: '🦊', penguin: '🐧' })[cfg().kind] || ''}`), anim('wave')); }, 1200);
+
+  /* تخصيص الشكل */
+  SP.customizeMascot = () => {
+    const c = { ...cfg() }; const prev = h('div', { class: 'm-preview' }), name = h('input', { class: 'inp', id: 'm-name', value: c.name, maxlength: 20 });
+    const kinds = h('div', { class: 'm-kinds' }), colors = h('div', { class: 'row' }), accs = h('div', { class: 'row' });
+    const draw = () => {
+      prev.innerHTML = svgFor(c);
+      kinds.replaceChildren(...Object.entries(KINDS).map(([k, l]) => { const b = h('button', { class: 'm-kind' + (c.kind === k ? ' on' : ''), 'aria-pressed': String(c.kind === k), onclick: () => { c.kind = k; c.color = ''; draw(); } }); b.innerHTML = svgFor({ kind: k, color: '', acc: 'none' }); b.append(h('span', {}, l)); return b; }));
+      colors.replaceChildren(...MCOLORS.map((x) => h('button', { class: 'pc' + ((c.color || KIND_COLOR[c.kind]) === x ? ' on' : ''), style: { background: x }, 'aria-label': 'لون', onclick: () => { c.color = x; draw(); } })));
+      accs.replaceChildren(...Object.entries(ACCS).map(([k, l]) => h('button', { class: 'chip' + (c.acc === k ? ' on' : ''), onclick: () => { c.acc = k; draw(); } }, l)));
+    };
+    draw();
+    SP.modal({ title: 'شكل مساعدك', wide: true, body: h('div', { class: 'm-custom' }, prev, h('div', {}, SP.field('الاسم', name), h('label', { class: 'lbl' }, 'الشخصية'), kinds, h('label', { class: 'lbl' }, 'اللون'), colors, h('label', { class: 'lbl' }, 'الإكسسوار'), accs)),
+      actions: [{ label: 'إلغاء', onclick: (x) => x() }, { label: 'حفظ', primary: true, onclick: (x) => { c.name = name.value.trim() || 'سند'; cfgs()[SP.state.me] = c; SP.save(); paint(); x(); SP.react('celebrate'); } }] });
+  };
 
   /* ---------- المحادثة ---------- */
-  let panelOpen = false, ctl = null;
+  let ctl = null;
   const chats = () => ((S().chat = S().chat || {})[SP.state.me] = (S().chat[SP.state.me] || []));
   const panel = h('section', { class: 'm-panel', hidden: true, 'aria-label': 'محادثة سند' });
-  const list = h('div', { class: 'm-list', 'aria-live': 'polite' }), input = h('textarea', { class: 'inp', id: 'sanad-input', rows: 1, placeholder: 'اكتب لسند…', 'aria-label': 'رسالة إلى سند' });
+  const list = h('div', { class: 'm-list', 'aria-live': 'polite' }), input = h('textarea', { class: 'inp', id: 'sanad-input', rows: 1, placeholder: 'اكتب رسالتك…', 'aria-label': 'رسالة إلى المساعد' });
   const sendBtn = h('button', { class: 'btn', onclick: () => send() }, 'إرسال'), stopBtn = h('button', { class: 'btn ghost', hidden: true, onclick: () => ctl && ctl.abort() }, 'إيقاف');
-  const face = h('span', { class: 'm-face' }); face.innerHTML = OWL;
+  const face = h('span', { class: 'm-face' }), title = h('b', {}, mname());
   const SUGG = ['ما مهامي اليوم؟', 'اختبرني بسؤال', 'لخّص آخر ملاحظاتي', 'كيف أنظّم وقتي للمذاكرة؟'];
-  panel.append(h('header', {}, face, h('div', {}, h('b', {}, 'سند'), h('div', { class: 'sub', style: { margin: 0, fontSize: '.8rem' } }, 'مساعدك في الدراسة')),
-    h('button', { class: 'btn ghost sm', 'aria-label': 'مسح المحادثة', onclick: () => { chats().length = 0; SP.save(); drawChat(); } }, 'مسح'), h('button', { class: 'btn ghost sm', 'aria-label': 'إغلاق', onclick: () => toggle(false) }, '✕')),
+  panel.append(h('header', {}, face, h('div', {}, title, h('div', { class: 'sub', style: { margin: 0, fontSize: '.8rem' } }, 'مساعدك في الدراسة')),
+    h('button', { class: 'btn ghost sm', onclick: () => SP.customizeMascot() }, 'شكلي'), h('button', { class: 'btn ghost sm', 'aria-label': 'مسح المحادثة', onclick: () => { chats().length = 0; SP.save(); drawChat(); } }, 'مسح'), h('button', { class: 'btn ghost sm', 'aria-label': 'إغلاق', onclick: () => toggle(false) }, '✕')),
     list, h('div', { class: 'm-sugg' }, SUGG.map((s) => h('button', { class: 'chip', onclick: () => send(s) }, s))), h('div', { class: 'm-input' }, input, sendBtn, stopBtn));
   document.body.append(panel);
   input.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } });
-  const toggle = (on = !panelOpen) => { panelOpen = on; panel.hidden = !on; root.classList.toggle('open', on); bubble.hidden = true; if (on) { drawChat(); input.focus(); } else fig.focus(); };
-  fig.addEventListener('click', () => toggle());
+  const toggle = (on = !panelOpen) => { panelOpen = on; panel.hidden = !on; root.classList.toggle('open', on); bubble.hidden = true; if (on) { drawChat(); input.focus(); } else chatBtn.focus(); };
   const msgEl = (m) => h('div', { class: 'm-msg ' + (m.role === 'user' ? 'me' : 'bot') }, m.text);
   function drawChat() {
     const c = chats();
-    list.replaceChildren(...(c.length ? c.map(msgEl) : [h('div', { class: 'm-msg bot' }, `أهلاً ${SP.me().name}! أنا سند 🦉 مساعدك في الدراسة. اسألني عن دروسك، أو اطلب مني أختبرك، أو أذكّرك بمهامك.`)]));
+    list.replaceChildren(...(c.length ? c.map(msgEl) : [h('div', { class: 'm-msg bot' }, `أهلاً ${SP.me().name}! أنا ${mname()}، مساعدك في الدراسة. اسألني عن دروسك، أو اطلب مني أختبرك، أو أذكّرك بمهامك.`)]));
     list.scrollTop = list.scrollHeight;
   }
   const brief = () => {
@@ -250,7 +329,7 @@
     const sample = await SP.aiSample(); root.dataset.mood = 'thinking';
     if (!sample) { setTimeout(() => { const a = offline(q); c.push({ role: 'bot', text: a }); SP.save(); drawChat(); SP.react('happy'); }, 500); return; }
     ctl = new AbortController(); sendBtn.hidden = true; stopBtn.hidden = false;
-    const RULES = `أنت «سند»، بومة لطيفة ومساعد دراسة داخل منصة دراسة عربية. تكلّم بالعربية بلهجة ودودة وواضحة، بجمل قصيرة، واستخدم إيموجي واحداً أو اثنين في كل رد بشكل طبيعي. ساعد في شرح الدروس، اختبار المستخدم بأسئلة، تنظيم الوقت، والتحفيز. لا تخترع معلومات عن ملفات لم تقرأها. ابدأ ردك دائماً بوسم المزاج بين قوسين مربعين واحد فقط من: [happy] [celebrate] [encourage] [thinking] [wave] ثم الرد. بيانات المستخدم الآن: ${JSON.stringify(brief())}`;
+    const RULES = `أنت «${mname()}»، ${KINDS[cfg().kind] || 'بومة'} لطيف ومساعد دراسة داخل منصة دراسة عربية. تكلّم بالعربية بلهجة ودودة وواضحة، بجمل قصيرة، واستخدم إيموجي واحداً أو اثنين في كل رد بشكل طبيعي. ساعد في شرح الدروس، اختبار المستخدم بأسئلة، تنظيم الوقت، والتحفيز. لا تخترع معلومات عن ملفات لم تقرأها. ابدأ ردك دائماً بوسم المزاج بين قوسين مربعين واحد فقط من: [happy] [celebrate] [encourage] [thinking] [wave] ثم الرد. بيانات المستخدم الآن: ${JSON.stringify(brief())}`;
     const turns = [{ role: 'user', content: RULES }, ...c.slice(-16).map((m) => ({ role: m.role === 'user' ? 'user' : 'assistant', content: m.text }))];
     const clean = (t) => t.replace(/^\s*\[(happy|celebrate|encourage|thinking|wave)\]\s*/i, '');
     try {
@@ -262,7 +341,7 @@
       if (e.text) c.push({ role: 'bot', text: clean(e.text) }); SP.save();
     } finally { ctl = null; sendBtn.hidden = false; stopBtn.hidden = true; }
   }
-  SP.on && (SP.listeners.route = SP.listeners.route || []).push(() => { updateBell(); if (panelOpen) drawChat(); });
-  updateBell();
+  (SP.listeners.route = SP.listeners.route || []).push(() => { updateBell(); paint(); if (panelOpen) drawChat(); });
+  updateBell(); paint();
   SP._ai = { offlineQuestions, normalize, offline, toggle, send };
 })();

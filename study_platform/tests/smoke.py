@@ -28,7 +28,9 @@ with sync_playwright() as p:
     for r in routes:
         pg.evaluate(f"location.hash='#/{r}'"); pg.wait_for_timeout(60)
         check(pg.locator("#main h1").count() >= 1 or pg.locator("#main .card").count() > 0, f"route {r} renders")
-    check(len(pg.locator("#nav a").all()) == 16, "16 nav sections")
+    check(len(pg.locator("#nav a").all()) == 5, "sidebar has 5 sections")
+    pg.evaluate("location.hash='#/files'"); pg.wait_for_timeout(60)
+    check(pg.locator(".subnav a").count() == 4 and pg.inner_text("#nav a.on").strip() == "مكتبتي", "hub sub-tabs for library")
 
     # معلم ينشئ صفاً ويضيف فويزاً
     pg.select_option("#who", "t1"); pg.evaluate("location.hash='#/classes'")
@@ -119,10 +121,25 @@ with sync_playwright() as p:
     check(pg.locator(".pg").count() == 3, "file opens in desk from Files")
 
 
+
+    # تفاعلات الشخصية
+    pg.evaluate("location.hash='#/home'"); pg.wait_for_timeout(100)
+    mood = lambda: pg.evaluate("document.getElementById('sanad').dataset.mood")
+    pg.locator("#sanad .m-fig").click(); pg.wait_for_timeout(500); check(mood() == "giggle", "single tap reaction")
+    pg.locator("#sanad .m-fig").click(click_count=2); pg.wait_for_timeout(500); check(mood() == "love", "double tap reaction")
+    pg.locator("#sanad .m-fig").click(click_count=3); pg.wait_for_timeout(500); check(mood() == "dizzy", "triple tap reaction")
+    for _ in range(6): pg.locator("#sanad .m-fig").click(delay=10)
+    pg.wait_for_timeout(500); check(mood() == "angry", "many taps reaction")
+    fb = pg.locator("#sanad .m-fig").bounding_box(); pg.mouse.move(fb["x"] + 30, fb["y"] + 30); pg.mouse.down(); pg.mouse.move(fb["x"] + 330, fb["y"] - 270, steps=10)
+    check(pg.evaluate("document.getElementById('sanad').classList.contains('lifted')"), "mascot lifted while dragging"); pg.mouse.up(); pg.wait_for_timeout(100)
+    check(pg.evaluate("SP.state.mascot.s1.pos.x") > 250 and mood() == "landed", "drag moves mascot and it lands")
+    pg.click("#sanad .m-chat"); pg.click(".m-panel >> text=شكلي"); pg.locator(".m-kind", has_text="قطة").click(); pg.locator(".md .chip", has_text="تاج").click(); pg.fill("#m-name", "مشمش"); pg.click(".md button:text-is('حفظ')")
+    check(pg.evaluate("document.querySelector('#sanad .m-fig svg').dataset.kind") == "cat" and pg.inner_text(".m-panel header b") == "مشمش", "mascot customized to cat named مشمش")
+    pg.click(".m-panel header button[aria-label='إغلاق']")
     # ---------- سند + الأسئلة + الإرسال ----------
     pg.select_option("#who", "s1"); pg.evaluate("location.hash='#/home'"); pg.wait_for_timeout(100)
     check(pg.locator("#sanad .m-fig svg").count() == 1, "mascot rendered")
-    pg.click("#sanad .m-fig"); check(pg.locator(".m-panel").is_visible(), "chat panel opens")
+    pg.click("#sanad .m-chat"); check(pg.locator(".m-panel").is_visible(), "chat panel opens")
     pg.locator(".m-sugg .chip", has_text="ما مهامي اليوم؟").click(); pg.wait_for_timeout(900)
     check("مراجعة درس الكسور" in pg.inner_text(".m-list"), "offline assistant lists tasks")
     pg.click(".m-panel header button[aria-label='إغلاق']")
@@ -174,7 +191,7 @@ with sync_playwright() as p:
       window.claude = {use: async (n) => n === 'sample' ? fake : null};
     """)
     p2 = ctx2.new_page(); p2.on("pageerror", lambda e: errors.append(str(e))); p2.goto(URL)
-    p2.click("#sanad .m-fig"); p2.fill("#sanad-input", "شجعني"); p2.press("#sanad-input", "Enter"); p2.wait_for_timeout(500)
+    p2.click("#sanad .m-chat"); p2.fill("#sanad-input", "شجعني"); p2.press("#sanad-input", "Enter"); p2.wait_for_timeout(500)
     check("أحسنت يا بطل" in p2.inner_text(".m-list") and "[celebrate]" not in p2.inner_text(".m-list"), "AI chat reply shown without mood tag")
     check(p2.evaluate("document.getElementById('sanad').dataset.mood") == "celebrate", "mascot mood follows reply")
     p2.click(".m-panel header button[aria-label='إغلاق']")
