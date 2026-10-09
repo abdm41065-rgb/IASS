@@ -20,7 +20,7 @@
   SP.timerSet = (mode, min) => { stop(); T.mode = mode; T.total = T.left = Math.max(1, min) * 60; SP.emit('tick'); };
   SP.timerToggle = () => { if (T.running) { T.left = Math.max(0, Math.ceil((T.endAt - Date.now()) / 1000)); stop(); } else { T.endAt = Date.now() + T.left * 1000; T.running = true; T.iv = setInterval(tick, 500); } SP.emit('tick'); };
 
-  SP.reg('study', '⏱️', 'الدراسة', () => {
+  SP.reg('study', '⏱️', 'التركيز', () => {
     const time = h('div', { class: 'big' }), ring = h('div', { class: 'ring' }), btn = h('button', { class: 'btn', onclick: SP.timerToggle }), goalTxt = h('div', { class: 'sub', style: { textAlign: 'center' } });
     const minInp = h('input', { class: 'inp', type: 'number', min: 1, max: 180, value: T.total / 60, style: { width: '80px' } });
     const upd = () => {
@@ -31,7 +31,7 @@
     const modes = h('div', { class: 'row', style: { justifyContent: 'center' } }, Object.entries(MODES).map(([k, [l, m]]) => h('button', { class: 'btn ghost', onclick: () => { SP.timerSet(k, m); minInp.value = m; SP.refresh(); } }, l + ' ' + m + 'د')));
     const goal = h('input', { class: 'inp', type: 'number', min: 5, value: S().goalMin || 60, style: { width: '90px' } });
     const manual = h('input', { class: 'inp', type: 'number', min: 1, value: 15, style: { width: '90px' } });
-    return SP.page('غرفة الدراسة', 'جلسات تركيز بنظام بومودورو. تُسجَّل الدقائق تلقائياً في تقدّمك.',
+    return SP.page('التركيز', 'جلسات تركيز بنظام بومودورو. تُسجَّل الدقائق تلقائياً في تقدّمك.',
       h('div', { class: 'grid' },
         h('div', { class: 'card' }, h('p', { class: 'sub', style: { textAlign: 'center' } }, MODES[T.mode][0]), time, modes,
           h('div', { class: 'row', style: { justifyContent: 'center', marginTop: '12px' } }, btn, h('button', { class: 'btn ghost', onclick: () => { SP.timerSet(T.mode, T.total / 60); SP.refresh(); } }, 'إعادة'), h('label', {}, 'مدة مخصصة ', minInp, ' د ', h('button', { class: 'btn ghost sm', onclick: () => { SP.timerSet(T.mode, +minInp.value || 25); } }, 'تطبيق')))),

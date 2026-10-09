@@ -39,9 +39,17 @@
     actions: [{ label: 'إلغاء', onclick: (c) => { c(); res(false); } }, { label: 'تأكيد', primary: true, cls: 'bad', onclick: (c) => { c(); res(true); } }],
   }));
   SP.field = (label, input) => h('div', {}, h('label', { class: 'lbl' }, label), input);
-  SP.download = (name, data, type = 'text/plain') => {
-    const a = h('a', { href: URL.createObjectURL(data instanceof Blob ? data : new Blob([data], { type })), download: name });
+  const plainDownload = (name, blob) => {
+    const a = h('a', { href: URL.createObjectURL(blob), download: name });
     document.body.append(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+  };
+  /* داخل claude.ai: إذن التنزيل الرسمي (يسأل المستخدم)، وخارجه: تنزيل عادي */
+  SP.download = async (name, data, type = 'text/plain') => {
+    const blob = data instanceof Blob ? data : new Blob([data], { type });
+    const dl = window.claude && window.claude.use ? await window.claude.use('downloads').catch(() => null) : null;
+    if (!dl) return plainDownload(name, blob);
+    try { await dl.save({ filename: name, data: blob }); }
+    catch (e) { if (e && e.code !== 'declined') SP.toast('تعذّر حفظ الملف: ' + (e.message || e.code), 'err'); }
   };
   SP.refresh = () => SP.route && SP.route();
   SP.go = (p) => { location.hash = '#/' + p; };

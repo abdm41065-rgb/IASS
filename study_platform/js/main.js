@@ -1,13 +1,14 @@
 /* الموجّه والهيكل العام */
 (function () {
   const SP = window.SP, h = SP.h;
-  const NAV = ['home', 'classes', 'teachers', 'students', 'notes', 'files', 'handouts', 'stickers', 'share', 'study', 'cards', 'quizzes', 'tasks', 'progress', 'settings'];
+  const NAV = ['home', 'desk', 'classes', 'teachers', 'students', 'notes', 'files', 'handouts', 'stickers', 'share', 'study', 'cards', 'quizzes', 'tasks', 'progress', 'settings'];
   SP.applyTheme = () => { const r = document.documentElement; if (SP.state.dark == null) r.removeAttribute('data-theme'); else r.setAttribute('data-theme', SP.state.dark ? 'dark' : 'light'); document.documentElement.style.setProperty('--fs', (SP.state.fontSize || 16) + 'px'); };
   SP.isDark = () => (SP.state.dark == null ? matchMedia('(prefers-color-scheme: dark)').matches : SP.state.dark);
   SP.setTheme = (d) => { SP.state.dark = d; SP.save(); SP.applyTheme(); };
   SP.toggleTheme = () => SP.setTheme(!SP.isDark());
   SP.fillWho = () => { const w = document.getElementById('who'); w.replaceChildren(...SP.state.users.map((u) => h('option', { value: u.id, selected: u.id === SP.state.me }, u.name + (u.role === 'teacher' ? ' · معلم' : ' · طالب')))); };
   const P = {
+    desk: '<path d="M5 3h9l5 5v13H5z"/><path d="M9 17l5.5-5.5 2 2L11 19H9z"/>',
     home: '<path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
     classes: '<path d="M3 21h18M5 21V8l7-4 7 4v13M9 21v-5h6v5"/>',
     teachers: '<circle cx="9" cy="7" r="3"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6M15 4h6v6h-3"/>',

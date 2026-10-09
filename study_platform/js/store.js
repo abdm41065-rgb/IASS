@@ -3,11 +3,19 @@
   const SP = (window.SP = { views: {}, nav: [], cleanups: [], listeners: {} });
   SP.uid = () => Math.random().toString(36).slice(2, 9) + Date.now().toString(36).slice(-3);
   SP.today = (d = new Date()) => new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
-  SP.COLORS = ['#007AFF', '#5AC8FA', '#0A4FB3', '#64A9FF', '#32ADE6', '#1E3A8A', '#3B82F6', '#9CC7FF'];
+  SP.COLORS = ['#1F4E99', '#3A6FB8', '#0F2E5C', '#5B8BD1', '#2C5F8A', '#7EA3D6', '#163A70', '#9DB8E0'];
   SP.EMOJIS = ['⭐', '🔥', '💡', '✅', '❗', '❓', '📌', '🎯', '🏆', '🧠', '📖', '✏️', '🔬', '🧮', '🌍', '🎨', '🎵', '💻', '⚡', '🚀', '👍', '❤️', '😀', '🤔', '🌟', '📅', '⏰', '🔖'];
   SP.DAYS = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس'];
   const KEY = 'sp_state_v1';
 
+  SP.sampleDoc = (owner) => ({ id: SP.uid(), ownerId: owner, name: 'دفتر تجريبي', kind: 'blank', fileId: '', created: Date.now(), updated: Date.now(), pages: [{ a: [
+    { id: SP.uid(), t: 'text', x: 0.62, y: 0.07, s: 0.045, c: '#1F4E99', v: 'هذا دفترك' },
+    { id: SP.uid(), t: 'text', x: 0.3, y: 0.15, s: 0.028, c: '#111827', v: 'اكتب على الصفحة، ارسم بالقلم، ظلّل المهم،\nوأشّر بالأسهم، وأضف ملصقات وصوراً وفيديوهات.' },
+    { id: SP.uid(), t: 'mark', c: '#FFE14D', w: 0, x1: 0.29, y1: 0.145, x2: 0.9, y2: 0.2 },
+    { id: SP.uid(), t: 'arrow', c: '#C62828', w: 0.005, x1: 0.25, y1: 0.42, x2: 0.4, y2: 0.24 },
+    { id: SP.uid(), t: 'oval', c: '#2E7D32', w: 0.004, x1: 0.05, y1: 0.42, x2: 0.45, y2: 0.52 },
+    { id: SP.uid(), t: 'text', x: 0.12, y: 0.445, s: 0.03, c: '#2E7D32', v: 'جرّب الأدوات' },
+    { id: SP.uid(), t: 'stk', x: 0.08, y: 0.06, s: 0.08, e: '⭐' }] }, { a: [] }] });
   function seed() {
     const t = SP.today();
     const q1 = SP.uid(), d1 = SP.uid();
@@ -33,11 +41,11 @@
         { id: SP.uid(), type: 'mcq', q: 'ما ناتج 7 × 8؟', options: ['54', '56', '58', '64'], answer: 1 },
         { id: SP.uid(), type: 'tf', q: 'العدد 15 عدد أولي.', options: ['صح', 'خطأ'], answer: 1 },
         { id: SP.uid(), type: 'short', q: 'ما ناتج 100 ÷ 4؟', options: [], answer: '25' }] }],
-      results: [],
+      results: [], docs: [SP.sampleDoc('s1')],
     };
   }
 
-  SP.load = () => { try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.v === 1) return s; } catch (e) {} return seed(); };
+  SP.load = () => { try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.v === 1) { if (!s.docs) s.docs = [SP.sampleDoc(s.me)]; return s; } } catch (e) {} return seed(); };
   SP.state = SP.load();
   SP.reset = () => { SP.state = seed(); SP.save(); };
   SP.replaceState = (s) => { SP.state = s; SP.save(); };

@@ -19,15 +19,16 @@ with sync_playwright() as p:
     b = p.chromium.launch(executable_path=EXE)
     pg = b.new_page(viewport={"width": 1280, "height": 900})
     pg.on("pageerror", lambda e: errors.append(str(e)))
+    pg.on("console", lambda m: m.type in ("error", "warning") and print("   [console]", m.text[:200]))
     pg.on("console", lambda m: m.type == "error" and "Failed to load resource" not in m.text and errors.append(m.text))
     pg.goto(URL)
 
-    routes = ["home", "classes", "classes/c1", "teachers", "students", "notes", "files", "handouts", "stickers", "share",
+    routes = ["home", "desk", "classes", "classes/c1", "teachers", "students", "notes", "files", "handouts", "stickers", "share",
               "study", "cards", "cards/" + pg.evaluate("SP.state.decks[0].id"), "quizzes", "tasks", "progress", "settings", "search/%D8%B1%D9%8A%D8%A7%D8%B6%D9%8A%D8%A7%D8%AA"]
     for r in routes:
         pg.evaluate(f"location.hash='#/{r}'"); pg.wait_for_timeout(60)
         check(pg.locator("#main h1").count() >= 1 or pg.locator("#main .card").count() > 0, f"route {r} renders")
-    check(len(pg.locator("#nav a").all()) == 15, "15 nav sections")
+    check(len(pg.locator("#nav a").all()) == 16, "16 nav sections")
 
     # معلم ينشئ صفاً ويضيف فويزاً
     pg.select_option("#who", "t1"); pg.evaluate("location.hash='#/classes'")
@@ -67,6 +68,55 @@ with sync_playwright() as p:
     check(pg.evaluate("SP.state.decks[0].cards.filter(c=>c.box===2).length") == 1, "flashcard leitner box advanced")
     pg.fill("#gsearch", "الجبر"); pg.press("#gsearch", "Enter"); pg.wait_for_timeout(100)
     check(pg.locator("#main >> text=درس الجبر").count() > 0, "global search finds note")
+
+
+    # ---------- دراسة ----------
+    import base64
+    pg.select_option("#who", "s1"); pg.evaluate("location.hash='#/desk'"); pg.wait_for_timeout(100)
+    check(pg.locator("#main >> text=دفتر تجريبي").count() > 0, "desk lists sample notebook")
+    pg.locator("#main .doccard").first.click(); pg.wait_for_timeout(400)
+    check(pg.locator(".pg").count() == 2, "notebook opens with 2 pages")
+    n0 = pg.evaluate("SP.state.docs[0].pages[0].a.length")
+    box = pg.locator(".pg svg.ink").first.bounding_box()
+    pg.mouse.move(box["x"] + 100, box["y"] + 400); pg.mouse.down(); pg.mouse.move(box["x"] + 200, box["y"] + 430, steps=8); pg.mouse.up()
+    check(pg.evaluate("SP.state.docs[0].pages[0].a.length") == n0 + 1, "pen stroke saved")
+    pg.click(".tb[title='سهم']"); pg.mouse.move(box["x"] + 300, box["y"] + 500); pg.mouse.down(); pg.mouse.move(box["x"] + 380, box["y"] + 560, steps=5); pg.mouse.up()
+    check(pg.evaluate("SP.state.docs[0].pages[0].a.at(-1).t") == "arrow", "arrow drawn")
+    pg.click(".tb[title='نص']"); pg.mouse.click(box["x"] + 700, box["y"] + 540); pg.keyboard.type("ملاحظة على الدرس"); pg.click(".tb[title='تحريك']")
+    check(pg.evaluate("SP.state.docs[0].pages[0].a.some(a=>a.t==='text'&&a.v.includes('ملاحظة على الدرس'))"), "text typed on page")
+    pg.click(".tb[title='تراجع']")
+    pg.click(".tb[title='ممحاة']"); cnt = pg.evaluate("SP.state.docs[0].pages[0].a.length")
+    pg.locator(".pg .obj.stk").first.click()
+    check(pg.evaluate("SP.state.docs[0].pages[0].a.length") == cnt - 1, "eraser removes sticker")
+    pg.click(".tb[title='تراجع']")
+    check(pg.evaluate("SP.state.docs[0].pages[0].a.length") == cnt, "undo restores")
+    png = Path(tempfile.mkdtemp()) / "pic.png"
+    import zlib, struct
+    def _png(w, hh):
+        raw = b"".join(b"\x00" + bytes([30, 80, 160]) * w for _ in range(hh))
+        ch = lambda t, d: struct.pack(">I", len(d)) + t + d + struct.pack(">I", zlib.crc32(t + d) & 0xffffffff)
+        return b"\x89PNG\r\n\x1a\n" + ch(b"IHDR", struct.pack(">IIBBBBB", w, hh, 8, 2, 0, 0, 0)) + ch(b"IDAT", zlib.compress(raw)) + ch(b"IEND", b"")
+    png.write_bytes(_png(40, 30))
+    pg.set_input_files("#desk-media", str(png)); pg.wait_for_timeout(500)
+    check(pg.evaluate("SP.state.docs[0].pages.some(p=>p.a.some(a=>a.t==='img'))") and pg.locator(".pg .obj.img img").count() == 1, "image inserted onto page")
+    pg.evaluate("() => { window.__saved=null; SP.saveFile=async(n,b)=>{window.__saved={n, b:new Uint8Array(await b.arrayBuffer())}}; }")
+    pg.click(".tb[title='تصدير PDF']"); pg.wait_for_function("window.__saved", timeout=15000)
+    info = pg.evaluate("PDFLib.PDFDocument.load(window.__saved.b).then(d=>({pages:d.getPageCount(), head:String.fromCharCode(...window.__saved.b.slice(0,5)), name:window.__saved.n}))")
+    check(info["head"] == "%PDF-" and info["pages"] == 2, f"notebook exports to PDF ({info})")
+    # PDF حقيقي
+    b64 = pg.evaluate("""(async()=>{const d=await PDFLib.PDFDocument.create(); for(let i=0;i<3;i++){const p=d.addPage([595,842]); p.drawText('Page '+(i+1),{x:50,y:780,size:30});} const b=await d.save(); let s=''; b.forEach(c=>s+=String.fromCharCode(c)); return btoa(s);})()""")
+    pdf = Path(tempfile.mkdtemp()) / "lesson.pdf"; pdf.write_bytes(base64.b64decode(b64))
+    pg.evaluate("location.hash='#/desk'"); pg.wait_for_timeout(100); pg.set_input_files("#desk-upload", str(pdf)); pg.wait_for_timeout(1500)
+    check(pg.locator(".pg").count() == 3, "uploaded PDF opens with 3 pages")
+    painted = pg.evaluate("(()=>{const c=document.querySelector('.pg canvas.bg');const d=c.getContext('2d').getImageData(0,0,c.width,c.height/6).data;let dark=0;for(let i=0;i<d.length;i+=4)if(d[i]<100)dark++;return dark})()")
+    check(painted > 50, "PDF page rendered by pdf.js")
+    box = pg.locator(".pg svg.ink").first.bounding_box(); pg.click(".tb[title='تظليل']")
+    pg.mouse.move(box["x"] + 40, box["y"] + 60); pg.mouse.down(); pg.mouse.move(box["x"] + 250, box["y"] + 60, steps=6); pg.mouse.up()
+    pg.evaluate("window.__saved=null"); pg.click(".tb[title='تصدير PDF']"); pg.wait_for_function("window.__saved", timeout=15000)
+    check(pg.evaluate("PDFLib.PDFDocument.load(window.__saved.b).then(d=>d.getPageCount())") == 3, "annotated PDF exports with same page count")
+    pg.evaluate("location.hash='#/files'"); pg.set_input_files("#main input[type=file]", str(pdf)); pg.wait_for_timeout(400)
+    pg.locator("#main >> text=افتح في دراسة").first.click(); pg.wait_for_timeout(1200)
+    check(pg.locator(".pg").count() == 3, "file opens in desk from Files")
 
     # عزل: مريم لا ترى ملاحظات/ملفات علي الشخصية
     pg.select_option("#who", "s2"); pg.evaluate("location.hash='#/notes'")
