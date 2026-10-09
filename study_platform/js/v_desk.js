@@ -19,6 +19,7 @@
     eraser: '<path d="M8 20h12M4 15l9-9 6 6-7 7H8z"/>', undo: '<path d="M9 14L4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/>', redo: '<path d="M15 14l5-5-5-5"/><path d="M20 9H10a6 6 0 0 0 0 12h3"/>',
     zin: '<circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4M8 11h6M11 8v6"/>', zout: '<circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4M8 11h6"/>',
     page: '<path d="M6 3h9l4 4v14H6z"/><path d="M12 10v6M9 13h6"/>', save: '<path d="M12 3v12M7 10l5 5 5-5M5 21h14"/>', back: '<path d="M9 6l6 6-6 6"/>',
+    quiz: '<circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1 .9-1 1.6V14M12 17.5h.01"/>',
     file: '<path d="M6 3h9l4 4v14H6z"/><path d="M15 3v4h4"/>', book: '<path d="M4 19V5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0 0 4h13"/>',
   };
   const libs = () => !!window.pdfjsLib;
@@ -71,7 +72,7 @@
     } });
     const list = mine().sort((a, b) => b.updated - a.updated);
     const label = { pdf: 'PDF', image: 'صورة', blank: 'دفتر' };
-    const root = SP.page('دراسة', 'افتح ملفات الدروس واكتب عليها: ارسم، ظلّل، أشّر بالأسهم، أضف نصوصاً وملصقات وصوراً وفيديوهات، ثم صدّرها PDF.',
+    const root = SP.page(h('span', {}, 'دراسة ', h('span', { class: 'sticker sm-stk', 'aria-hidden': 'true' }, '📎')), 'افتح ملفات الدروس واكتب عليها: ارسم، ظلّل، أشّر بالأسهم، أضف نصوصاً وملصقات وصوراً وفيديوهات، ثم صدّرها PDF.',
       h('div', { class: 'row' }, h('button', { class: 'btn', onclick: () => input.click() }, 'أضف ملف درس (PDF أو صورة)'), input,
         h('button', { class: 'btn ghost', onclick: newNotebook }, 'دفتر فارغ'), h('button', { class: 'btn ghost', onclick: fromFiles }, 'من قسم الملفات')),
       h('p', { class: 'sub', style: { marginTop: '10px' } }, 'يمكنك أيضاً سحب ملف PDF أو صورة وإفلاته هنا.'),
@@ -117,6 +118,7 @@
         tb('undo', 'تراجع', false, () => restore(hist, fut), !hist.length), tb('redo', 'إعادة', false, () => restore(fut, hist), !fut.length),
         tb('zout', 'تصغير', false, () => { zoom = clamp(zoom - 0.15, 0.5, 2.5); layout(); }), tb('zin', 'تكبير', false, () => { zoom = clamp(zoom + 0.15, 0.5, 2.5); layout(); }),
         d.kind === 'blank' ? tb('page', 'صفحة', false, () => { snap(); d.pages.push({ a: [] }); sizes.push(A4); commit(); layout(); }) : null,
+        d.kind !== 'blank' ? tb('quiz', 'أسئلة', false, async () => SP.questionsFor({ name: d.name, mime: d.kind === 'pdf' ? 'application/pdf' : ((await SP.idb.get(d.fileId)) || {}).type || 'image/png', blob: await SP.idb.get(d.fileId) })) : null,
         tb('save', 'تصدير PDF', false, exportPdf));
     }
 
@@ -245,7 +247,7 @@
         if (tool === 'eraser') { const t = e.target.closest && e.target.closest('[data-id]'); if (t) { snap(); pg.a = pg.a.filter((a) => a.id !== t.getAttribute('data-id')); commit(); drawOverlay(el); } return; }
         if (tool === 'text') {
           e.preventDefault(); snap(); const a = { id: SP.uid(), t: 'text', x, y: r4(y - 0.012), s: r4((10 + width * 2) / W), c: color, v: '' }; pg.a.push(a); drawOverlay(el);
-          const o = el._layer.querySelector(`[data-id="${a.id}"]`); o.contentEditable = 'true'; setTimeout(() => o.focus(), 0); hist.pop(); return;
+          const o = el._layer.querySelector(`[data-id="${a.id}"]`); o.contentEditable = 'true'; hist.pop(); o.focus(); return;
         }
         if (tool === 'sticker') { snap(); pg.a.push({ id: SP.uid(), t: 'stk', x: r4(x - 0.03), y: r4(y - 0.025), s: 0.06, e: emoji }); commit(); drawOverlay(el); return; }
         e.preventDefault(); svg.setPointerCapture(e.pointerId); snap();

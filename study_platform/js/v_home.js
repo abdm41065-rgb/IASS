@@ -17,7 +17,7 @@
     const last = (s.docs || []).filter((d) => d.ownerId === uid).sort((a, b) => b.updated - a.updated)[0];
     const next = tasks[0], pct = Math.min(100, Math.round((100 * todayMin) / goal));
     const line = next ? `أقرب مهمة: ${next.text}${next.due ? ' (' + next.due + ')' : ''}` : last ? `آخر ما فتحته: «${last.name}»` : 'ابدأ بفتح درس في «دراسة» أو جلسة تركيز قصيرة.';
-    const hero = h('section', { class: 'hero', 'aria-label': 'ملخص اليوم' },
+    const hero = h('section', { class: 'hero', 'aria-label': 'ملخص اليوم' }, h('span', { class: 'sticker hero-stk', 'aria-hidden': 'true' }, SP.streak(uid) >= 3 ? '🔥' : pct >= 100 ? '🌟' : '✏️'),
       h('div', {}, h('div', { class: 'day' }, new Date().toLocaleDateString('ar', { weekday: 'long', day: 'numeric', month: 'long' })),
         h('h1', {}, `${greet}، ${me.name}`), h('p', { class: 'line' }, line),
         h('div', { class: 'meta' }, h('div', {}, h('b', {}, SP.streak(uid)), h('span', {}, 'أيام متتالية')), h('div', {}, h('b', {}, SP.xp(uid)), h('span', {}, 'نقاط')), h('div', {}, h('b', {}, SP.myClasses().length), h('span', {}, 'صفوف'))),

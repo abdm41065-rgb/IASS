@@ -7,7 +7,7 @@
   const MODES = { focus: ['تركيز', 25], short: ['استراحة قصيرة', 5], long: ['استراحة طويلة', 15] };
   const fmt = (s) => String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0');
   SP.fmtTime = fmt;
-  SP.logStudy = (min) => { if (min > 0) { S().sessions.push({ userId: SP.state.me, ts: Date.now(), day: SP.today(), min }); SP.save(); } };
+  SP.logStudy = (min) => { if (min > 0) { S().sessions.push({ userId: SP.state.me, ts: Date.now(), day: SP.today(), min }); SP.save(); SP.emit('react', 'celebrate'); } };
   function tick() {
     T.left = Math.max(0, Math.ceil((T.endAt - Date.now()) / 1000));
     if (T.left <= 0) {
@@ -136,8 +136,8 @@
     const finish = () => {
       if (finished) return; finished = true; clearInterval(timer);
       const score = q.questions.filter((qq) => correct(qq, ans[qq.id])).length, secs = Math.round((Date.now() - t0) / 1000);
-      S().results.push({ id: SP.uid(), quizId: q.id, userId: SP.state.me, score, total: q.questions.length, secs, ts: Date.now() }); SP.save();
-      root.replaceChildren(SP.page(`نتيجتك: ${score}/${q.questions.length}`, Math.round((100 * score) / q.questions.length) + '% · ' + fmt(secs),
+      S().results.push({ id: SP.uid(), quizId: q.id, userId: SP.state.me, score, total: q.questions.length, secs, ts: Date.now() }); SP.save(); SP.emit('react', score / q.questions.length >= 0.8 ? 'celebrate' : 'encourage');
+      root.replaceChildren(h('div', { class: 'sticker big-stk', 'aria-hidden': 'true' }, score === q.questions.length ? '🏆' : score / q.questions.length >= 0.6 ? '⭐' : '💪'), SP.page(`نتيجتك: ${score}/${q.questions.length}`, Math.round((100 * score) / q.questions.length) + '% · ' + fmt(secs),
         q.questions.map((qq, i) => { const ok = correct(qq, ans[qq.id]); return h('div', { class: 'card', style: { margin: '8px 0' } }, h('b', {}, `${i + 1}. ${qq.q} ${ok ? '✅' : '❌'}`),
           qq.type === 'short' ? h('p', {}, 'إجابتك: ' + (ans[qq.id] || '—') + ' · الصحيحة: ' + String(qq.answer).split('|')[0]) : qq.options.map((o, k) => h('div', { class: 'opt ' + (k === qq.answer ? 'right' : k === ans[qq.id] ? 'wrong' : '') }, o))); }),
         h('div', { class: 'row' }, h('button', { class: 'btn', onclick: () => SP.go('quizzes') }, 'رجوع للفويزات'), h('button', { class: 'btn ghost', onclick: () => leaderboard(q) }, 'الترتيب'))));

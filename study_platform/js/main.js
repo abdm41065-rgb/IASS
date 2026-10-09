@@ -34,7 +34,7 @@
     navEl.replaceChildren(...NAV.map((k) => h('a', { href: '#/' + k, class: k === key ? 'on' : '' }, icon(k), SP.views[k].label)));
     document.title = v.label + ' · منصة الدراسة';
     try { main.replaceChildren(v.render(parts.slice(1))); } catch (e) { console.error(e); main.replaceChildren(SP.empty('حدث خطأ غير متوقع في هذه الصفحة.')); }
-    document.body.classList.remove('nav-open'); window.scrollTo(0, 0);
+    document.body.classList.remove('nav-open'); window.scrollTo(0, 0); SP.emit('route');
   };
   window.addEventListener('hashchange', SP.route);
   document.getElementById('who').addEventListener('change', (e) => { SP.state.me = e.target.value; SP.save(); SP.route(); });

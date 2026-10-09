@@ -15,7 +15,7 @@
       actions: [{ label: 'إلغاء', onclick: (c) => c() }, { label: 'حفظ', primary: true, onclick: (c) => {
         if (!title.value.trim() && !body.value.trim()) return SP.toast('الملاحظة فارغة', 'err');
         Object.assign(n, { title: title.value.trim() || 'بدون عنوان', body: body.value, tags: SP.parseTags(tags.value), classId: cls.value, color, pinned, stickers: st, updated: Date.now() });
-        if (!note) S().notes.push(n); SP.save(); c(); SP.refresh();
+        if (!note) S().notes.push(n); SP.save(); c(); SP.refresh(); SP.emit('react', 'write');
       } }] });
   }
   SP.reg('notes', '📝', 'الملاحظات', () => {
@@ -72,7 +72,7 @@
       try { await SP.idb.put(id, file); } catch (e) { SP.toast('تعذّر حفظ ' + file.name, 'err'); continue; }
       S().files.push({ id, ownerId: SP.state.me, name: file.name, mime: file.type || '', size: file.size, tags: [], color: '', star: false, stickers: [], kind, classId: classId || '', added: Date.now(), desc: '', pages: 0, readPages: 0 }); n++;
     }
-    SP.save(); SP.toast(`تم رفع ${n} ملف`); SP.refresh();
+    SP.save(); SP.toast(`تم رفع ${n} ملف`); SP.refresh(); n && SP.emit('react', 'file');
   }
   function handoutFromNotes() {
     const notes = S().notes.filter((n) => visibleNote(n)); const title = h('input', { class: 'inp', style: { width: '100%' }, value: 'ملزمتي' }), picked = new Set();
@@ -99,6 +99,8 @@
         f.desc ? h('p', {}, f.desc) : null, h('div', {}, f.tags.map((t) => h('span', { class: 'chip' }, '#' + t))),
         f.kind === 'handout' && f.pages ? h('div', {}, h('div', { class: 'bar' }, h('i', { style: { width: Math.min(100, (100 * f.readPages) / f.pages) + '%' } })), h('div', { class: 'row', style: { marginTop: '6px' } }, h('small', {}, 'قرأت'), h('input', { class: 'inp', type: 'number', min: 0, max: f.pages, value: f.readPages || 0, style: { width: '70px' }, onchange: (e) => { f.readPages = Math.min(f.pages, +e.target.value || 0); SP.save(); draw(); } }), h('small', {}, 'من ' + f.pages))) : null,
         h('div', { class: 'row', style: { marginTop: '8px' } }, h('button', { class: 'btn ghost sm', onclick: () => preview(f) }, 'معاينة'), /pdf|image/.test(f.mime || '') ? h('button', { class: 'btn sm', onclick: () => SP.openInDesk(f) }, 'افتح في دراسة') : null,
+          /pdf|image|text|html/.test(f.mime || '') || /\.(txt|md)$/i.test(f.name) ? h('button', { class: 'btn ghost sm', onclick: async () => SP.questionsFor({ name: f.name, mime: f.mime, blob: await SP.idb.get(f.id) }) }, 'أسئلة') : null,
+          h('button', { class: 'btn ghost sm', onclick: () => SP.sendFile(f) }, 'إرسال'),
           canEdit(f) ? [h('button', { class: 'btn ghost sm', onclick: () => fileEditor(f, f.kind) }, 'تمييز'), h('button', { class: 'btn ghost sm', onclick: async () => { if (await SP.confirm('حذف الملف؟')) { await SP.idb.del(f.id); S().files = S().files.filter((x) => x.id !== f.id); SP.save(); draw(); } } }, 'حذف')] : null))) : [SP.empty('لا توجد ملفات. ارفع ملفاً أو اسحبه هنا.')]));
     };
     const input = h('input', { type: 'file', multiple: true, style: { display: 'none' }, onchange: (e) => addFiles([...e.target.files], kind || 'file', classId) });

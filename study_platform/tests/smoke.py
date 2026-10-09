@@ -82,7 +82,7 @@ with sync_playwright() as p:
     check(pg.evaluate("SP.state.docs[0].pages[0].a.length") == n0 + 1, "pen stroke saved")
     pg.click(".tb[title='سهم']"); pg.mouse.move(box["x"] + 300, box["y"] + 500); pg.mouse.down(); pg.mouse.move(box["x"] + 380, box["y"] + 560, steps=5); pg.mouse.up()
     check(pg.evaluate("SP.state.docs[0].pages[0].a.at(-1).t") == "arrow", "arrow drawn")
-    pg.click(".tb[title='نص']"); pg.mouse.click(box["x"] + 700, box["y"] + 540); pg.keyboard.type("ملاحظة على الدرس"); pg.click(".tb[title='تحريك']")
+    pg.click(".tb[title='نص']"); pg.mouse.click(box["x"] + 700, box["y"] + 420); pg.keyboard.type("ملاحظة على الدرس"); pg.click(".tb[title='تحريك']")
     check(pg.evaluate("SP.state.docs[0].pages[0].a.some(a=>a.t==='text'&&a.v.includes('ملاحظة على الدرس'))"), "text typed on page")
     pg.click(".tb[title='تراجع']")
     pg.click(".tb[title='ممحاة']"); cnt = pg.evaluate("SP.state.docs[0].pages[0].a.length")
@@ -118,6 +118,35 @@ with sync_playwright() as p:
     pg.locator("#main >> text=افتح في دراسة").first.click(); pg.wait_for_timeout(1200)
     check(pg.locator(".pg").count() == 3, "file opens in desk from Files")
 
+
+    # ---------- سند + الأسئلة + الإرسال ----------
+    pg.select_option("#who", "s1"); pg.evaluate("location.hash='#/home'"); pg.wait_for_timeout(100)
+    check(pg.locator("#sanad .m-fig svg").count() == 1, "mascot rendered")
+    pg.click("#sanad .m-fig"); check(pg.locator(".m-panel").is_visible(), "chat panel opens")
+    pg.locator(".m-sugg .chip", has_text="ما مهامي اليوم؟").click(); pg.wait_for_timeout(900)
+    check("مراجعة درس الكسور" in pg.inner_text(".m-list"), "offline assistant lists tasks")
+    pg.click(".m-panel header button[aria-label='إغلاق']")
+    lesson = Path(tempfile.mkdtemp()) / "lesson.txt"
+    lesson.write_text("\n".join([
+        "الخلية هي الوحدة الأساسية للتركيب والوظيفة في جميع الكائنات الحية.", "تحتوي الخلية النباتية على جدار خلوي يمنحها الشكل والدعامة.",
+        "البلاستيدات الخضراء مسؤولة عن عملية البناء الضوئي في النبات.", "الميتوكوندريا تنتج الطاقة اللازمة لنشاطات الخلية المختلفة.",
+        "النواة تحتوي على المادة الوراثية وتتحكم في أنشطة الخلية.", "الغشاء البلازمي ينظم دخول المواد وخروجها من الخلية.",
+        "الفجوة العصارية كبيرة في الخلية النباتية وتخزن الماء والأملاح.", "الريبوسومات تقوم بتصنيع البروتينات داخل السيتوبلازم."]), encoding="utf-8")
+    pg.evaluate("location.hash='#/files'"); pg.set_input_files("#main input[type=file]", str(lesson)); pg.wait_for_timeout(400)
+    card = pg.locator("#main .card", has_text="lesson.txt"); card.locator("text=أسئلة").click()
+    pg.click(".md >> text=ولّد الأسئلة"); pg.wait_for_selector(".qsec", timeout=8000)
+    check(pg.locator(".qsec").count() == 3 and pg.locator(".qsec >> li").count() >= 10, "offline generator builds 3 sections")
+    nq = pg.evaluate("SP.state.quizzes.length"); pg.click(".md >> text=احفظ كفويز")
+    check(pg.evaluate("SP.state.quizzes.length") == nq + 1 and pg.evaluate("SP.state.quizzes.at(-1).questions.length") == 10, "generated questions saved as quiz")
+    pg.click(".md button:text-is('إغلاق')")
+    card.locator("text=إرسال").click(); pg.locator(".md label", has_text="مريم").locator("input").check(); pg.fill("#send-note", "راجعيه قبل الاختبار")
+    pg.click(".md button:text-is('إرسال')"); pg.wait_for_timeout(300)
+    check(pg.evaluate("SP.state.files.some(f=>f.ownerId==='s2'&&f.name==='lesson.txt')") and pg.evaluate("SP.state.inbox.length") == 1, "file sent to another user")
+    pg.select_option("#who", "s2"); pg.wait_for_timeout(200)
+    check(pg.inner_text("#inbox .badge") == "1", "recipient sees inbox badge")
+    pg.click("#inbox"); check("راجعيه قبل الاختبار" in pg.inner_text(".md"), "inbox shows message"); pg.click(".md button:text-is('إغلاق')")
+    check(pg.locator("#inbox .badge").is_hidden(), "badge clears after reading")
+
     # عزل: مريم لا ترى ملاحظات/ملفات علي الشخصية
     pg.select_option("#who", "s2"); pg.evaluate("location.hash='#/notes'")
     check(pg.locator("#main >> text=درس الجبر").count() == 0, "other student can't see private note")
@@ -132,6 +161,27 @@ with sync_playwright() as p:
     check(pg.evaluate("document.body.classList.contains('nav-open')"), "mobile nav opens")
     pg.screenshot(path=str(ROOT / "tests" / "mobile.png"))
     pg.set_viewport_size({"width": 1280, "height": 900}); pg.evaluate("location.hash='#/home'"); pg.screenshot(path=str(ROOT / "tests" / "home.png"))
+
+    # ---------- محاكاة Claude (مسار المساعد الذكي) ----------
+    ctx2 = b.new_context(viewport={"width": 1280, "height": 900})
+    ctx2.add_init_script("""
+      const fake = async (turns, o) => { const t = '[celebrate] أحسنت يا بطل 🎉'; o && o.onText && o.onText({text: t, delta: t}); return {text: t, truncated: false}; };
+      fake.json = async (prompt, o) => ({title: 'اختبار الخلية', sections: [
+        {type: 'mcq', questions: [{q: 'ما وحدة بناء الكائن الحي؟', options: ['الخلية','الذرة','العضو','النسيج'], answer: 0, explain: 'الخلية'}]},
+        {type: 'tf', questions: [{q: 'النواة تنتج الطاقة', answer: false, explain: 'الميتوكوندريا'}]},
+        {type: 'short', questions: [{q: 'ما العضية المسؤولة عن البناء الضوئي؟', answer: 'البلاستيدات الخضراء'}, {q: '', answer: 'x'}]}]});
+      fake.limits = async () => ({maxPromptBytes: 262144});
+      window.claude = {use: async (n) => n === 'sample' ? fake : null};
+    """)
+    p2 = ctx2.new_page(); p2.on("pageerror", lambda e: errors.append(str(e))); p2.goto(URL)
+    p2.click("#sanad .m-fig"); p2.fill("#sanad-input", "شجعني"); p2.press("#sanad-input", "Enter"); p2.wait_for_timeout(500)
+    check("أحسنت يا بطل" in p2.inner_text(".m-list") and "[celebrate]" not in p2.inner_text(".m-list"), "AI chat reply shown without mood tag")
+    check(p2.evaluate("document.getElementById('sanad').dataset.mood") == "celebrate", "mascot mood follows reply")
+    p2.click(".m-panel header button[aria-label='إغلاق']")
+    p2.evaluate("location.hash='#/files'"); p2.set_input_files("#main input[type=file]", str(lesson)); p2.wait_for_timeout(400)
+    p2.locator("#main .card", has_text="lesson.txt").locator("text=أسئلة").click(); p2.click(".md >> text=ولّد الأسئلة"); p2.wait_for_selector(".qsec", timeout=8000)
+    check(p2.locator(".qsec").count() == 3 and p2.locator(".qq").count() == 3, "AI questions normalized (invalid one dropped)")
+    ctx2.close()
     b.close()
 
 check(not errors, "no console/page errors" + (": " + "; ".join(errors[:3]) if errors else ""))
