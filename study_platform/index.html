@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>منصة الدراسة</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="app">
+  <aside id="side"><div class="brand">📚 منصة الدراسة</div><nav id="nav"></nav></aside>
+  <div id="shell">
+    <header id="top">
+      <button id="burger" class="btn ghost" aria-label="القائمة">☰</button>
+      <input id="gsearch" class="inp" type="search" placeholder="🔍 ابحث في الملاحظات والملفات والمنشورات والفويزات…">
+      <span id="mini"></span>
+      <select id="who" class="inp" title="تبديل المستخدم"></select>
+      <button id="theme" class="btn ghost" title="الوضع الليلي">🌓</button>
+    </header>
+    <main id="main" tabindex="-1"></main>
+  </div>
+</div>
+<div id="toasts" aria-live="polite"></div>
+<script src="js/store.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/v_home.js"></script>
+<script src="js/v_content.js"></script>
+<script src="js/v_learn.js"></script>
+<script src="js/v_share.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
