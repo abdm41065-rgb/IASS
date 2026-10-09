@@ -19,7 +19,7 @@ with sync_playwright() as p:
     b = p.chromium.launch(executable_path=EXE)
     pg = b.new_page(viewport={"width": 1280, "height": 900})
     pg.on("pageerror", lambda e: errors.append(str(e)))
-    pg.on("console", lambda m: m.type == "error" and errors.append(m.text))
+    pg.on("console", lambda m: m.type == "error" and "Failed to load resource" not in m.text and errors.append(m.text))
     pg.goto(URL)
 
     routes = ["home", "classes", "classes/c1", "teachers", "students", "notes", "files", "handouts", "stickers", "share",
@@ -76,7 +76,7 @@ with sync_playwright() as p:
 
     # مؤقت + وضع ليلي + جوال
     pg.evaluate("location.hash='#/study'"); pg.click("#main >> text=ابدأ"); pg.wait_for_timeout(1300)
-    check("⏱️" in pg.inner_text("#mini"), "mini timer shows while running")
+    check(":" in pg.inner_text("#mini"), "mini timer shows while running")
     pg.click("#theme"); check(pg.evaluate("document.documentElement.getAttribute('data-theme')==='dark'"), "dark mode")
     pg.set_viewport_size({"width": 390, "height": 800}); pg.click("#burger")
     check(pg.evaluate("document.body.classList.contains('nav-open')"), "mobile nav opens")

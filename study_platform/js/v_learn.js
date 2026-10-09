@@ -24,7 +24,7 @@
     const time = h('div', { class: 'big' }), ring = h('div', { class: 'ring' }), btn = h('button', { class: 'btn', onclick: SP.timerToggle }), goalTxt = h('div', { class: 'sub', style: { textAlign: 'center' } });
     const minInp = h('input', { class: 'inp', type: 'number', min: 1, max: 180, value: T.total / 60, style: { width: '80px' } });
     const upd = () => {
-      time.textContent = fmt(T.left); btn.textContent = T.running ? '⏸️ إيقاف مؤقت' : '▶️ ابدأ';
+      time.textContent = fmt(T.left); btn.textContent = T.running ? 'إيقاف مؤقت' : 'ابدأ';
       const m = SP.studyMin(SP.state.me, SP.today()), g = S().goalMin || 60; ring.style.setProperty('--p', Math.min(100, (100 * m) / g)); ring.replaceChildren(h('span', {}, m + '/' + g + 'د')); goalTxt.textContent = 'هدف اليوم: ' + g + ' دقيقة';
     };
     SP.on('tick', upd); upd();
@@ -34,7 +34,7 @@
     return SP.page('غرفة الدراسة', 'جلسات تركيز بنظام بومودورو. تُسجَّل الدقائق تلقائياً في تقدّمك.',
       h('div', { class: 'grid' },
         h('div', { class: 'card' }, h('p', { class: 'sub', style: { textAlign: 'center' } }, MODES[T.mode][0]), time, modes,
-          h('div', { class: 'row', style: { justifyContent: 'center', marginTop: '12px' } }, btn, h('button', { class: 'btn ghost', onclick: () => { SP.timerSet(T.mode, T.total / 60); SP.refresh(); } }, '↺ إعادة'), h('label', {}, 'مدة مخصصة ', minInp, ' د ', h('button', { class: 'btn ghost sm', onclick: () => { SP.timerSet(T.mode, +minInp.value || 25); } }, 'تطبيق')))),
+          h('div', { class: 'row', style: { justifyContent: 'center', marginTop: '12px' } }, btn, h('button', { class: 'btn ghost', onclick: () => { SP.timerSet(T.mode, T.total / 60); SP.refresh(); } }, 'إعادة'), h('label', {}, 'مدة مخصصة ', minInp, ' د ', h('button', { class: 'btn ghost sm', onclick: () => { SP.timerSet(T.mode, +minInp.value || 25); } }, 'تطبيق')))),
         h('div', { class: 'card' }, ring, goalTxt, h('div', { class: 'row', style: { justifyContent: 'center', marginTop: '10px' } }, h('label', {}, 'الهدف اليومي ', goal, ' د '), h('button', { class: 'btn ghost sm', onclick: () => { S().goalMin = +goal.value || 60; SP.save(); SP.refresh(); } }, 'حفظ')),
           h('div', { class: 'row', style: { justifyContent: 'center', marginTop: '10px' } }, h('label', {}, 'تسجيل يدوي ', manual, ' د '), h('button', { class: 'btn ghost sm', onclick: () => { SP.logStudy(+manual.value || 0); SP.toast('تم التسجيل'); SP.refresh(); } }, 'أضف')))),
       h('h2', {}, 'سجل الدراسة'), (() => { const mine = S().sessions.filter((x) => x.userId === SP.state.me).slice(-8).reverse(); return mine.length ? h('div', {}, mine.map((x) => h('span', { class: 'chip' }, x.day + ' · ' + x.min + 'د'))) : SP.empty('لا جلسات بعد'); })());
@@ -55,15 +55,15 @@
       root.replaceChildren(SP.page('مراجعة: ' + d.name, `${done}/${total}`, h('div', { class: 'bar' }, h('i', { style: { width: (100 * done) / Math.max(1, total) + '%' } })),
         h('div', { class: 'card flash', style: { margin: '14px 0' }, role: 'button', tabindex: 0, onclick: () => { shown = true; draw(); } }, shown ? h('div', {}, h('small', { class: 'sub' }, c.q), h('div', {}, c.a)) : c.q),
         shown ? h('div', { class: 'row', style: { justifyContent: 'center' } },
-          h('button', { class: 'btn bad', onclick: () => { c.box = 1; c.due = t; queue.push(queue.shift()); shown = false; SP.save(); draw(); } }, '✗ لم أعرفها'),
-          h('button', { class: 'btn ok', onclick: () => { c.box = Math.min(6, (c.box || 1) + 1); const dd = new Date(); dd.setDate(dd.getDate() + INTERVAL[c.box]); c.due = SP.today(dd); queue.shift(); done++; shown = false; SP.save(); draw(); } }, '✓ عرفتها')) : h('p', { class: 'sub', style: { textAlign: 'center' } }, 'اضغط على البطاقة لإظهار الإجابة'),
+          h('button', { class: 'btn bad', onclick: () => { c.box = 1; c.due = t; queue.push(queue.shift()); shown = false; SP.save(); draw(); } }, 'لم أعرفها'),
+          h('button', { class: 'btn ok', onclick: () => { c.box = Math.min(6, (c.box || 1) + 1); const dd = new Date(); dd.setDate(dd.getDate() + INTERVAL[c.box]); c.due = SP.today(dd); queue.shift(); done++; shown = false; SP.save(); draw(); } }, 'عرفتها')) : h('p', { class: 'sub', style: { textAlign: 'center' } }, 'اضغط على البطاقة لإظهار الإجابة'),
         h('div', { style: { textAlign: 'center', marginTop: '14px' } }, h('button', { class: 'btn ghost sm', onclick: () => SP.go('cards/' + d.id) }, 'إنهاء'))));
     }; draw();
   }
   SP.reg('cards', '🃏', 'البطاقات', (p) => {
     if (!p[0]) {
       const list = S().decks.filter(visibleDeck), t = SP.today();
-      return SP.page('البطاقات التعليمية', 'احفظ بالتكرار المتباعد: البطاقة التي تعرفها تظهر لك لاحقاً بفترات أطول.', h('button', { class: 'btn', onclick: deckModal }, '➕ مجموعة جديدة'),
+      return SP.page('البطاقات التعليمية', 'احفظ بالتكرار المتباعد: البطاقة التي تعرفها تظهر لك لاحقاً بفترات أطول.', h('button', { class: 'btn', onclick: deckModal }, 'مجموعة جديدة'),
         h('div', { class: 'grid', style: { marginTop: '14px' } }, list.length ? list.map((d) => { const due = d.cards.filter((c) => (c.due || t) <= t).length; return h('div', { class: 'card click', onclick: () => SP.go('cards/' + d.id) }, h('h3', {}, d.name), h('p', { class: 'sub' }, d.cards.length + ' بطاقة · ' + (d.classId ? SP.className(d.classId) : 'شخصية')), h('span', { class: 'chip' + (due ? ' on' : '') }, due + ' للمراجعة')); }) : SP.empty('لا توجد مجموعات')));
     }
     const d = S().decks.find((x) => x.id === p[0]); if (!d || !visibleDeck(d)) return SP.page('غير موجودة', '', h('button', { class: 'btn', onclick: () => SP.go('cards') }, 'رجوع'));
@@ -71,8 +71,8 @@
     if (p[1] === 'study') { if (!mine) return SP.page('انسخ المجموعة أولاً', '', h('button', { class: 'btn', onclick: () => SP.go('cards/' + d.id) }, 'رجوع')); studyDeck(d, root); return root; }
     const q = h('input', { class: 'inp', placeholder: 'السؤال', style: { flex: 1 } }), a = h('input', { class: 'inp', placeholder: 'الإجابة', style: { flex: 1 } }), bulk = h('textarea', { class: 'inp', placeholder: 'استيراد جماعي: سطر لكل بطاقة بالشكل  سؤال | إجابة' });
     const t = SP.today(), due = d.cards.filter((c) => (c.due || t) <= t).length;
-    return SP.page(d.name, d.cards.length + ' بطاقة · ' + due + ' للمراجعة اليوم', h('div', { class: 'row' }, mine ? h('button', { class: 'btn', onclick: () => SP.go('cards/' + d.id + '/study') }, '▶️ ابدأ المراجعة (' + due + ')') : h('button', { class: 'btn', onclick: () => { const c = JSON.parse(JSON.stringify(d)); c.id = SP.uid(); c.ownerId = SP.state.me; c.classId = ''; c.cards.forEach((x) => { x.id = SP.uid(); x.box = 1; x.due = t; }); S().decks.push(c); SP.save(); SP.go('cards/' + c.id); } }, '📥 نسخ إلى مجموعاتي'),
-      h('button', { class: 'btn ghost', onclick: () => SP.go('cards') }, 'رجوع'), mine ? h('button', { class: 'btn ghost', onclick: async () => { if (await SP.confirm('حذف المجموعة؟')) { S().decks = S().decks.filter((x) => x.id !== d.id); SP.save(); SP.go('cards'); } } }, '🗑️ حذف') : null),
+    return SP.page(d.name, d.cards.length + ' بطاقة · ' + due + ' للمراجعة اليوم', h('div', { class: 'row' }, mine ? h('button', { class: 'btn', onclick: () => SP.go('cards/' + d.id + '/study') }, 'ابدأ المراجعة (' + due + ')') : h('button', { class: 'btn', onclick: () => { const c = JSON.parse(JSON.stringify(d)); c.id = SP.uid(); c.ownerId = SP.state.me; c.classId = ''; c.cards.forEach((x) => { x.id = SP.uid(); x.box = 1; x.due = t; }); S().decks.push(c); SP.save(); SP.go('cards/' + c.id); } }, 'نسخ إلى مجموعاتي'),
+      h('button', { class: 'btn ghost', onclick: () => SP.go('cards') }, 'رجوع'), mine ? h('button', { class: 'btn ghost', onclick: async () => { if (await SP.confirm('حذف المجموعة؟')) { S().decks = S().decks.filter((x) => x.id !== d.id); SP.save(); SP.go('cards'); } } }, 'حذف') : null),
       mine ? h('div', { class: 'card', style: { margin: '12px 0' } }, h('div', { class: 'row' }, q, a, h('button', { class: 'btn', onclick: () => { if (!q.value.trim() || !a.value.trim()) return; d.cards.push({ id: SP.uid(), q: q.value.trim(), a: a.value.trim(), box: 1, due: t }); SP.save(); SP.refresh(); } }, 'إضافة')),
         h('div', { style: { marginTop: '8px' } }, bulk, h('button', { class: 'btn ghost sm', style: { marginTop: '6px' }, onclick: () => { let n = 0; bulk.value.split('\n').forEach((l) => { const [x, y] = l.split('|'); if (x && y && x.trim() && y.trim()) { d.cards.push({ id: SP.uid(), q: x.trim(), a: y.trim(), box: 1, due: t }); n++; } }); SP.save(); SP.toast(n + ' بطاقة'); SP.refresh(); } }, 'استيراد'))) : null,
       h('table', {}, d.cards.map((c) => h('tr', {}, h('td', {}, c.q), h('td', {}, c.a), h('td', {}, h('span', { class: 'chip' }, 'مستوى ' + (c.box || 1))), mine ? h('td', {}, h('button', { class: 'btn ghost sm', 'aria-label': 'حذف', onclick: () => { d.cards = d.cards.filter((x) => x.id !== c.id); SP.save(); SP.refresh(); } }, '✕')) : null))));
@@ -92,7 +92,7 @@
         qq.type === 'short' ? h('input', { class: 'inp', style: { width: '100%' }, placeholder: 'الإجابة الصحيحة (يمكن عدة إجابات مفصولة بـ |)', value: qq.answer, oninput: (e) => (qq.answer = e.target.value) })
           : qq.options.map((o, k) => h('label', { class: 'row', style: { margin: '4px 0' } }, h('input', { type: 'radio', name: 'a' + qq.id, checked: qq.answer === k, onchange: () => (qq.answer = k) }), qq.type === 'tf' ? h('span', {}, o) : h('input', { class: 'inp', style: { flex: 1 }, placeholder: 'خيار ' + (k + 1), value: o, oninput: (e) => (qq.options[k] = e.target.value) }))));
     })); draw();
-    SP.modal({ title: quiz ? 'تعديل الفويز' : 'فويز جديد', wide: true, body: h('div', {}, SP.field('العنوان', title), h('div', { class: 'row' }, SP.field('الصف', cls), SP.field('المدة بالدقائق (0 = بلا حد)', lim)), box, h('button', { class: 'btn ghost', style: { marginTop: '8px' }, onclick: () => { q.questions.push(blank()); draw(); } }, '➕ سؤال')),
+    SP.modal({ title: quiz ? 'تعديل الفويز' : 'فويز جديد', wide: true, body: h('div', {}, SP.field('العنوان', title), h('div', { class: 'row' }, SP.field('الصف', cls), SP.field('المدة بالدقائق (0 = بلا حد)', lim)), box, h('button', { class: 'btn ghost', style: { marginTop: '8px' }, onclick: () => { q.questions.push(blank()); draw(); } }, 'سؤال')),
       actions: [{ label: 'إلغاء', onclick: (c) => c() }, { label: 'حفظ', primary: true, onclick: (c) => {
         if (!title.value.trim()) return SP.toast('اكتب عنوان الفويز', 'err');
         for (const qq of q.questions) {
@@ -108,7 +108,7 @@
   }
   function leaderboard(q) {
     const rows = SP.bestResults(q.id);
-    SP.modal({ title: '🏆 ترتيب: ' + q.title, body: rows.length ? h('table', {}, h('thead', {}, h('tr', {}, ['#', 'الطالب', 'الدرجة', 'الوقت'].map((x) => h('th', {}, x)))), h('tbody', {}, rows.map((r, i) => h('tr', {}, h('td', {}, ['🥇', '🥈', '🥉'][i] || i + 1), h('td', {}, SP.user(r.userId).name), h('td', {}, r.score + '/' + r.total), h('td', {}, fmt(r.secs)))))) : SP.empty('لا نتائج بعد'), actions: [{ label: 'إغلاق', onclick: (c) => c() }] });
+    SP.modal({ title: 'ترتيب: ' + q.title, body: rows.length ? h('table', {}, h('thead', {}, h('tr', {}, ['#', 'الطالب', 'الدرجة', 'الوقت'].map((x) => h('th', {}, x)))), h('tbody', {}, rows.map((r, i) => h('tr', {}, h('td', {}, ['🥇', '🥈', '🥉'][i] || i + 1), h('td', {}, SP.user(r.userId).name), h('td', {}, r.score + '/' + r.total), h('td', {}, fmt(r.secs)))))) : SP.empty('لا نتائج بعد'), actions: [{ label: 'إغلاق', onclick: (c) => c() }] });
   }
   SP.quizList = (classId) => {
     const root = h('div', {}), list = h('div', { class: 'grid' });
@@ -121,13 +121,13 @@
         const move = (dir) => { const j = i + dir; if (j < 0 || j >= qs.length) return; const a = qs[i], b = qs[j]; [a.order, b.order] = [b.order, a.order]; if (a.order === b.order) b.order += dir * -0.5; SP.save(); draw(); };
         return h('div', { class: 'card' }, h('div', { class: 'row sp' }, h('h3', {}, q.title), h('span', { class: 'chip' }, q.questions.length + ' أسئلة')),
           h('p', { class: 'sub' }, (q.classId ? SP.className(q.classId) : 'تدريب شخصي') + (q.timeLimit ? ' · ' + q.timeLimit + 'د' : '') + (best != null ? ' · أفضل نتيجة لك: ' + best + '%' : '')),
-          h('div', { class: 'row' }, h('button', { class: 'btn sm', onclick: () => SP.go('quizzes/take/' + q.id) }, best == null ? '▶️ ابدأ' : '🔁 أعد المحاولة'), h('button', { class: 'btn ghost sm', onclick: () => leaderboard(q) }, '🏆 الترتيب'),
-            canManage(q) ? [h('button', { class: 'btn ghost sm', onclick: () => quizEditor(q) }, '✏️'), h('button', { class: 'btn ghost sm', title: 'تصدير', onclick: () => SP.download(q.title + '.quiz.json', JSON.stringify(q, null, 1), 'application/json') }, '⬇️'),
+          h('div', { class: 'row' }, h('button', { class: 'btn sm', onclick: () => SP.go('quizzes/take/' + q.id) }, best == null ? 'ابدأ' : 'أعد المحاولة'), h('button', { class: 'btn ghost sm', onclick: () => leaderboard(q) }, 'الترتيب'),
+            canManage(q) ? [h('button', { class: 'btn ghost sm', onclick: () => quizEditor(q) }, 'تعديل'), h('button', { class: 'btn ghost sm', title: 'تصدير', onclick: () => SP.download(q.title + '.quiz.json', JSON.stringify(q, null, 1), 'application/json') }, 'تنزيل'),
               h('button', { class: 'btn ghost sm', 'aria-label': 'أعلى', disabled: sort !== 'order' || i === 0, onclick: () => move(-1) }, '▲'), h('button', { class: 'btn ghost sm', 'aria-label': 'أسفل', disabled: sort !== 'order' || i === qs.length - 1, onclick: () => move(1) }, '▼'),
-              h('button', { class: 'btn ghost sm', onclick: async () => { if (await SP.confirm('حذف الفويز ونتائجه؟')) { S().quizzes = S().quizzes.filter((x) => x.id !== q.id); S().results = S().results.filter((r) => r.quizId !== q.id); SP.save(); draw(); } } }, '🗑️')] : null));
+              h('button', { class: 'btn ghost sm', onclick: async () => { if (await SP.confirm('حذف الفويز ونتائجه؟')) { S().quizzes = S().quizzes.filter((x) => x.id !== q.id); S().results = S().results.filter((r) => r.quizId !== q.id); SP.save(); draw(); } } }, 'حذف')] : null));
       }) : [SP.empty('لا توجد فويزات')]));
     };
-    root.append(h('div', { class: 'row' }, h('button', { class: 'btn', onclick: () => quizEditor() }, '➕ فويز جديد'), h('label', {}, 'الترتيب: ', h('select', { class: 'inp', onchange: (e) => { sort = e.target.value; draw(); } }, [['order', 'ترتيبي اليدوي'], ['date', 'الأحدث'], ['title', 'أبجدي']].map(([v, l]) => h('option', { value: v }, l))))), h('div', { style: { marginTop: '12px' } }, list)); draw(); return root;
+    root.append(h('div', { class: 'row' }, h('button', { class: 'btn', onclick: () => quizEditor() }, 'فويز جديد'), h('label', {}, 'الترتيب: ', h('select', { class: 'inp', onchange: (e) => { sort = e.target.value; draw(); } }, [['order', 'ترتيبي اليدوي'], ['date', 'الأحدث'], ['title', 'أبجدي']].map(([v, l]) => h('option', { value: v }, l))))), h('div', { style: { marginTop: '12px' } }, list)); draw(); return root;
   };
   const norm = (s) => String(s).trim().toLowerCase().replace(/[ً-ْ]/g, '').replace(/[أإآ]/g, 'ا').replace(/ة/g, 'ه');
   const correct = (qq, a) => (qq.type === 'short' ? a != null && String(qq.answer).split('|').some((x) => norm(x) === norm(a)) : a === qq.answer);
@@ -140,14 +140,14 @@
       root.replaceChildren(SP.page(`نتيجتك: ${score}/${q.questions.length}`, Math.round((100 * score) / q.questions.length) + '% · ' + fmt(secs),
         q.questions.map((qq, i) => { const ok = correct(qq, ans[qq.id]); return h('div', { class: 'card', style: { margin: '8px 0' } }, h('b', {}, `${i + 1}. ${qq.q} ${ok ? '✅' : '❌'}`),
           qq.type === 'short' ? h('p', {}, 'إجابتك: ' + (ans[qq.id] || '—') + ' · الصحيحة: ' + String(qq.answer).split('|')[0]) : qq.options.map((o, k) => h('div', { class: 'opt ' + (k === qq.answer ? 'right' : k === ans[qq.id] ? 'wrong' : '') }, o))); }),
-        h('div', { class: 'row' }, h('button', { class: 'btn', onclick: () => SP.go('quizzes') }, 'رجوع للفويزات'), h('button', { class: 'btn ghost', onclick: () => leaderboard(q) }, '🏆 الترتيب'))));
+        h('div', { class: 'row' }, h('button', { class: 'btn', onclick: () => SP.go('quizzes') }, 'رجوع للفويزات'), h('button', { class: 'btn ghost', onclick: () => leaderboard(q) }, 'الترتيب'))));
     };
     const clock = h('span', { class: 'chip' });
     if (q.timeLimit) { timer = setInterval(() => { const left = q.timeLimit * 60 - Math.round((Date.now() - t0) / 1000); clock.textContent = '⏳ ' + fmt(Math.max(0, left)); if (left <= 0) finish(); }, 500); SP.cleanups.push(() => clearInterval(timer)); }
     root.append(SP.page(q.title, q.questions.length + ' أسئلة', clock, q.questions.map((qq, i) => h('div', { class: 'card', style: { margin: '10px 0' } }, h('b', {}, `${i + 1}. ${qq.q}`),
       qq.type === 'short' ? h('input', { class: 'inp', style: { width: '100%', marginTop: '8px' }, placeholder: 'إجابتك', oninput: (e) => (ans[qq.id] = e.target.value) })
         : qq.options.map((o, k) => h('label', { class: 'opt' }, h('input', { type: 'radio', name: 'q' + qq.id, onchange: () => (ans[qq.id] = k) }), ' ' + o)))),
-    h('button', { class: 'btn', onclick: finish }, '✔️ تسليم'))); return root;
+    h('button', { class: 'btn', onclick: finish }, 'تسليم'))); return root;
   }
   SP.reg('quizzes', '❓', 'الفويزات', (p) => {
     if (p[0] === 'take') { const q = S().quizzes.find((x) => x.id === p[1]); return q && visibleQuiz(q) ? takeQuiz(q) : SP.page('غير موجود', ''); }
@@ -168,7 +168,7 @@
         const tt = (S().timetable[SP.state.me] = S().timetable[SP.state.me] || {});
         body = h('div', { style: { overflowX: 'auto' } }, h('table', {}, h('thead', {}, h('tr', {}, h('th', {}, 'الحصة'), SP.DAYS.map((d) => h('th', {}, d)))), h('tbody', {}, [1, 2, 3, 4, 5, 6, 7].map((p) => h('tr', {}, h('th', {}, p), SP.DAYS.map((d, di) => h('td', {}, h('input', { class: 'inp', style: { width: '100%', minWidth: '90px' }, value: tt[di + '-' + p] || '', 'aria-label': d + ' الحصة ' + p, onchange: (e) => { tt[di + '-' + p] = e.target.value; SP.save(); } }))))))));
       }
-      root.replaceChildren(SP.page('المهام والجدول', 'نظّم واجباتك وجدولك الأسبوعي.', SP.tabs([['tasks', '✅ المهام'], ['tt', '🗓️ الجدول الأسبوعي']], tab, (k) => { tab = k; draw(); }), body));
+      root.replaceChildren(SP.page('المهام والجدول', 'نظّم واجباتك وجدولك الأسبوعي.', SP.tabs([['tasks', 'المهام'], ['tt', 'الجدول الأسبوعي']], tab, (k) => { tab = k; draw(); }), body));
     }; draw(); return root;
   });
 

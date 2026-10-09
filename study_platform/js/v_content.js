@@ -10,7 +10,7 @@
     const n = note || { id: SP.uid(), ownerId: SP.state.me, title: '', body: '', color: SP.COLORS[2], pinned: false, tags: [], classId: '', stickers: [], updated: Date.now() };
     const title = h('input', { class: 'inp', style: { width: '100%' }, value: n.title, placeholder: 'العنوان' }), body = h('textarea', { class: 'inp', style: { minHeight: '180px' }, placeholder: 'اكتب ملاحظتك…' });
     body.value = n.body; const tags = SP.tagInput(n.tags), cls = SP.classSelect(n.classId, false), st = [...(n.stickers || [])]; let color = n.color, pinned = n.pinned;
-    const pin = h('label', {}, h('input', { type: 'checkbox', checked: pinned, onchange: (e) => (pinned = e.target.checked) }), ' 📌 تثبيت');
+    const pin = h('label', {}, h('input', { type: 'checkbox', checked: pinned, onchange: (e) => (pinned = e.target.checked) }), ' تثبيت');
     SP.modal({ title: note ? 'تعديل الملاحظة' : 'ملاحظة جديدة', wide: true, body: h('div', {}, SP.field('العنوان', title), SP.field('المحتوى', body), SP.field('الوسوم', tags), SP.field('الصف (اختياري: ليراها زملاؤك)', cls), SP.field('اللون', SP.swatches(color, (c) => (color = c))), SP.field('ملصقات', SP.stickerPicker(st)), h('div', { style: { marginTop: '10px' } }, pin)),
       actions: [{ label: 'إلغاء', onclick: (c) => c() }, { label: 'حفظ', primary: true, onclick: (c) => {
         if (!title.value.trim() && !body.value.trim()) return SP.toast('الملاحظة فارغة', 'err');
@@ -26,16 +26,16 @@
       const tags = [...new Set(all().flatMap((n) => n.tags))];
       bar.replaceChildren(SP.filterBar(tags, tag, (t) => { tag = t; draw(); }));
       const list = all().filter((n) => (!tag || n.tags.includes(tag)) && (!onlyPin || n.pinned) && (n.title + n.body + n.tags.join(' ')).toLowerCase().includes(q)).sort((a, b) => b.pinned - a.pinned || b.updated - a.updated);
-      grid.replaceChildren(...(list.length ? list.map((n) => h('div', { class: 'note', style: { background: tint(n.color), borderColor: n.color } },
+      grid.replaceChildren(...(list.length ? list.map((n) => h('div', { class: 'note', style: { borderInlineStartColor: n.color } },
         h('div', { class: 'row sp' }, h('b', {}, (n.pinned ? '📌 ' : '') + n.title), n.classId ? h('span', { class: 'chip' }, SP.className(n.classId)) : null),
         h('p', {}, n.body.length > 220 ? n.body.slice(0, 220) + '…' : n.body),
         h('div', {}, (n.stickers || []).map((e) => h('span', { style: { fontSize: '1.3rem' } }, e)), n.tags.map((t) => h('span', { class: 'chip' }, '#' + t))),
         h('div', { class: 'row', style: { marginTop: '8px' } }, h('small', { class: 'sub', style: { margin: 0 } }, SP.date(n.updated) + (n.ownerId !== SP.state.me ? ' · ' + SP.user(n.ownerId).name : '')),
-          h('button', { class: 'btn ghost sm', onclick: () => SP.download((n.title || 'note') + '.txt', n.title + '\n\n' + n.body) }, '⬇️'),
-          canEdit(n) ? [h('button', { class: 'btn ghost sm', onclick: () => noteEditor(n) }, '✏️'), h('button', { class: 'btn ghost sm', onclick: async () => { if (await SP.confirm('حذف الملاحظة؟')) { S().notes = S().notes.filter((x) => x.id !== n.id); SP.save(); draw(); } } }, '🗑️')] : null))) : [SP.empty('لا توجد ملاحظات مطابقة')]));
+          h('button', { class: 'btn ghost sm', onclick: () => SP.download((n.title || 'note') + '.txt', n.title + '\n\n' + n.body) }, 'تنزيل'),
+          canEdit(n) ? [h('button', { class: 'btn ghost sm', onclick: () => noteEditor(n) }, 'تعديل'), h('button', { class: 'btn ghost sm', onclick: async () => { if (await SP.confirm('حذف الملاحظة؟')) { S().notes = S().notes.filter((x) => x.id !== n.id); SP.save(); draw(); } } }, 'حذف')] : null))) : [SP.empty('لا توجد ملاحظات مطابقة')]));
     };
     root.append(SP.page('الملاحظات', 'دوّن أفكارك ولوّنها ووسمها ودبّسها.', h('div', { class: 'row' },
-      h('button', { class: 'btn', onclick: () => noteEditor() }, '➕ ملاحظة جديدة'), h('input', { class: 'inp', placeholder: 'بحث في الملاحظات…', oninput: (e) => { q = e.target.value.toLowerCase(); draw(); } }),
+      h('button', { class: 'btn', onclick: () => noteEditor() }, 'ملاحظة جديدة'), h('input', { class: 'inp', placeholder: 'بحث في الملاحظات…', oninput: (e) => { q = e.target.value.toLowerCase(); draw(); } }),
       h('label', {}, h('input', { type: 'checkbox', onchange: (e) => { onlyPin = e.target.checked; draw(); } }), ' المثبّتة فقط')), h('div', { style: { margin: '10px 0' } }, bar), grid)); draw(); return root;
   });
 
@@ -53,7 +53,7 @@
       else if (m.includes('html')) box.append(h('iframe', { src: url, sandbox: '', style: { width: '100%', height: '70vh', border: 0, background: '#fff' } }));
       else if (m.startsWith('text')) { const pre = h('pre', { style: { whiteSpace: 'pre-wrap' } }); blob.text().then((t) => (pre.textContent = t.slice(0, 20000))); box.append(pre); }
       else box.append(SP.empty('لا يمكن معاينة هذا النوع. نزّل الملف لفتحه.'));
-      box.append(h('div', { style: { marginTop: '10px' } }, h('button', { class: 'btn', onclick: () => SP.download(f.name, blob) }, '⬇️ تنزيل')));
+      box.append(h('div', { style: { marginTop: '10px' } }, h('button', { class: 'btn', onclick: () => SP.download(f.name, blob) }, 'تنزيل')));
     }
     SP.modal({ title: f.name, wide: true, body: box, actions: [{ label: 'إغلاق', onclick: (c) => c() }] });
   }
@@ -62,7 +62,7 @@
     let color = f.color || '', star = !!f.star; const st = [...(f.stickers || [])], pages = h('input', { class: 'inp', type: 'number', min: 0, value: f.pages || 0 });
     const colors = h('span', {}); const drawC = () => colors.replaceChildren(h('span', { class: 'sw' + (!color ? ' on' : ''), style: { background: 'var(--line)' }, onclick: () => { color = ''; drawC(); } }), ...SP.COLORS.map((x) => h('span', { class: 'sw' + (x === color ? ' on' : ''), style: { background: x }, onclick: () => { color = x; drawC(); } }))); drawC();
     SP.modal({ title: 'تمييز وتنظيم: ' + f.name, wide: true, body: h('div', {}, SP.field('الوصف', desc), SP.field('الوسوم', tags), SP.field('الصف', cls), SP.field('لون التمييز', colors), SP.field('ملصقات', SP.stickerPicker(st)),
-      kind === 'handout' ? SP.field('عدد صفحات الملزمة', pages) : null, h('label', { style: { display: 'block', marginTop: '10px' } }, h('input', { type: 'checkbox', checked: star, onchange: (e) => (star = e.target.checked) }), ' ⭐ مهم (مميّز)')),
+      kind === 'handout' ? SP.field('عدد صفحات الملزمة', pages) : null, h('label', { style: { display: 'block', marginTop: '10px' } }, h('input', { type: 'checkbox', checked: star, onchange: (e) => (star = e.target.checked) }), ' مهم (مميّز)')),
       actions: [{ label: 'إلغاء', onclick: (c) => c() }, { label: 'حفظ', primary: true, onclick: (c) => { Object.assign(f, { desc: desc.value, tags: SP.parseTags(tags.value), classId: cls.value, color, star, stickers: st, pages: +pages.value || 0 }); SP.save(); c(); SP.refresh(); } }] });
   }
   async function addFiles(fileList, kind, classId) {
@@ -98,14 +98,14 @@
         h('b', { style: { wordBreak: 'break-all', cursor: 'pointer' }, onclick: () => preview(f) }, f.name), h('div', { class: 'sub', style: { margin: 0 } }, SP.size(f.size) + ' · ' + SP.date(f.added) + (f.classId ? ' · ' + SP.className(f.classId) : '') + (f.ownerId !== SP.state.me ? ' · ' + SP.user(f.ownerId).name : '')),
         f.desc ? h('p', {}, f.desc) : null, h('div', {}, f.tags.map((t) => h('span', { class: 'chip' }, '#' + t))),
         f.kind === 'handout' && f.pages ? h('div', {}, h('div', { class: 'bar' }, h('i', { style: { width: Math.min(100, (100 * f.readPages) / f.pages) + '%' } })), h('div', { class: 'row', style: { marginTop: '6px' } }, h('small', {}, 'قرأت'), h('input', { class: 'inp', type: 'number', min: 0, max: f.pages, value: f.readPages || 0, style: { width: '70px' }, onchange: (e) => { f.readPages = Math.min(f.pages, +e.target.value || 0); SP.save(); draw(); } }), h('small', {}, 'من ' + f.pages))) : null,
-        h('div', { class: 'row', style: { marginTop: '8px' } }, h('button', { class: 'btn ghost sm', onclick: () => preview(f) }, '👁️ معاينة'),
-          canEdit(f) ? [h('button', { class: 'btn ghost sm', onclick: () => fileEditor(f, f.kind) }, '🏷️ تمييز'), h('button', { class: 'btn ghost sm', onclick: async () => { if (await SP.confirm('حذف الملف؟')) { await SP.idb.del(f.id); S().files = S().files.filter((x) => x.id !== f.id); SP.save(); draw(); } } }, '🗑️')] : null))) : [SP.empty('لا توجد ملفات. ارفع ملفاً أو اسحبه هنا.')]));
+        h('div', { class: 'row', style: { marginTop: '8px' } }, h('button', { class: 'btn ghost sm', onclick: () => preview(f) }, 'معاينة'),
+          canEdit(f) ? [h('button', { class: 'btn ghost sm', onclick: () => fileEditor(f, f.kind) }, 'تمييز'), h('button', { class: 'btn ghost sm', onclick: async () => { if (await SP.confirm('حذف الملف؟')) { await SP.idb.del(f.id); S().files = S().files.filter((x) => x.id !== f.id); SP.save(); draw(); } } }, 'حذف')] : null))) : [SP.empty('لا توجد ملفات. ارفع ملفاً أو اسحبه هنا.')]));
     };
     const input = h('input', { type: 'file', multiple: true, style: { display: 'none' }, onchange: (e) => addFiles([...e.target.files], kind || 'file', classId) });
     const colorBtns = h('span', {}, h('span', { class: 'sw', style: { background: 'var(--line)' }, title: 'كل الألوان', onclick: () => { colorF = ''; draw(); } }), SP.COLORS.map((c) => h('span', { class: 'sw', style: { background: c, width: '18px', height: '18px' }, onclick: () => { colorF = c; draw(); } })));
-    root.append(h('div', { class: 'row' }, h('button', { class: 'btn', onclick: () => input.click() }, kind === 'handout' ? '📚 رفع ملزمة' : '⬆️ رفع ملفات'), input,
-      kind === 'handout' ? h('button', { class: 'btn ghost', onclick: handoutFromNotes }, '🪄 ملزمة من ملاحظاتي') : null,
-      h('input', { class: 'inp', placeholder: 'بحث…', oninput: (e) => { q = e.target.value.toLowerCase(); draw(); } }), colorBtns, h('label', {}, h('input', { type: 'checkbox', onchange: (e) => { onlyStar = e.target.checked; draw(); } }), ' ⭐ المهمة فقط')),
+    root.append(h('div', { class: 'row' }, h('button', { class: 'btn', onclick: () => input.click() }, kind === 'handout' ? 'رفع ملزمة' : 'رفع ملفات'), input,
+      kind === 'handout' ? h('button', { class: 'btn ghost', onclick: handoutFromNotes }, 'ملزمة من ملاحظاتي') : null,
+      h('input', { class: 'inp', placeholder: 'بحث…', oninput: (e) => { q = e.target.value.toLowerCase(); draw(); } }), colorBtns, h('label', {}, h('input', { type: 'checkbox', onchange: (e) => { onlyStar = e.target.checked; draw(); } }), ' المهمة فقط')),
     h('div', { style: { margin: '10px 0' } }, bar), grid);
     root.addEventListener('dragover', (e) => e.preventDefault()); root.addEventListener('drop', (e) => { e.preventDefault(); if (e.dataTransfer.files.length) addFiles([...e.dataTransfer.files], kind || 'file', classId); });
     draw(); return root;
@@ -135,7 +135,7 @@
     const add = (kind, text, color) => { const it = { id: SP.uid(), kind, text, color, x: 40 + Math.random() * 400, y: 30 + Math.random() * 300, rot: Math.round(Math.random() * 16 - 8) }; board.push(it); SP.save(); place(it); };
     return SP.page('لوح الملصقات', 'اسحب الملصقات والورقات اللاصقة وضعها كما تشاء. تُحفظ تلقائياً.',
       h('div', { class: 'card' }, h('div', {}, SP.EMOJIS.map((e) => h('button', { class: 'emo', onclick: () => add('emoji', e) }, e))),
-        h('div', { class: 'row', style: { marginTop: '8px' } }, h('b', {}, 'ورقة لاصقة:'), SP.COLORS.map((c) => h('button', { class: 'btn sm', style: { background: c }, onclick: () => add('note', 'اكتب هنا…', tint(c).length ? c + 'cc' : c) }, '＋')),
+        h('div', { class: 'row', style: { marginTop: '8px' } }, h('b', {}, 'ورقة لاصقة:'), SP.COLORS.map((c) => h('button', { class: 'btn sm', style: { background: c }, onclick: () => add('note', 'اكتب هنا…', c + '40') }, '＋')),
           h('button', { class: 'btn ghost sm', onclick: async () => { if (board.length && (await SP.confirm('مسح كل الملصقات؟'))) { board.length = 0; SP.save(); SP.refresh(); } } }, 'مسح الكل'))), h('div', { style: { marginTop: '12px' } }, el));
   });
 })();

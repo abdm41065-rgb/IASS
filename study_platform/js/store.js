@@ -3,7 +3,7 @@
   const SP = (window.SP = { views: {}, nav: [], cleanups: [], listeners: {} });
   SP.uid = () => Math.random().toString(36).slice(2, 9) + Date.now().toString(36).slice(-3);
   SP.today = (d = new Date()) => new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
-  SP.COLORS = ['#6366f1', '#14b8a6', '#f59e0b', '#ef4444', '#8b5cf6', '#10b981', '#ec4899', '#3b82f6'];
+  SP.COLORS = ['#007AFF', '#5AC8FA', '#0A4FB3', '#64A9FF', '#32ADE6', '#1E3A8A', '#3B82F6', '#9CC7FF'];
   SP.EMOJIS = ['⭐', '🔥', '💡', '✅', '❗', '❓', '📌', '🎯', '🏆', '🧠', '📖', '✏️', '🔬', '🧮', '🌍', '🎨', '🎵', '💻', '⚡', '🚀', '👍', '❤️', '😀', '🤔', '🌟', '📅', '⏰', '🔖'];
   SP.DAYS = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس'];
   const KEY = 'sp_state_v1';

@@ -12,7 +12,7 @@
     const stat = (n, l, go) => h('div', { class: 'card stat click', onclick: () => go && SP.go(go) }, h('b', {}, n), h('span', {}, l));
     const tasks = s.tasks.filter((x) => x.userId === uid && !x.done).sort((a, b) => (a.due || '9').localeCompare(b.due || '9')).slice(0, 5);
     const anns = s.posts.filter((p) => p.kind === 'announcement' && SP.canSeeClass(p.classId)).sort((a, b) => b.ts - a.ts).slice(0, 3);
-    const act = (ic, l, go) => h('button', { class: 'btn ghost', onclick: () => SP.go(go) }, ic + ' ' + l);
+    const act = (ic, l, go) => h('button', { class: 'btn ghost', onclick: () => SP.go(go) }, l);
     return SP.page(`أهلاً ${me.name} 👋`, me.role === 'teacher' ? 'لوحة المعلم: صفوفك، فويزاتك، وإعلاناتك.' : 'ماذا ستدرس اليوم؟',
       h('div', { class: 'grid s' },
         stat(SP.myClasses().length, 'صفوفي', 'classes'), stat(myNotes.length, 'ملاحظاتي', 'notes'), stat(myFiles.length, 'ملفاتي', 'files'),
@@ -21,8 +21,8 @@
       h('h2', {}, 'إجراءات سريعة'),
       h('div', { class: 'row' }, act('📝', 'ملاحظة جديدة', 'notes'), act('📁', 'رفع ملف', 'files'), act('⏱️', 'ابدأ جلسة تركيز', 'study'), act('🃏', 'راجع البطاقات', 'cards'), act('❓', 'الفويزات', 'quizzes'), act('💬', 'شارك معلومة', 'share')),
       h('div', { class: 'grid', style: { marginTop: '10px' } },
-        h('div', {}, h('h2', {}, '📢 آخر الإعلانات'), anns.length ? anns.map((p) => h('div', { class: 'card', style: { marginBottom: '8px' } }, h('b', {}, SP.className(p.classId) || 'عام'), h('p', {}, p.text))) : SP.empty('لا توجد إعلانات')),
-        h('div', {}, h('h2', {}, '✅ مهام قادمة'), tasks.length ? tasks.map((x) => h('div', { class: 'card', style: { marginBottom: '8px' } }, x.text, ' ', h('span', { class: 'chip' }, x.due || 'بلا موعد'))) : SP.empty('لا مهام معلّقة 🎉'))));
+        h('div', {}, h('h2', {}, 'آخر الإعلانات'), anns.length ? anns.map((p) => h('div', { class: 'card', style: { marginBottom: '8px' } }, h('b', {}, SP.className(p.classId) || 'عام'), h('p', {}, p.text))) : SP.empty('لا توجد إعلانات')),
+        h('div', {}, h('h2', {}, 'مهام قادمة'), tasks.length ? tasks.map((x) => h('div', { class: 'card', style: { marginBottom: '8px' } }, x.text, ' ', h('span', { class: 'chip' }, x.due || 'بلا موعد'))) : SP.empty('لا مهام معلّقة 🎉'))));
   });
 
   /* ---------- الصفوف ---------- */
@@ -30,7 +30,7 @@
     const n = c.memberIds.length;
     return h('div', { class: 'card click', style: { borderTop: `5px solid ${c.color}` }, onclick: () => SP.go('classes/' + c.id) },
       h('h3', {}, c.name), h('p', { class: 'sub' }, c.subject || ''),
-      h('div', { class: 'row sp' }, h('span', {}, '👨‍🏫 ' + SP.user(c.teacherId).name), h('span', { class: 'chip' }, n + ' طالب')));
+      h('div', { class: 'row sp' }, h('span', {}, '' + SP.user(c.teacherId).name), h('span', { class: 'chip' }, n + ' طالب')));
   }
   function newClassModal() {
     const name = h('input', { class: 'inp', style: { width: '100%' }, placeholder: 'مثال: العلوم - الصف الخامس' }), subj = h('input', { class: 'inp', style: { width: '100%' } });
@@ -68,11 +68,11 @@
             if (!text.value.trim()) return;
             s.posts.push({ id: SP.uid(), classId: id, authorId: SP.state.me, kind: 'announcement', text: text.value.trim(), tags: ['إعلان'], likes: [], comments: [], pinned: false, ts: Date.now() });
             SP.save(); draw();
-          } }, '📢 نشر إعلان')) : null,
+          } }, 'نشر إعلان')) : null,
           h('h2', {}, 'الإعلانات'), anns.length ? anns.map((p) => h('div', { class: 'card', style: { marginBottom: '8px' } }, h('p', {}, p.text), h('small', { class: 'sub' }, SP.date(p.ts)))) : SP.empty('لا توجد إعلانات'));
       } else if (tab === 'members') {
         const addable = s.users.filter((u) => u.role === 'student' && !c.memberIds.includes(u.id)), sel = h('select', { class: 'inp' }, addable.map((u) => h('option', { value: u.id }, u.name)));
-        body = h('div', {}, h('div', { class: 'card row' }, h('b', {}, '👨‍🏫 ' + SP.user(c.teacherId).name), h('span', { class: 'chip' }, 'المعلم')),
+        body = h('div', {}, h('div', { class: 'card row' }, h('b', {}, '' + SP.user(c.teacherId).name), h('span', { class: 'chip' }, 'المعلم')),
           isOwner && addable.length ? h('div', { class: 'row', style: { margin: '10px 0' } }, sel, h('button', { class: 'btn', onclick: () => { c.memberIds.push(sel.value); SP.save(); draw(); } }, 'إضافة طالب')) : null,
           h('div', { class: 'grid s', style: { marginTop: '10px' } }, c.memberIds.map((m) => { const u = SP.user(m); return h('div', { class: 'card row sp' }, h('span', { class: 'row' }, SP.avatar(u), u.name), isOwner ? h('button', { class: 'btn sm bad', 'aria-label': 'إزالة', onclick: async () => { if (await SP.confirm('إزالة ' + u.name + ' من الصف؟')) { c.memberIds = c.memberIds.filter((x) => x !== m); SP.save(); draw(); } } }, '✕') : null); })));
       } else if (tab === 'quizzes') {
@@ -89,9 +89,9 @@
       root.replaceChildren(
         h('div', { class: 'row sp' }, h('div', {}, h('h1', {}, h('span', { class: 'dot', style: { background: c.color } }), ' ', c.name), h('p', { class: 'sub' }, c.subject || '')),
           h('div', { class: 'row' }, isOwner ? h('span', { class: 'chip', title: 'كود الانضمام' }, 'الكود: ' + c.code) : null,
-            isOwner ? h('button', { class: 'btn ghost sm', onclick: async () => { if (await SP.confirm('حذف الصف نهائياً مع فويزاته ومنشوراته؟')) { const s2 = S(); s2.classes = s2.classes.filter((x) => x.id !== id); s2.quizzes = s2.quizzes.filter((x) => x.classId !== id); s2.posts = s2.posts.filter((x) => x.classId !== id); SP.save(); SP.go('classes'); } } }, '🗑️ حذف') : null,
+            isOwner ? h('button', { class: 'btn ghost sm', onclick: async () => { if (await SP.confirm('حذف الصف نهائياً مع فويزاته ومنشوراته؟')) { const s2 = S(); s2.classes = s2.classes.filter((x) => x.id !== id); s2.quizzes = s2.quizzes.filter((x) => x.classId !== id); s2.posts = s2.posts.filter((x) => x.classId !== id); SP.save(); SP.go('classes'); } } }, 'حذف') : null,
             !isOwner && SP.state.me ? h('button', { class: 'btn ghost sm', onclick: async () => { if (await SP.confirm('مغادرة الصف؟')) { c.memberIds = c.memberIds.filter((x) => x !== SP.state.me); SP.save(); SP.go('classes'); } } }, 'مغادرة') : null)),
-        SP.tabs([['over', '📢 نظرة عامة'], ['members', '👥 الأعضاء'], ['quizzes', '❓ الفويزات'], ['files', '📁 الملفات'], ['posts', '💬 المنشورات'], ['prog', '📊 التقدم']], tab, (k) => { tab = k; draw(); }), body);
+        SP.tabs([['over', 'نظرة عامة'], ['members', 'الأعضاء'], ['quizzes', 'الفويزات'], ['files', 'الملفات'], ['posts', 'المنشورات'], ['prog', 'التقدم']], tab, (k) => { tab = k; draw(); }), body);
     };
     draw(); return root;
   }
@@ -99,7 +99,7 @@
     if (p[0]) return classDetail(p[0]);
     const list = SP.myClasses();
     return SP.page('الصفوف', SP.isTeacher() ? 'أنشئ صفوفك وشارك الكود مع طلابك.' : 'الصفوف التي انضممت إليها.',
-      h('div', { class: 'row' }, SP.isTeacher() ? h('button', { class: 'btn', onclick: newClassModal }, '➕ إنشاء صف') : h('button', { class: 'btn', onclick: joinModal }, '🔑 انضمام بكود')),
+      h('div', { class: 'row' }, SP.isTeacher() ? h('button', { class: 'btn', onclick: newClassModal }, 'إنشاء صف') : h('button', { class: 'btn', onclick: joinModal }, 'انضمام بكود')),
       h('div', { class: 'grid', style: { marginTop: '14px' } }, list.length ? list.map(classCard) : SP.empty('لا توجد صفوف بعد')));
   });
 
@@ -112,10 +112,10 @@
         h('div', { style: { marginTop: '8px' } }, cls.map((c) => h('span', { class: 'chip', style: { borderColor: c.color } }, c.name))));
     }));
     if (!SP.isTeacher()) return SP.page('المعلمون', 'تعرّف على معلميك وصفوفهم. اطرح سؤالاً من قسم «المشاركة».', dir,
-      h('div', { style: { marginTop: '14px' } }, h('button', { class: 'btn', onclick: () => SP.go('share') }, '❓ اسأل معلمك')));
+      h('div', { style: { marginTop: '14px' } }, h('button', { class: 'btn', onclick: () => SP.go('share') }, 'اسأل معلمك')));
     const mine = SP.myClasses(), pending = s.quizzes.filter((q) => mine.some((c) => c.id === q.classId));
     return SP.page('لوحة المعلم', 'أدواتك لإدارة الصفوف والمتابعة.',
-      h('div', { class: 'row' }, h('button', { class: 'btn', onclick: () => SP.go('classes') }, '🏫 إدارة الصفوف'), h('button', { class: 'btn', onclick: () => SP.go('quizzes') }, '❓ فويز جديد'), h('button', { class: 'btn', onclick: () => SP.go('files') }, '📁 نشر ملف لصف'), h('button', { class: 'btn', onclick: () => SP.go('students') }, '🎓 متابعة الطلاب')),
+      h('div', { class: 'row' }, h('button', { class: 'btn', onclick: () => SP.go('classes') }, 'إدارة الصفوف'), h('button', { class: 'btn', onclick: () => SP.go('quizzes') }, 'فويز جديد'), h('button', { class: 'btn', onclick: () => SP.go('files') }, 'نشر ملف لصف'), h('button', { class: 'btn', onclick: () => SP.go('students') }, 'متابعة الطلاب')),
       h('h2', {}, 'نتائج الفويزات'),
       pending.length ? h('table', {}, h('thead', {}, h('tr', {}, ['الفويز', 'الصف', 'المحاولات', 'متوسط الدرجات', 'الأفضل'].map((x) => h('th', {}, x)))),
         h('tbody', {}, pending.map((q) => { const rs = s.results.filter((r) => r.quizId === q.id), top = SP.bestResults(q.id)[0];
