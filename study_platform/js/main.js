@@ -2,10 +2,10 @@
 (function () {
   const SP = window.SP, h = SP.h;
   const HUBS = [
-    ['home', 'الرئيسية', ['home', 'tasks', 'progress']],
+    ['home', 'الرئيسية', ['home', 'calendar', 'tasks', 'progress']],
     ['desk', 'دراسة', ['desk', 'quizzes', 'cards', 'study']],
     ['notes', 'مكتبتي', ['notes', 'files', 'handouts', 'stickers']],
-    ['classes', 'الصفوف', ['classes', 'share', 'teachers', 'students']],
+    ['classes', 'الصفوف', ['classes', 'lectures', 'share', 'teachers', 'students']],
     ['settings', 'الإعدادات', ['settings']],
   ];
   const ICON_FOR = { home: 'home', desk: 'desk', notes: 'files', classes: 'classes', settings: 'settings' };

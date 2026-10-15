@@ -7,7 +7,7 @@ css = (R / "css/style.css").read_text(encoding="utf-8")
 body = re.search(r"<body>(.*?)</body>", src, re.S).group(1)
 body = re.sub(r'<script src="(js|vendor)/[^"]+"></script>\s*', "", body)
 CDN = "".join(f'<script src="https://cdnjs.cloudflare.com/ajax/libs/{x}"></script>\n' for x in ["pdf.js/3.11.174/pdf.min.js", "pdf.js/3.11.174/pdf.worker.min.js", "pdf-lib/1.17.1/pdf-lib.min.js"])
-js = "\n".join((R / "js" / n).read_text(encoding="utf-8") for n in ["store", "ui", "v_home", "v_content", "v_learn", "v_share", "v_desk", "v_ai", "main"] for n in [n + ".js"])
+js = "\n".join((R / "js" / n).read_text(encoding="utf-8") for n in ["store", "ui", "v_home", "v_content", "v_learn", "v_share", "v_desk", "v_lectures", "v_ai", "main"] for n in [n + ".js"])
 js = js.replace("</script", "<\\/script")
 font = re.search(r'<link rel="stylesheet" href="https://fonts[^>]+>', src).group(0)
 out = f"<title>منصة الدراسة</title>\n{font}\n<style>{css}</style>\n{body}\n{CDN}<script>\n{js}\n</script>\n"

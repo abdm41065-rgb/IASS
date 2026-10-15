@@ -302,7 +302,8 @@
     if (document.hidden || panelOpen || asleep) return;
     const uid = SP.state.me, t = SP.today(), due = S().decks.filter((d) => d.ownerId === uid).flatMap((d) => d.cards).filter((c) => (c.due || t) <= t).length;
     const tasks = S().tasks.filter((x) => x.userId === uid && !x.done && x.due && x.due <= t).length, min = SP.studyMin(uid, t), goal = S().goalMin || 60;
-    const tips = [due && `عندك ${due} بطاقة للمراجعة اليوم 🃏`, tasks && `${tasks} مهمة موعدها اليوم ✅`, min < goal && `باقي ${goal - min} دقيقة على هدفك اليوم ⏱️`, min >= goal && 'حققت هدف اليوم! 🌟', 'جرّب: افتح درساً في «دراسة» وظلّل المهم 🖍️', 'اسألني أي سؤال عن دروسك 💬', 'استراحة قصيرة تساعد على التركيز ☕', 'أستطيع كتابة أسئلة من أي ملف 📄❓', 'تقدر تغيّر شكلي من زر 💬 ثم «شكلي» 🎨'].filter(Boolean);
+    const ex = SP.upcomingExams ? SP.upcomingExams()[0] : null, exSoon = ex && new Date(`${ex.date}T${ex.time || '08:00'}`) - Date.now() < 3 * 864e5;
+    const tips = [exSoon && `امتحان «${ex.title}» قريب: ${SP.countdown(new Date(`${ex.date}T${ex.time || '08:00'}`))} 📝`, exSoon && 'ذاكر الآن ولو 25 دقيقة، سأكون معك ⏱️', due && `عندك ${due} بطاقة للمراجعة اليوم 🃏`, tasks && `${tasks} مهمة موعدها اليوم ✅`, min < goal && `باقي ${goal - min} دقيقة على هدفك اليوم ⏱️`, min >= goal && 'حققت هدف اليوم! 🌟', 'جرّب: افتح درساً في «دراسة» وظلّل المهم 🖍️', 'اسألني أي سؤال عن دروسك 💬', 'استراحة قصيرة تساعد على التركيز ☕', 'أستطيع كتابة أسئلة من أي ملف 📄❓', 'تقدر تغيّر شكلي من زر 💬 ثم «شكلي» 🎨'].filter(Boolean);
     say(tips[Math.floor(Math.random() * tips.length)], 5500); anim(Math.random() < 0.5 ? 'wave' : 'nod');
   };
   setInterval(tip, 75000);

@@ -16,6 +16,14 @@
     { id: SP.uid(), t: 'oval', c: '#2E7D32', w: 0.004, x1: 0.05, y1: 0.42, x2: 0.45, y2: 0.52 },
     { id: SP.uid(), t: 'text', x: 0.12, y: 0.445, s: 0.03, c: '#2E7D32', v: 'جرّب الأدوات' },
     { id: SP.uid(), t: 'stk', x: 0.08, y: 0.06, s: 0.08, e: '⭐' }] }, { a: [] }] });
+  SP.sampleItems = (classes) => {
+    if (!classes.some((c) => c.id === 'c1')) return [];
+    const d = (n) => { const x = new Date(); x.setDate(x.getDate() + n); return SP.today(x); };
+    return [
+      { id: SP.uid(), classId: 'c1', by: 't1', type: 'exam', title: 'امتحان الكسور الشهري', ts: Date.now(), date: d(6), time: '09:00', kind: 'شهري', place: 'القاعة 3', topics: ['جمع الكسور وطرحها', 'ضرب الكسور', 'تبسيط الكسور'], quizId: '' },
+      { id: SP.uid(), classId: 'c1', by: 't1', type: 'homework', title: 'حل تمارين صفحة 42', ts: Date.now(), due: d(3), max: 100, desc: 'حل التمارين من 1 إلى 8 وصوّر الحل وارفعه هنا.', fileId: '', fname: '', fmime: '', subs: {} },
+    ];
+  };
   function seed() {
     const t = SP.today();
     const q1 = SP.uid(), d1 = SP.uid();
@@ -41,13 +49,14 @@
         { id: SP.uid(), type: 'mcq', q: 'ما ناتج 7 × 8؟', options: ['54', '56', '58', '64'], answer: 1 },
         { id: SP.uid(), type: 'tf', q: 'العدد 15 عدد أولي.', options: ['صح', 'خطأ'], answer: 1 },
         { id: SP.uid(), type: 'short', q: 'ما ناتج 100 ÷ 4؟', options: [], answer: '25' }] }],
-      results: [], docs: [SP.sampleDoc('s1')],
+      results: [], docs: [SP.sampleDoc('s1')], classItems: null,
     };
   }
 
-  SP.load = () => { try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.v === 1) { if (!s.docs) s.docs = [SP.sampleDoc(s.me)]; return s; } } catch (e) {} return seed(); };
+  SP.load = () => { try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.v === 1) { if (!s.docs) s.docs = [SP.sampleDoc(s.me)]; if (!s.classItems) s.classItems = SP.sampleItems(s.classes); return s; } } catch (e) {} return seed(); };
   SP.state = SP.load();
-  SP.reset = () => { SP.state = seed(); SP.save(); };
+  if (!SP.state.classItems) SP.state.classItems = SP.sampleItems(SP.state.classes);
+  SP.reset = () => { SP.state = seed(); SP.state.classItems = SP.sampleItems(SP.state.classes); SP.save(); };
   SP.replaceState = (s) => { SP.state = s; SP.save(); };
   SP.save = () => {
     try { localStorage.setItem(KEY, JSON.stringify(SP.state)); }

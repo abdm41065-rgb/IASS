@@ -343,3 +343,41 @@ button.chip{border:0;cursor:pointer;font:inherit;font-size:.8rem}
 #sanad.dance .m-body{animation:waddle .25s ease-in-out 6}#sanad.slide .m-body{animation:slide 1.3s ease-in-out}#sanad.fall .m-body{animation:fall 1.5s ease-in-out}#sanad.skill .m-body{animation:skill 1.3s cubic-bezier(.3,1.5,.5,1)}#sanad.peek .m-body{animation:nod .5s ease-in-out}
 #sanad.wink .lid-r{transform:scaleY(1)}
 @media(prefers-reduced-motion:reduce){#sanad .m-body{animation:none!important}}
+
+/* ===== المحاضرات والامتحانات ===== */
+.exam-banner{display:flex;align-items:center;gap:16px;background:var(--card);border-radius:16px;padding:14px 16px;margin:4px 0 16px;outline:1px solid var(--line);outline-offset:-1px;border-inline-start:6px solid var(--blue);box-shadow:var(--sh);flex-wrap:wrap}
+.exam-banner.warm{border-inline-start-color:#E07B00}.exam-banner.hot{border-inline-start-color:var(--bad)}
+.eb-date{width:58px;height:62px;border-radius:12px;background:var(--blue);color:var(--on-blue);display:grid;place-content:center;text-align:center;line-height:1.1;flex:none}
+.exam-banner.warm .eb-date{background:#E07B00;color:#fff}.exam-banner.hot .eb-date{background:var(--bad);color:#fff}
+.eb-date b{font-size:1.5rem}.eb-date span{font-size:.75rem}
+.eb-main{flex:1;min-width:180px;display:grid}.eb-kind{font-size:.78rem;color:var(--mute)}.eb-when{font-size:.88rem;color:var(--mute)}
+.eb-count{font-weight:700;color:var(--blue);font-variant-numeric:tabular-nums}
+.exam-banner.hot .eb-count,.exam-card.hot .eb-count{color:var(--bad)}.exam-banner.warm .eb-count,.exam-card.warm .eb-count{color:#B45F00}
+.exam-strip{margin-bottom:8px}.exam-strip h2{margin-top:6px}
+.exam-card{border-inline-start:5px solid var(--blue)}.exam-card.warm{border-inline-start-color:#E07B00}.exam-card.hot{border-inline-start-color:var(--bad)}
+.ci-compose .btn{flex:1 1 auto}
+.ci-list{display:grid;gap:14px}
+.ci{border-inline-start:5px solid var(--line)}.ci-lecture{border-inline-start-color:var(--blue)}.ci-gallery{border-inline-start-color:#2C5F8A}.ci-exam{border-inline-start-color:#E07B00}.ci-homework{border-inline-start-color:#2E7D32}
+.ci-exam.hot{border-inline-start-color:var(--bad)}
+.ci-ic{font-size:1.3rem}
+.exam-when{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:baseline}
+.topics{margin:10px 0 0;padding-inline-start:20px;display:grid;gap:2px}
+.g-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px}
+.g-thumb{aspect-ratio:1;border:0;padding:0;border-radius:10px;overflow:hidden;cursor:pointer;background:var(--fill);max-width:100%}
+.g-thumb img{width:100%;height:100%;object-fit:cover;display:block}.g-thumb.more{font-size:1.3rem;font-weight:700;color:var(--blue)}
+.lec-layout{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:22px;align-items:start}
+.lec-video{width:100%;max-height:60vh;border-radius:14px;background:#000;display:block}
+.chapters{display:grid;gap:4px}.chap{text-align:start;border:0;background:var(--fill);border-radius:10px;padding:8px 10px;cursor:pointer;color:var(--ink)}.chap.on{background:var(--blue-tint);box-shadow:inset 3px 0 0 var(--blue)}
+.vnote{display:flex;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid var(--line)}.vnote span:not(.chip){flex:1}.vnote .chip{cursor:pointer;border:0}
+@media(max-width:900px){.lec-layout{grid-template-columns:1fr}}
+/* التقويم */
+.cal-wrap{overflow-x:auto}
+.cal{display:grid;grid-template-columns:repeat(7,minmax(92px,1fr));gap:6px;min-width:660px}
+.cal-h{text-align:center;color:var(--mute);font-size:.82rem;font-weight:600;padding:4px}
+.cal-cell{background:var(--card);border-radius:10px;min-height:92px;padding:6px;outline:1px solid var(--line);outline-offset:-1px;display:flex;flex-direction:column;gap:3px}
+.cal-cell.empty-cell{background:transparent;outline:0}.cal-cell.today{outline:2px solid var(--blue)}
+.cal-d{font-size:.8rem;font-weight:700;color:var(--mute)}.cal-cell.today .cal-d{color:var(--blue)}
+.cal-ev{display:block;border:0;border-radius:6px;padding:2px 6px;font-size:.72rem;text-align:start;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;font:inherit;font-size:.72rem}
+.cal-ev.exam{background:rgba(224,123,0,.16);color:#9A4F00}.cal-ev.hw{background:rgba(46,125,50,.14);color:var(--ok)}.cal-ev.task{background:var(--blue-tint);color:var(--blue)}
+.cal-legend{margin-bottom:10px;gap:6px}.cal-legend .cal-ev{cursor:default}
+.exam-strip{margin-bottom:18px}

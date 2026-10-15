@@ -16,7 +16,8 @@
     const hr = new Date().getHours(), greet = hr < 12 ? 'صباح الخير' : hr < 18 ? 'نهارك سعيد' : 'مساء الخير';
     const last = (s.docs || []).filter((d) => d.ownerId === uid).sort((a, b) => b.updated - a.updated)[0];
     const next = tasks[0], pct = Math.min(100, Math.round((100 * todayMin) / goal));
-    const line = next ? `أقرب مهمة: ${next.text}${next.due ? ' (' + next.due + ')' : ''}` : last ? `آخر ما فتحته: «${last.name}»` : 'ابدأ بفتح درس في «دراسة» أو جلسة تركيز قصيرة.';
+    const ex = SP.upcomingExams ? SP.upcomingExams()[0] : null;
+    const line = ex && (new Date(`${ex.date}T${ex.time || '08:00'}`) - Date.now()) < 7 * 864e5 ? `امتحان «${ex.title}»: ${SP.countdown(new Date(`${ex.date}T${ex.time || '08:00'}`))}` : next ? `أقرب مهمة: ${next.text}${next.due ? ' (' + next.due + ')' : ''}` : last ? `آخر ما فتحته: «${last.name}»` : 'ابدأ بفتح درس في «دراسة» أو جلسة تركيز قصيرة.';
     const hero = h('section', { class: 'hero', 'aria-label': 'ملخص اليوم' }, h('span', { class: 'sticker hero-stk', 'aria-hidden': 'true' }, SP.streak(uid) >= 3 ? '🔥' : pct >= 100 ? '🌟' : '✏️'),
       h('div', {}, h('div', { class: 'day' }, new Date().toLocaleDateString('ar', { weekday: 'long', day: 'numeric', month: 'long' })),
         h('h1', {}, `${greet}، ${me.name}`), h('p', { class: 'line' }, line),
@@ -24,7 +25,7 @@
         h('button', { class: 'btn go', onclick: () => SP.go(last ? 'desk/' + last.id : 'desk') }, last ? 'تابع الدراسة' : 'افتح درساً')),
       h('div', { class: 'ring', style: { '--p': pct }, role: 'img', 'aria-label': `دراسة اليوم ${todayMin} من ${goal} دقيقة` }, h('span', {}, h('b', { style: { fontSize: '1.6rem' } }, todayMin + 'د'), h('small', {}, 'من ' + goal + ' دقيقة اليوم'))));
     hero.querySelector('.ring').style.setProperty('--p', pct);
-    return h('div', {}, hero,
+    return h('div', {}, hero, SP.examStrip && SP.examStrip(),
       h('div', { class: 'grid s' },
         stat(SP.myClasses().length, 'صفوفي', 'classes'), stat(myNotes.length, 'ملاحظاتي', 'notes'), stat(myFiles.length, 'ملفاتي', 'files'),
         stat(s.results.filter((r) => r.userId === uid).length, 'فويزات حللتها', 'quizzes'), stat((s.docs || []).filter((d) => d.ownerId === uid).length, 'دروسي في دراسة', 'desk')),
@@ -63,11 +64,11 @@
         SP.save(); c(); SP.go('classes/' + cl.id); SP.toast('تم الانضمام إلى ' + cl.name);
       } }] });
   }
-  function classDetail(id) {
+  function classDetail(id, startTab) {
     const c = SP.classById(id);
     if (!c || !SP.canSeeClass(id)) return SP.page('الصف غير موجود', '', h('button', { class: 'btn', onclick: () => SP.go('classes') }, 'رجوع'));
     const isOwner = SP.isTeacher() && c.teacherId === SP.state.me, root = h('div', {});
-    let tab = 'over';
+    let tab = ['over', 'lec', 'members', 'quizzes', 'files', 'posts', 'prog'].includes(startTab) ? startTab : 'lec';
     const draw = () => {
       const s = S(); let body;
       if (tab === 'over') {
@@ -80,6 +81,8 @@
             SP.save(); draw();
           } }, 'نشر إعلان')) : null,
           h('h2', {}, 'الإعلانات'), anns.length ? anns.map((p) => h('div', { class: 'card', style: { marginBottom: '8px' } }, h('p', {}, p.text), h('small', { class: 'sub' }, SP.date(p.ts)))) : SP.empty('لا توجد إعلانات'));
+      } else if (tab === 'lec') {
+        body = SP.classItemsPanel ? SP.classItemsPanel(id) : h('div');
       } else if (tab === 'members') {
         const addable = s.users.filter((u) => u.role === 'student' && !c.memberIds.includes(u.id)), sel = h('select', { class: 'inp' }, addable.map((u) => h('option', { value: u.id }, u.name)));
         body = h('div', {}, h('div', { class: 'card row' }, h('b', {}, '' + SP.user(c.teacherId).name), h('span', { class: 'chip' }, 'المعلم')),
@@ -96,17 +99,17 @@
         body = rows.length ? h('table', {}, h('thead', {}, h('tr', {}, ['الطالب', 'متوسط الفويزات', 'دقائق الدراسة', 'نقاط XP'].map((x) => h('th', {}, x)))),
           h('tbody', {}, rows.map((r) => h('tr', {}, h('td', {}, r.u.name), h('td', {}, r.avg == null ? '—' : r.avg + '%'), h('td', {}, r.min), h('td', {}, r.xp))))) : SP.empty('لا يوجد طلاب بعد');
       }
-      root.replaceChildren(
+      root.replaceChildren(...[
         h('div', { class: 'row sp' }, h('div', {}, h('h1', {}, h('span', { class: 'dot', style: { background: c.color } }), ' ', c.name), h('p', { class: 'sub' }, c.subject || '')),
           h('div', { class: 'row' }, isOwner ? h('span', { class: 'chip', title: 'كود الانضمام' }, 'الكود: ' + c.code) : null,
             isOwner ? h('button', { class: 'btn ghost sm', onclick: async () => { if (await SP.confirm('حذف الصف نهائياً مع فويزاته ومنشوراته؟')) { const s2 = S(); s2.classes = s2.classes.filter((x) => x.id !== id); s2.quizzes = s2.quizzes.filter((x) => x.classId !== id); s2.posts = s2.posts.filter((x) => x.classId !== id); SP.save(); SP.go('classes'); } } }, 'حذف') : null,
             !isOwner && SP.state.me ? h('button', { class: 'btn ghost sm', onclick: async () => { if (await SP.confirm('مغادرة الصف؟')) { c.memberIds = c.memberIds.filter((x) => x !== SP.state.me); SP.save(); SP.go('classes'); } } }, 'مغادرة') : null)),
-        SP.tabs([['over', 'نظرة عامة'], ['members', 'الأعضاء'], ['quizzes', 'الفويزات'], ['files', 'الملفات'], ['posts', 'المنشورات'], ['prog', 'التقدم']], tab, (k) => { tab = k; draw(); }), body);
+        SP.examBanner && SP.examBanner(id), SP.tabs([['lec', 'المحاضرات'], ['over', 'الإعلانات'], ['members', 'الأعضاء'], ['quizzes', 'الفويزات'], ['files', 'الملفات'], ['posts', 'المنشورات'], ['prog', 'التقدم']], tab, (k) => { tab = k; draw(); }), body].filter(Boolean));
     };
     draw(); return root;
   }
   SP.reg('classes', '🏫', 'الصفوف', (p) => {
-    if (p[0]) return classDetail(p[0]);
+    if (p[0]) return classDetail(p[0], p[1]);
     const list = SP.myClasses();
     return SP.page('الصفوف', SP.isTeacher() ? 'أنشئ صفوفك وشارك الكود مع طلابك.' : 'الصفوف التي انضممت إليها.',
       h('div', { class: 'row' }, SP.isTeacher() ? h('button', { class: 'btn', onclick: newClassModal }, 'إنشاء صف') : h('button', { class: 'btn', onclick: joinModal }, 'انضمام بكود')),

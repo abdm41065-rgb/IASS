@@ -36,6 +36,8 @@ with sync_playwright() as p:
     pg.select_option("#who", "t1"); pg.evaluate("location.hash='#/classes'")
     pg.click("text=إنشاء صف"); pg.fill(".md input", "العلوم"); pg.click(".md button:text-is(\"إنشاء\")")
     check(pg.evaluate("SP.state.classes.length") == 2, "teacher creates class")
+    pg.locator("#main .card", has_text="العلوم").click(); pg.wait_for_timeout(100)
+    check("null" not in pg.inner_text("#main"), "class page without exams renders no stray text")
     pg.evaluate("location.hash='#/quizzes'"); pg.click("#main >> text=فويز جديد")
     pg.fill(".md input[placeholder='عنوان الفويز']", "فويز العلوم"); pg.fill(".md input[placeholder='نص السؤال']", "ما عاصمة العراق؟")
     for i, t in enumerate(["أربيل", "بغداد", "البصرة", "الموصل"]):
@@ -170,6 +172,50 @@ with sync_playwright() as p:
     check(pg.inner_text("#inbox .badge") == "1", "recipient sees inbox badge")
     pg.click("#inbox"); check("راجعيه قبل الاختبار" in pg.inner_text(".md"), "inbox shows message"); pg.click(".md button:text-is('إغلاق')")
     check(pg.locator("#inbox .badge").is_hidden(), "badge clears after reading")
+
+
+    # ---------- المحاضرات والامتحانات والواجبات ----------
+    pg.select_option("#who", "s1"); pg.evaluate("location.hash='#/home'"); pg.wait_for_timeout(100)
+    check("امتحان الكسور الشهري" in pg.inner_text(".exam-strip") and "باقي" in pg.inner_text(".exam-strip"), "student home shows upcoming exam with countdown")
+    pg.evaluate("location.hash='#/classes/c1'"); pg.wait_for_timeout(100)
+    check(pg.locator(".exam-banner").count() == 1 and "امتحان الكسور الشهري" in pg.inner_text(".exam-banner"), "exam banner on top of class page")
+    pg.select_option("#who", "t1"); pg.evaluate("location.hash='#/classes/c1/lec'"); pg.wait_for_timeout(100)
+    pg.click(".ci-compose >> text=موعد امتحان"); pg.fill("#ci-title", "اختبار قصير: الضرب")
+    soon = pg.evaluate("(()=>{const d=new Date();d.setDate(d.getDate()+1);return SP.today(d)})()"); pg.fill("#ci-date", soon); pg.click(".md >> text=نشر للطلاب")
+    check("اختبار قصير: الضرب" in pg.inner_text(".exam-banner") and pg.locator(".exam-banner.hot").count() == 1, "nearest exam takes the banner (urgent style)")
+    # ألبوم صور
+    imgs = [Path(tempfile.mkdtemp()) / f"board{i}.png" for i in range(2)]
+    for x in imgs: x.write_bytes(_png(60, 40))
+    pg.click(".ci-compose >> text=ألبوم صور"); pg.fill("#ci-title", "صور السبورة"); pg.set_input_files("#ci-images", [str(x) for x in imgs]); pg.click(".md >> text=نشر للطلاب"); pg.wait_for_timeout(400)
+    check(pg.locator(".ci-gallery .g-thumb").count() == 2, "gallery posted with 2 images")
+    pg.locator(".ci-gallery .g-thumb").first.click(); pg.click(".md >> text=التالية")
+    check("2 / 2" in pg.inner_text(".md"), "lightbox navigates images"); pg.click(".md button:text-is('إغلاق')")
+    # محاضرة فيديو حقيقية (مسجّلة في المتصفح)
+    vb64 = pg.evaluate("""(async()=>{const c=document.createElement('canvas');c.width=160;c.height=90;const x=c.getContext('2d');const st=c.captureStream(20);const rec=new MediaRecorder(st,{mimeType:'video/webm'});const ch=[];rec.ondataavailable=e=>ch.push(e.data);rec.start();
+      for(let i=0;i<30;i++){x.fillStyle=`hsl(${i*12},70%,50%)`;x.fillRect(0,0,160,90);await new Promise(res=>setTimeout(res,50));} const done=new Promise(res=>rec.onstop=res); rec.stop(); await done; const b=new Blob(ch,{type:'video/webm'}); const u=new Uint8Array(await b.arrayBuffer()); let s=''; u.forEach(c=>s+=String.fromCharCode(c)); return btoa(s);})()""")
+    vid = Path(tempfile.mkdtemp()) / "lec.webm"; vid.write_bytes(base64.b64decode(vb64))
+    pg.click(".ci-compose >> text=محاضرة فيديو"); pg.fill("#ci-title", "شرح ضرب الكسور"); pg.set_input_files("#ci-video", str(vid)); pg.fill("#ci-chapters", "00:00 مقدمة\n00:01 المثال الأول")
+    pg.click(".md >> text=نشر للطلاب"); pg.wait_for_timeout(400)
+    check(pg.locator(".ci-lecture").count() == 1 and "شاهدها 0 طالب" in pg.inner_text(".ci-lecture"), "lecture posted; teacher sees watchers")
+    # واجب: الطالب يسلّم والمعلم يصحح
+    pg.select_option("#who", "s1"); pg.evaluate("location.hash='#/classes/c1/lec'"); pg.wait_for_timeout(100)
+    pg.locator(".ci-lecture button:text-is('شاهد')").click(); pg.wait_for_timeout(600)
+    check(pg.locator(".chap").count() == 2 and pg.locator(".lec-video").count() == 1, "lecture page with chapters")
+    pg.fill("#lec-note", "مثال مهم"); pg.press("#lec-note", "Enter")
+    check("مثال مهم" in pg.inner_text("#main") and pg.evaluate("SP.state.vnotes.s1 && Object.values(SP.state.vnotes.s1)[0].length") == 1, "timestamped lecture note saved")
+    pg.evaluate("location.hash='#/classes/c1/lec'"); pg.wait_for_timeout(100)
+    hw = pg.locator(".ci-homework", has_text="حل تمارين صفحة 42")
+    with pg.expect_file_chooser() as fc: hw.locator("text=سلّم الواجب").click()
+    fc.value.set_files(str(imgs[0])); pg.wait_for_timeout(400)
+    check("بانتظار التصحيح" in pg.inner_text(".ci-homework"), "student submits homework")
+    pg.select_option("#who", "t1"); pg.evaluate("location.hash='#/classes/c1/lec'"); pg.wait_for_timeout(100)
+    pg.locator(".ci-homework >> text=التسليمات والدرجات").click(); pg.fill(".md input[type=number]", "95"); pg.press(".md input[type=number]", "Tab"); pg.click(".md button:text-is('تم')")
+    pg.select_option("#who", "s1"); pg.evaluate("location.hash='#/classes/c1/lec'"); pg.wait_for_timeout(100)
+    check("الدرجة: 95 / 100" in pg.inner_text(".ci-homework"), "student sees grade")
+    pg.evaluate("location.hash='#/calendar'"); pg.wait_for_timeout(100)
+    check("امتحان: امتحان الكسور الشهري" in pg.inner_text(".cal") or pg.locator(".cal-ev.exam").count() >= 1, "calendar shows exams")
+    pg.click("#nav a >> text=الصفوف"); pg.wait_for_timeout(60)
+    check(pg.locator(".subnav a", has_text="المحاضرات").count() == 1, "lectures sub-tab in classes hub")
 
     # عزل: مريم لا ترى ملاحظات/ملفات علي الشخصية
     pg.select_option("#who", "s2"); pg.evaluate("location.hash='#/notes'")
