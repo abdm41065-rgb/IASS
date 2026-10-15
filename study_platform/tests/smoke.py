@@ -136,6 +136,13 @@ with sync_playwright() as p:
     pg.click("#sanad .m-chat"); pg.click(".m-panel >> text=شكلي"); pg.locator(".m-kind", has_text="قطة").click(); pg.locator(".md .chip", has_text="تاج").click(); pg.fill("#m-name", "مشمش"); pg.click(".md button:text-is('حفظ')")
     check(pg.evaluate("document.querySelector('#sanad .m-fig svg').dataset.kind") == "cat" and pg.inner_text(".m-panel header b") == "مشمش", "mascot customized to cat named مشمش")
     pg.click(".m-panel header button[aria-label='إغلاق']")
+    check(pg.evaluate("document.getElementById('sanad').dataset.kind") == "cat", "mascot root carries its kind")
+    pg.mouse.move(5, 5); pg.wait_for_timeout(120)
+    check(pg.evaluate("getComputedStyle(document.getElementById('sanad')).getPropertyValue('--px').trim()") != "", "eyes follow the student's pointer")
+    fb = pg.locator("#sanad .m-fig").bounding_box(); pg.mouse.move(fb["x"] + 38, fb["y"] + 38); pg.mouse.down(); pg.wait_for_timeout(800); pg.mouse.up(); pg.wait_for_timeout(100)
+    check("سمكة" in pg.inner_text("#sanad .m-bubble") or "أكلت" in pg.inner_text("#sanad .m-bubble"), "cat long-press skill (feed me)")
+    pg.locator("#sanad .m-fig").click(); pg.wait_for_timeout(500)
+    check(pg.evaluate("document.getElementById('sanad').classList.contains('purr')"), "cat single tap uses its own animation (purr)")
     # ---------- سند + الأسئلة + الإرسال ----------
     pg.select_option("#who", "s1"); pg.evaluate("location.hash='#/home'"); pg.wait_for_timeout(100)
     check(pg.locator("#sanad .m-fig svg").count() == 1, "mascot rendered")

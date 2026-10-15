@@ -249,3 +249,97 @@ th,td{padding:10px 14px;border-bottom:1px solid var(--line);text-align:start;fon
 @media(max-width:640px){.m-custom{grid-template-columns:1fr}.m-preview{margin:auto}}
 .m-bubble{pointer-events:none}.mascot{pointer-events:none}.mascot .m-row>*{pointer-events:auto}
 button.chip{border:0;cursor:pointer;font:inherit;font-size:.8rem}
+/* ===== حركات مستقلة لكل شخصية ===== */
+.pupils{transform:translate(var(--px,0px),var(--py,0px))}
+.tail,.ears,.led,.scan,.feet .fl,.feet .fr{transform-box:fill-box}
+.m-fig svg{overflow:visible}
+/* بومة: ميلان رأس هادئ + أذنان تهتزان */
+.mascot[data-kind="owl"] .m-body{animation:owlIdle 5s ease-in-out infinite}
+.mascot[data-kind="owl"] .ears{transform-origin:center bottom;animation:twitch 6s ease-in-out infinite}
+@keyframes owlIdle{0%,100%{transform:rotate(0)}30%{transform:rotate(-5deg) translateY(-2px)}60%{transform:rotate(4deg)}}
+/* قطة: ذيل يتمايل، تنفّس بطيء */
+.mascot[data-kind="cat"] .m-body{animation:breathe 3.5s ease-in-out infinite}
+.mascot[data-kind="cat"] .tail{transform-origin:0% 100%;animation:swish 1.8s ease-in-out infinite}
+.mascot[data-kind="cat"] .ears{transform-origin:center bottom;animation:twitch 4s ease-in-out infinite}
+@keyframes swish{0%,100%{transform:rotate(0)}50%{transform:rotate(-22deg)}}
+/* روبوت: يطفو، ضوء الهوائي يومض، خط مسح على الشاشة */
+.mascot[data-kind="robot"] .m-body{animation:hover 2.4s ease-in-out infinite}
+.mascot[data-kind="robot"] .led{animation:led 1.2s steps(2) infinite}
+.mascot[data-kind="robot"] .scan{animation:scan 2.2s linear infinite}
+@keyframes hover{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+@keyframes led{50%{fill:#ef4444}}
+@keyframes scan{0%{transform:translateY(0);opacity:.5}100%{transform:translateY(34px);opacity:0}}
+/* دب: تنفّس عميق وتمايل بطيء */
+.mascot[data-kind="bear"] .m-body{transform-origin:60px 112px;animation:bearSway 5s ease-in-out infinite}
+@keyframes bearSway{0%,100%{transform:rotate(-2deg) scaleY(1)}50%{transform:rotate(2deg) scaleY(1.03)}}
+/* ثعلب: قفزات قصيرة وذيل سريع */
+.mascot[data-kind="fox"] .m-body{animation:hop 3s cubic-bezier(.3,1.5,.5,1) infinite}
+.mascot[data-kind="fox"] .tail{transform-origin:0% 100%;animation:swish .8s ease-in-out infinite}
+@keyframes hop{0%,70%,100%{transform:translateY(0)}80%{transform:translateY(-10px)}}
+/* بطريق: مشية متمايلة وأقدام تتحرك */
+.mascot[data-kind="penguin"] .m-body{transform-origin:60px 112px;animation:waddle 1.3s ease-in-out infinite}
+.mascot[data-kind="penguin"] .feet .fl{animation:step 1.3s ease-in-out infinite}.mascot[data-kind="penguin"] .feet .fr{animation:step 1.3s ease-in-out infinite .65s}
+@keyframes waddle{0%,100%{transform:rotate(-5deg)}50%{transform:rotate(5deg)}}
+@keyframes step{50%{transform:translateY(-2px)}}
+@keyframes breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.025)}}
+@keyframes twitch{0%,90%,100%{transform:rotate(0)}93%{transform:rotate(-12deg)}96%{transform:rotate(8deg)}}
+/* حركات النقر الخاصة (تتغلب على حركة السكون) */
+.mascot.hoot .m-body{animation:hoot .8s ease-in-out}
+.mascot.flap .wing,.mascot.flapfast .wing{animation:wave .18s ease-in-out 6}
+.mascot.headspin .m-body{animation:spin 1.2s cubic-bezier(.5,0,.5,1)}
+.mascot.ruffle .m-body{animation:ruffle .8s ease-in-out}
+.mascot.purr .m-body{animation:purr .08s linear 10}
+.mascot.knead .m-body{animation:pulse .3s ease-in-out 4}
+.mascot.pounce .m-body{animation:pounce 1s cubic-bezier(.3,1.4,.5,1)}
+.mascot.hiss .m-body{animation:hiss .9s ease-in-out}
+.mascot.beep .m-body{animation:nod .3s ease-in-out 3}.mascot.beep .led{animation:led .15s steps(2) 6}
+.mascot.heartscreen .m-body{animation:pulse .35s ease-in-out 3}
+.mascot.glitch .m-body{animation:glitch .12s steps(2) 9}
+.mascot.overheat .m-body{animation:shake .08s linear 12;filter:hue-rotate(-40deg) saturate(1.6)}
+.mascot.hug .m-body{animation:hug 1s ease-in-out}
+.mascot.honey .m-body{animation:pulse .4s ease-in-out 3}
+.mascot.roll .m-body{animation:roll 1.4s ease-in-out}
+.mascot.roar .m-body{animation:roar 1s ease-in-out}
+.mascot.wink .lid-r{transform:scaleY(1)}.mascot.wink .m-body{animation:nod .4s ease-in-out}
+.mascot.backflip .m-body{animation:backflip 1s cubic-bezier(.4,0,.3,1)}
+.mascot.zoom .m-body{animation:zoom 1s ease-in-out}
+.mascot.sulk .m-body{animation:sulk 1.4s ease-in-out}
+.mascot.dance .m-body{animation:waddle .25s ease-in-out 6}
+.mascot.slide .m-body{animation:slide 1.3s ease-in-out}
+.mascot.fall .m-body{animation:fall 1.5s ease-in-out}
+.mascot.skill .m-body{animation:skill 1.3s cubic-bezier(.3,1.5,.5,1)}
+.mascot.peek .m-body{animation:nod .5s ease-in-out}
+@keyframes hoot{30%{transform:rotate(-14deg) scale(1.04)}60%{transform:rotate(10deg)}}
+@keyframes ruffle{0%,100%{transform:scale(1)}30%{transform:scale(1.15,1.08)}50%{transform:scale(1.12) translateX(-3px)}70%{transform:scale(1.12) translateX(3px)}}
+@keyframes purr{50%{transform:translateX(.8px)}}
+@keyframes pounce{0%{transform:none}30%{transform:scale(1.1,.85)}60%{transform:translate(18px,-20px) rotate(10deg)}100%{transform:none}}
+@keyframes hiss{30%,70%{transform:scale(.95,1.15) translateY(-4px)}}
+@keyframes glitch{0%{transform:skewX(12deg) translateX(-3px);opacity:.7}100%{transform:skewX(-10deg) translateX(3px);opacity:1}}
+@keyframes hug{40%,60%{transform:scale(.88,1.06)}}
+@keyframes roll{to{transform:rotate(-360deg)}}
+@keyframes roar{30%{transform:scale(1.18)}40%,60%{transform:scale(1.18) translateX(-3px)}50%,70%{transform:scale(1.18) translateX(3px)}}
+@keyframes backflip{0%{transform:none}50%{transform:translateY(-28px) rotate(-180deg)}100%{transform:rotate(-360deg)}}
+@keyframes zoom{30%{transform:translateX(60px) skewX(-15deg)}31%{opacity:0}69%{opacity:0;transform:translateX(-60px)}70%{opacity:1;transform:translateX(-60px) skewX(15deg)}}
+@keyframes sulk{20%,80%{transform:scaleX(-1) rotate(-6deg)}}
+@keyframes slide{0%{transform:none}30%{transform:rotate(-80deg) translate(0,0)}70%{transform:rotate(-80deg) translate(0,-40px)}100%{transform:none}}
+@keyframes fall{30%,70%{transform:rotate(90deg) translate(20px,-10px)}}
+@keyframes skill{0%{transform:none}40%{transform:translateY(-16px) scale(1.12)}100%{transform:none}}
+@media(prefers-reduced-motion:reduce){.mascot .m-body,.mascot .tail,.mascot .ears,.mascot .led,.mascot .scan,.mascot .feet *{animation:none!important}}
+/* حركات التفاعل العامة فوق حركة السكون لكل شخصية */
+#sanad.jump .m-body{animation:jump .7s cubic-bezier(.3,1.6,.5,1) 2}
+#sanad.spin .m-body{animation:spin 1.2s cubic-bezier(.5,0,.5,1)}
+#sanad.shake .m-body{animation:shake .12s linear 6}
+#sanad.love .m-body{animation:pulse .4s ease-in-out 3}
+#sanad.land .m-body{animation:land .5s cubic-bezier(.3,1.5,.5,1)}
+#sanad.nod .m-body{animation:nod .45s ease-in-out 2}
+#sanad.think .m-body{animation:tilt 1.3s ease-in-out 2}
+#sanad.lifted .m-body{animation:wiggle .35s ease-in-out infinite}
+#sanad.sleep .m-body{animation:bob 5s ease-in-out infinite}
+#sanad.hoot .m-body{animation:hoot .8s ease-in-out}#sanad.headspin .m-body{animation:spin 1.2s cubic-bezier(.5,0,.5,1)}#sanad.ruffle .m-body{animation:ruffle .8s ease-in-out}
+#sanad.purr .m-body{animation:purr .08s linear 10}#sanad.knead .m-body{animation:pulse .3s ease-in-out 4}#sanad.pounce .m-body{animation:pounce 1s cubic-bezier(.3,1.4,.5,1)}#sanad.hiss .m-body{animation:hiss .9s ease-in-out}
+#sanad.beep .m-body{animation:nod .3s ease-in-out 3}#sanad.heartscreen .m-body{animation:pulse .35s ease-in-out 3}#sanad.glitch .m-body{animation:glitch .12s steps(2) 9}#sanad.overheat .m-body{animation:shake .08s linear 12}
+#sanad.hug .m-body{animation:hug 1s ease-in-out}#sanad.honey .m-body{animation:pulse .4s ease-in-out 3}#sanad.roll .m-body{animation:roll 1.4s ease-in-out}#sanad.roar .m-body{animation:roar 1s ease-in-out}
+#sanad.wink .m-body{animation:nod .4s ease-in-out}#sanad.backflip .m-body{animation:backflip 1s cubic-bezier(.4,0,.3,1)}#sanad.zoom .m-body{animation:zoom 1s ease-in-out}#sanad.sulk .m-body{animation:sulk 1.4s ease-in-out}
+#sanad.dance .m-body{animation:waddle .25s ease-in-out 6}#sanad.slide .m-body{animation:slide 1.3s ease-in-out}#sanad.fall .m-body{animation:fall 1.5s ease-in-out}#sanad.skill .m-body{animation:skill 1.3s cubic-bezier(.3,1.5,.5,1)}#sanad.peek .m-body{animation:nod .5s ease-in-out}
+#sanad.wink .lid-r{transform:scaleY(1)}
+@media(prefers-reduced-motion:reduce){#sanad .m-body{animation:none!important}}

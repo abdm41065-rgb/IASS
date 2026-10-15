@@ -164,15 +164,15 @@
   function svgFor(cfg) {
     const k = KINDS[cfg.kind] ? cfg.kind : 'owl', C = cfg.color || KIND_COLOR[k], D = shade(C, -0.3), L = k === 'fox' || k === 'penguin' ? '#FFFFFF' : shade(C, 0.82), P = '#14213D';
     const arms = (rx = 9, ry = 15, fill = D) => `<ellipse class="wing wl" cx="23" cy="80" rx="${rx}" ry="${ry}" fill="${fill}"/><ellipse class="wing wr" cx="97" cy="80" rx="${rx}" ry="${ry}" fill="${fill}"/>`;
-    const eyes = `<circle cx="44" cy="60" r="15" fill="#fff"/><circle cx="76" cy="60" r="15" fill="#fff"/><g class="pupils"><circle cx="45" cy="61" r="6.5" fill="${P}"/><circle cx="77" cy="61" r="6.5" fill="${P}"/><circle cx="47" cy="58.5" r="2" fill="#fff"/><circle cx="79" cy="58.5" r="2" fill="#fff"/></g><g class="lids"><rect x="28" y="44" width="32" height="32" rx="16" fill="${C}"/><rect x="60" y="44" width="32" height="32" rx="16" fill="${C}"/></g>`;
+    const eyes = `<circle cx="44" cy="60" r="15" fill="#fff"/><circle cx="76" cy="60" r="15" fill="#fff"/><g class="pupils"><circle cx="45" cy="61" r="6.5" fill="${P}"/><circle cx="77" cy="61" r="6.5" fill="${P}"/><circle cx="47" cy="58.5" r="2" fill="#fff"/><circle cx="79" cy="58.5" r="2" fill="#fff"/></g><g class="lids"><rect x="28" y="44" width="32" height="32" rx="16" fill="${C}"/><rect class="lid-r" x="60" y="44" width="32" height="32" rx="16" fill="${C}"/></g>`;
     const cheeks = `<circle cx="33" cy="76" r="4" fill="#F7A8B8" opacity=".6"/><circle cx="87" cy="76" r="4" fill="#F7A8B8" opacity=".6"/>`;
     const B = {
-      owl: `<path class="wing wl" d="M22 70c-10 6-12 22-4 30 6-4 10-14 10-26z" fill="${D}"/><path class="wing wr" d="M98 70c10 6 12 22 4 30-6-4-10-14-10-26z" fill="${D}"/><path d="M28 44 33 22 46 38z M92 44 87 22 74 38z" fill="${C}"/><ellipse cx="60" cy="72" rx="38" ry="40" fill="${C}"/><ellipse cx="60" cy="88" rx="22" ry="20" fill="${L}"/><path d="M50 84h20M48 92h24M52 100h16" stroke="${shade(C, 0.5)}" stroke-width="2" stroke-linecap="round" fill="none"/>${eyes}${cheeks}<path d="M55 71h10l-5 8z" fill="#F2B233"/>`,
-      cat: `${arms()}<path d="M26 50 30 18 52 36z M94 50 90 18 68 36z" fill="${C}"/><path d="M31 40 33 26 44 36z M89 40 87 26 76 36z" fill="#F7A8B8"/><ellipse cx="60" cy="72" rx="38" ry="40" fill="${C}"/><ellipse cx="60" cy="92" rx="20" ry="16" fill="${L}"/>${eyes}${cheeks}<path d="M56 72h8l-4 5z" fill="#E66A8A"/><path d="M60 77c-2 4-7 4-8 1M60 77c2 4 7 4 8 1" stroke="${P}" stroke-width="1.8" fill="none" stroke-linecap="round"/><path d="M30 74h-14M30 79l-13 3M90 74h14M90 79l13 3" stroke="${P}" stroke-width="1.4" opacity=".55" stroke-linecap="round"/>`,
-      robot: `<path d="M60 30V16" stroke="${D}" stroke-width="3"/><circle cx="60" cy="14" r="5" fill="#F2B233"/>${arms(8, 14)}<rect x="22" y="30" width="76" height="80" rx="18" fill="${C}"/><rect x="28" y="42" width="64" height="40" rx="12" fill="${L}"/>${eyes}<rect x="46" y="90" width="28" height="8" rx="3" fill="${D}"/><path d="M52 90v8M60 90v8M68 90v8" stroke="${L}" stroke-width="1.5"/><circle cx="30" cy="100" r="2.5" fill="${D}"/><circle cx="90" cy="100" r="2.5" fill="${D}"/>`,
-      bear: `<circle cx="30" cy="36" r="12" fill="${C}"/><circle cx="90" cy="36" r="12" fill="${C}"/><circle cx="30" cy="36" r="6" fill="${L}"/><circle cx="90" cy="36" r="6" fill="${L}"/>${arms(10, 15)}<ellipse cx="60" cy="72" rx="38" ry="40" fill="${C}"/><ellipse cx="60" cy="94" rx="20" ry="15" fill="${L}"/>${eyes}<ellipse cx="60" cy="78" rx="12" ry="9" fill="${L}"/><ellipse cx="60" cy="74" rx="5" ry="3.5" fill="${P}"/><path d="M60 78v4M56 83c2 2 6 2 8 0" stroke="${P}" stroke-width="1.6" fill="none" stroke-linecap="round"/>${cheeks}`,
-      fox: `<path d="M24 52 26 14 52 36z M96 52 94 14 68 36z" fill="${C}"/><path d="M30 42 31 26 43 36z M90 42 89 26 77 36z" fill="${P}" opacity=".6"/>${arms()}<ellipse cx="60" cy="72" rx="38" ry="40" fill="${C}"/><path d="M22 72c10 4 22 6 38 22 16-16 28-18 38-22-2 22-18 38-38 38S24 94 22 72z" fill="#fff"/>${eyes}<ellipse cx="60" cy="80" rx="5" ry="3.5" fill="${P}"/>${cheeks}`,
-      penguin: `<path class="wing wl" d="M24 66c-10 10-10 26-2 32 6-6 8-18 8-30z" fill="${C}"/><path class="wing wr" d="M96 66c10 10 10 26 2 32-6-6-8-18-8-30z" fill="${C}"/><ellipse cx="60" cy="70" rx="38" ry="42" fill="${C}"/><ellipse cx="60" cy="80" rx="27" ry="32" fill="#fff"/>${eyes}<path d="M54 74h12l-6 8z" fill="#F2A33A"/><ellipse cx="48" cy="111" rx="9" ry="4" fill="#F2A33A"/><ellipse cx="72" cy="111" rx="9" ry="4" fill="#F2A33A"/>${cheeks}`,
+      owl: `<path class="wing wl" d="M22 70c-10 6-12 22-4 30 6-4 10-14 10-26z" fill="${D}"/><path class="wing wr" d="M98 70c10 6 12 22 4 30-6-4-10-14-10-26z" fill="${D}"/><path class="ears" d="M28 44 33 22 46 38z M92 44 87 22 74 38z" fill="${C}"/><ellipse cx="60" cy="72" rx="38" ry="40" fill="${C}"/><ellipse cx="60" cy="88" rx="22" ry="20" fill="${L}"/><path d="M50 84h20M48 92h24M52 100h16" stroke="${shade(C, 0.5)}" stroke-width="2" stroke-linecap="round" fill="none"/>${eyes}${cheeks}<path d="M55 71h10l-5 8z" fill="#F2B233"/>`,
+      cat: `<path class="tail" d="M90 104c16 2 26-8 24-24-1-8-6-12-10-12" stroke="${D}" stroke-width="8" fill="none" stroke-linecap="round"/>${arms()}<path class="ears" d="M26 50 30 18 52 36z M94 50 90 18 68 36z" fill="${C}"/><path d="M31 40 33 26 44 36z M89 40 87 26 76 36z" fill="#F7A8B8"/><ellipse cx="60" cy="72" rx="38" ry="40" fill="${C}"/><ellipse cx="60" cy="92" rx="20" ry="16" fill="${L}"/>${eyes}${cheeks}<path d="M56 72h8l-4 5z" fill="#E66A8A"/><path d="M60 77c-2 4-7 4-8 1M60 77c2 4 7 4 8 1" stroke="${P}" stroke-width="1.8" fill="none" stroke-linecap="round"/><path d="M30 74h-14M30 79l-13 3M90 74h14M90 79l13 3" stroke="${P}" stroke-width="1.4" opacity=".55" stroke-linecap="round"/>`,
+      robot: `<path d="M60 30V16" stroke="${D}" stroke-width="3"/><circle class="led" cx="60" cy="14" r="5" fill="#F2B233"/>${arms(8, 14)}<rect x="22" y="30" width="76" height="80" rx="18" fill="${C}"/><rect x="28" y="42" width="64" height="40" rx="12" fill="${L}"/>${eyes}<rect class="scan" x="30" y="44" width="60" height="3" rx="1.5" fill="#fff" opacity=".5"/><rect x="46" y="90" width="28" height="8" rx="3" fill="${D}"/><path d="M52 90v8M60 90v8M68 90v8" stroke="${L}" stroke-width="1.5"/><circle cx="30" cy="100" r="2.5" fill="${D}"/><circle cx="90" cy="100" r="2.5" fill="${D}"/>`,
+      bear: `<g class="ears"><circle cx="30" cy="36" r="12" fill="${C}"/><circle cx="90" cy="36" r="12" fill="${C}"/><circle cx="30" cy="36" r="6" fill="${L}"/><circle cx="90" cy="36" r="6" fill="${L}"/></g>${arms(10, 15)}<ellipse cx="60" cy="72" rx="38" ry="40" fill="${C}"/><ellipse cx="60" cy="94" rx="20" ry="15" fill="${L}"/>${eyes}<ellipse cx="60" cy="78" rx="12" ry="9" fill="${L}"/><ellipse cx="60" cy="74" rx="5" ry="3.5" fill="${P}"/><path d="M60 78v4M56 83c2 2 6 2 8 0" stroke="${P}" stroke-width="1.6" fill="none" stroke-linecap="round"/>${cheeks}`,
+      fox: `<g class="tail"><path d="M88 100c22 4 32-14 26-34-8 8-14 18-28 24z" fill="${C}"/><path d="M114 66c-3 4-6 8-10 10 6 0 10-4 10-10z" fill="#fff"/></g><path class="ears" d="M24 52 26 14 52 36z M96 52 94 14 68 36z" fill="${C}"/><path d="M30 42 31 26 43 36z M90 42 89 26 77 36z" fill="${P}" opacity=".6"/>${arms()}<ellipse cx="60" cy="72" rx="38" ry="40" fill="${C}"/><path d="M22 72c10 4 22 6 38 22 16-16 28-18 38-22-2 22-18 38-38 38S24 94 22 72z" fill="#fff"/>${eyes}<ellipse cx="60" cy="80" rx="5" ry="3.5" fill="${P}"/>${cheeks}`,
+      penguin: `<path class="wing wl" d="M24 66c-10 10-10 26-2 32 6-6 8-18 8-30z" fill="${C}"/><path class="wing wr" d="M96 66c10 10 10 26 2 32-6-6-8-18-8-30z" fill="${C}"/><ellipse cx="60" cy="70" rx="38" ry="42" fill="${C}"/><ellipse cx="60" cy="80" rx="27" ry="32" fill="#fff"/>${eyes}<path d="M54 74h12l-6 8z" fill="#F2A33A"/><g class="feet"><ellipse class="fl" cx="48" cy="111" rx="9" ry="4" fill="#F2A33A"/><ellipse class="fr" cx="72" cy="111" rx="9" ry="4" fill="#F2A33A"/></g>${cheeks}`,
     };
     const A = {
       cap: `<path d="M30 30 60 18 90 30 60 42z" fill="${P}"/><path d="M84 32v14" stroke="#F2B233" stroke-width="2.5" stroke-linecap="round"/><circle cx="84" cy="47" r="3" fill="#F2B233"/>`,
@@ -187,6 +187,39 @@
   const cfgs = () => (S().mascot = S().mascot || {});
   const cfg = () => (cfgs()[SP.state.me] = Object.assign({ kind: 'owl', color: '', acc: 'cap', name: 'سند' }, cfgs()[SP.state.me] || {}));
   const mname = () => cfg().name || 'سند';
+
+  /* ---------- شخصية مستقلة لكل شكل: حركة، نقرات، صوت، ومهارة خاصة ---------- */
+  const R = (a) => a[Math.floor(Math.random() * a.length)];
+  const PERSONA = {
+    owl: { voice: 'بومة حكيمة هادئة، تحب النصائح والحكم القصيرة، وتقول أحياناً «هوو هوو»', emoji: '🦉', greet: ['هوو هوو! أنا {n} 🦉', 'مساء الحكمة يا {u} 🦉'],
+      taps: [['giggle', 'hoot', 900, ['هوو؟ 🦉', 'نعم يا {u}؟', 'أنا منتبهة 👀']], ['love', 'flap', 1200, ['تحية بجناحيّ 🪽❤️', 'أنت تلميذ نجيب 🦉❤️'], '🪶'],
+        ['dizzy', 'headspin', 1300, ['لففت رأسي كاملاً! 🌀', 'البوم يلف رأسه… لكن ليس هكذا 😵‍💫']], ['angry', 'ruffle', 900, ['ريشي انتفش! 😤', 'هدوء من فضلك 🦉😤'], '🪶']],
+      skill: ['حكمة اليوم', () => R(['التكرار المتباعد أقوى من السهر ليلة الامتحان 📚', 'اشرح الدرس لغيرك؛ من يعلّم يتعلم مرتين 🧑‍🏫', 'نم جيداً؛ الذاكرة تُثبَّت أثناء النوم 😴', 'ابدأ بأصعب مادة وأنت في قمة تركيزك ⛰️', 'اكتب الأسئلة على درسك قبل أن تقرأه؛ ستركز أكثر ❓'])] },
+    cat: { voice: 'قطة مرحة ودلوعة، تقول «مياو» أحياناً، تحب السمك والنوم، وتمزح كثيراً', emoji: '🐱', greet: ['مياو! أنا {n} 🐱', 'خرررر… أهلاً {u} 😺'],
+      taps: [['giggle', 'purr', 900, ['خرررر 😺', 'مياو؟ 🐾', 'هنا خلف الأذن… أكثر 😸']], ['love', 'knead', 1200, ['أعجن قلبك بمخالبي 🐾❤️', 'مياو مياو ❤️'], '🐾'],
+        ['dizzy', 'pounce', 1100, ['انقضاض! 🐈💨', 'أمسكت الفأرة؟ 🐭']], ['angry', 'hiss', 900, ['ششش! 😾', 'لا تزعج قطة نائمة 😾'], '💢']],
+      skill: ['اطعمني', () => { const m = SP.studyMin(SP.state.me, SP.today()); return m >= 10 ? `شبعت! أكلت ${m} دقيقة من دراستك اليوم 🐟😻` : `جوعانة… ادرس ${10 - m} دقائق بعد لتطعمني سمكة 🐟🥺`; }] },
+    robot: { voice: 'روبوت ذكي دقيق يحب الأرقام والإحصاءات، يبدأ أحياناً بـ «بيب!» ويتكلم بأسلوب تقني لطيف', emoji: '🤖', greet: ['بيب بوب! الوحدة {n} جاهزة 🤖', 'تم التشغيل. أهلاً {u} ⚡'],
+      taps: [['giggle', 'beep', 900, ['بيب! 🤖', 'تم استلام الإشارة 📡', 'بوب؟ 🔵']], ['love', 'heartscreen', 1200, ['خطأ: الإعجاب تجاوز 100% ❤️', '01001100 = حب 💙'], '💙'],
+        ['dizzy', 'glitch', 1100, ['ت-ت-تشويش 📺', 'إعادة المعايرة… 🔧']], ['angry', 'overheat', 1100, ['ارتفاع حرارة! 🔥', 'النظام مشغول 😤⚙️'], '💨']],
+      skill: ['تقرير', () => { const u = SP.state.me, s = S(), t = SP.today(), cards = s.decks.filter((d) => d.ownerId === u).flatMap((d) => d.cards); return `📊 تقرير اليوم:\nدراسة: ${SP.studyMin(u, t)} د من ${s.goalMin || 60}\nبطاقات للمراجعة: ${cards.filter((c) => (c.due || t) <= t).length}\nمتوسط الفويزات: ${SP.avgScore(u) == null ? '—' : SP.avgScore(u) + '%'}\nأيام متتالية: ${SP.streak(u)} 🤖`; }] },
+    bear: { voice: 'دب حنون دافئ يحب العسل والعناق، يطمئن الطالب ويهدّئه دائماً', emoji: '🐻', greet: ['أهلاً يا صغيري {u} 🐻', 'عناق دب كبير! 🤗'],
+      taps: [['giggle', 'hug', 1000, ['عناق! 🤗', 'أنا هنا معك 🐻', 'هممم؟ 🍯']], ['love', 'honey', 1200, ['خذ عسلاً، تستحقه 🍯❤️', 'أنت رائع 🧸'], '🍯'],
+        ['dizzy', 'roll', 1500, ['تدحرجت! 🐻🌀', 'الدنيا تلف بي 😵']], ['angry', 'roar', 1000, ['غرررر! 🐻', 'أيقظتني من السبات 😤'], '💥']],
+      skill: ['عناق تشجيع', () => { const a = SP.avgScore(SP.state.me); return a == null ? 'لم تحل فويزاً بعد، جرّب واحداً وأنا معك 🐻🤗' : a >= 80 ? `متوسطك ${a}%! فخور بك جداً 🐻🏆` : `متوسطك ${a}%. كل محاولة تقربك، عناق ودفعة للأمام 🤗💪`; }] },
+    fox: { voice: 'ثعلب ذكي سريع البديهة يحب الألغاز والتحديات والمزاح الخفيف', emoji: '🦊', greet: ['هيه {u}! مستعد لتحدٍ؟ 🦊', 'الثعلب {n} وصل 😉'],
+      taps: [['giggle', 'wink', 900, ['😉', 'ذكي أنت… أو أنا؟ 🦊', 'لاحظتك 👀']], ['love', 'backflip', 1100, ['شقلبة لأجلك! 🤸❤️', 'ثعلب سعيد 🧡'], '🧡'],
+        ['dizzy', 'zoom', 1000, ['زووووم 💨', 'أسرع ثعلب في المنصة ⚡']], ['angry', 'sulk', 1400, ['هممف 😒', 'لن أكلمك… لثانيتين 😤'], '😒']],
+      skill: ['لغز', () => { const cards = S().decks.filter((d) => d.ownerId === SP.state.me).flatMap((d) => d.cards); if (cards.length) { const c = R(cards); pendingAnswer = c.a; return `لغز من بطاقاتك 🦊\n${c.q}\n(انقرني مرة لأكشف الجواب)`; } const r = R([['ما الشيء الذي كلما أخذت منه كبر؟', 'الحفرة'], ['له أوراق وليس شجرة، وله جلد وليس حيواناً؟', 'الكتاب']]); pendingAnswer = r[1]; return `لغز 🦊\n${r[0]}\n(انقرني لأكشف الجواب)`; }] },
+    penguin: { voice: 'بطريق لطيف كثير الحركة ومرح قليلاً أخرق، يحب الرقص والمعلومات الطريفة عن الثلج والعلوم', emoji: '🐧', greet: ['واك واك! أنا {n} 🐧', 'انزلقت إليك يا {u} 🐧❄️'],
+      taps: [['giggle', 'flapfast', 900, ['واك! 🐧', 'جناحاي لا يطيران لكنهما يلوّحان 👋', 'برررد ❄️']], ['love', 'dance', 1400, ['رقصة البطريق 💃🐧', 'قلب من ثلج ❄️❤️'], '❄️'],
+        ['dizzy', 'slide', 1300, ['تزلّج على البطن! 🛷', 'وييييي ❄️']], ['angry', 'fall', 1500, ['أوبس… وقعت 😵', 'من دفعني؟ 😤🐧'], '💫']],
+      skill: ['رقصة ومعلومة', () => R(['معلومة: البطريق الإمبراطوري يغوص حتى 500 متر! 🐧', 'معلومة: الماء أكثف عند 4 درجات مئوية، لذلك يطفو الثلج ❄️', 'معلومة: دماغك يستهلك نحو 20% من طاقة جسمك 🧠', 'معلومة: الضوء يقطع المسافة من الشمس إلى الأرض في 8 دقائق تقريباً ☀️'])] },
+  };
+  let pendingAnswer = null;
+  const persona = () => PERSONA[cfg().kind] || PERSONA.owl;
+  const fill = (t) => t.replace('{n}', mname()).replace('{u}', SP.me().name);
+  SP.mascotSkill = () => { const p = persona(), text = p.skill[1](); root.dataset.mood = 'celebrate'; say(text, 9000); anim('skill', 1400); burst(p.emoji, 4); return text; };
 
   const MOODS = {
     happy: ['😊', ['تمام!', 'ممتاز 👌', 'أحسنت!']], celebrate: ['🎉', ['رائع جداً! 🏆', 'إنجاز يستحق الاحتفال 🎉', 'نجم! ⭐']], encourage: ['💪', ['لا بأس، نحاول مرة ثانية 💪', 'كل خطأ درس جديد 🌱', 'قريب جداً، استمر!']],
@@ -212,7 +245,7 @@
   };
   (SP.listeners.react = SP.listeners.react || []).push(SP.react);
   const paint = () => {
-    const c = cfg(); fig.innerHTML = svgFor(c);
+    const c = cfg(); fig.innerHTML = svgFor(c); root.dataset.kind = PERSONA[c.kind] ? c.kind : 'owl'; const sc = document.querySelector('.m-sugg .chip.on'); if (sc) sc.textContent = '✨ ' + persona().skill[0];
     fig.setAttribute('aria-label', `${mname()} (${KINDS[c.kind] || 'بومة'}): انقر للتفاعل`); chatBtn.setAttribute('aria-label', 'تكلّم مع ' + mname());
     const p = c.pos; root.style.left = (p ? p.x : 16) + 'px'; root.style.bottom = `calc(${p ? p.y : 16}px + env(safe-area-inset-bottom, 0px))`;
     const f = document.querySelector('.m-panel .m-face'), t = document.querySelector('.m-panel header b'); if (f) f.innerHTML = svgFor(c); if (t) t.textContent = mname();
@@ -220,18 +253,23 @@
 
   /* النقرات: واحدة، اثنتان، ثلاث، خمس فأكثر — والسحب (رفع وإنزال) */
   let taps = 0, tapT = 0, down = null, dragging = false, lastAct = Date.now(), asleep = false;
-  const reactTaps = (n) => SP.react(n === 1 ? 'giggle' : n === 2 ? 'love' : n <= 4 ? 'dizzy' : 'angry');
+  const reactTaps = (n) => {
+    if (n === 1 && pendingAnswer) { say('الجواب: ' + pendingAnswer + ' 🦊', 7000); pendingAnswer = null; anim('wink', 900); return; }
+    const [mood, cls, ms, lines, emo] = persona().taps[n === 1 ? 0 : n === 2 ? 1 : n <= 4 ? 2 : 3];
+    root.dataset.mood = mood; say(fill(R(lines))); wake(false); anim(cls, ms); if (emo) burst(emo, n >= 3 ? 3 : 6);
+  };
   const clampPos = (x, y) => ({ x: Math.round(Math.max(4, Math.min(innerWidth - 90, x))), y: Math.round(Math.max(4, Math.min(innerHeight - 110, y))) });
-  fig.addEventListener('pointerdown', (e) => { if (e.button) return; const p = cfg().pos || { x: 16, y: 16 }; down = { x: e.clientX, y: e.clientY, px: p.x, py: p.y, last: e.clientY }; dragging = false; fig.setPointerCapture(e.pointerId); });
+  let pressT = 0, pressed = false;
+  fig.addEventListener('pointerdown', (e) => { if (e.button) return; const p = cfg().pos || { x: 16, y: 16 }; down = { x: e.clientX, y: e.clientY, px: p.x, py: p.y, last: e.clientY }; dragging = false; pressed = false; fig.setPointerCapture(e.pointerId); clearTimeout(pressT); pressT = setTimeout(() => { if (down && !dragging) { pressed = true; SP.mascotSkill(); } }, 650); });
   fig.addEventListener('pointermove', (e) => {
     if (!down) return; const dx = e.clientX - down.x, dy = e.clientY - down.y;
-    if (!dragging && Math.hypot(dx, dy) > 8) { dragging = true; root.classList.add('lifted'); SP.react('lifted'); }
+    if (!dragging && Math.hypot(dx, dy) > 8) { dragging = true; clearTimeout(pressT); root.classList.add('lifted'); SP.react('lifted'); }
     if (!dragging) return;
     const c = cfg(); c.pos = clampPos(down.px + dx, down.py - dy); root.style.left = c.pos.x + 'px'; root.style.bottom = c.pos.y + 'px';
     root.dataset.look = e.clientY < down.last - 2 ? 'up' : e.clientY > down.last + 2 ? 'down' : root.dataset.look; down.last = e.clientY;
   });
   const up = () => {
-    if (!down) return; const was = dragging; down = null; dragging = false; delete root.dataset.look;
+    clearTimeout(pressT); if (!down) return; const was = dragging; down = null; dragging = false; delete root.dataset.look; if (pressed) { pressed = false; return; }
     if (was) { root.classList.remove('lifted'); SP.save(); SP.react('landed'); return; }
     taps++; clearTimeout(tapT); tapT = setTimeout(() => { reactTaps(taps); taps = 0; }, 360);
   };
@@ -240,6 +278,12 @@
   chatBtn.addEventListener('click', () => toggle());
   addEventListener('resize', () => { const c = cfg(); if (c.pos) { c.pos = clampPos(c.pos.x, c.pos.y); paint(); } });
 
+  let raf = 0, hoverAt = 0;
+  addEventListener('pointermove', (e) => {
+    if (raf || reduced) return; raf = requestAnimationFrame(() => { raf = 0; const r = fig.getBoundingClientRect(), dx = e.clientX - (r.left + r.width / 2), dy = e.clientY - (r.top + r.height * 0.45), d = Math.hypot(dx, dy) || 1, k = root.dataset.kind === 'cat' ? 4.5 : 3;
+      root.style.setProperty('--px', (dx / d * k).toFixed(1) + 'px'); root.style.setProperty('--py', (dy / d * k).toFixed(1) + 'px'); });
+  }, { passive: true });
+  fig.addEventListener('pointerenter', () => { if (Date.now() - hoverAt < 20000 || dragging) return; hoverAt = Date.now(); say(R(['👀', 'أراك 😄', persona().emoji + '؟'])); anim('peek', 600); });
   /* التمرير لأعلى وأسفل: العينان تتبعان الاتجاه، والتمرير السريع يدوّخه */
   let lastY = scrollY, lastT = performance.now(), lookT = 0, dizzyAt = 0;
   addEventListener('scroll', () => {
@@ -262,7 +306,7 @@
     say(tips[Math.floor(Math.random() * tips.length)], 5500); anim(Math.random() < 0.5 ? 'wave' : 'nod');
   };
   setInterval(tip, 75000);
-  setTimeout(() => { const n = inbox().filter((m) => m.to === SP.state.me && !m.read).length; n ? SP.react('inbox') : (say(`أهلاً! أنا ${mname()} ${({ owl: '🦉', cat: '🐱', robot: '🤖', bear: '🐻', fox: '🦊', penguin: '🐧' })[cfg().kind] || ''}`), anim('wave')); }, 1200);
+  setTimeout(() => { const n = inbox().filter((m) => m.to === SP.state.me && !m.read).length; n ? SP.react('inbox') : (say(fill(R(persona().greet))), anim('wave')); }, 1200);
 
   /* تخصيص الشكل */
   SP.customizeMascot = () => {
@@ -287,9 +331,10 @@
   const sendBtn = h('button', { class: 'btn', onclick: () => send() }, 'إرسال'), stopBtn = h('button', { class: 'btn ghost', hidden: true, onclick: () => ctl && ctl.abort() }, 'إيقاف');
   const face = h('span', { class: 'm-face' }), title = h('b', {}, mname());
   const SUGG = ['ما مهامي اليوم؟', 'اختبرني بسؤال', 'لخّص آخر ملاحظاتي', 'كيف أنظّم وقتي للمذاكرة؟'];
+  const skillChip = h('button', { class: 'chip on', onclick: () => { const c = chats(); c.push({ role: 'bot', text: SP.mascotSkill() }); SP.save(); drawChat(); } });
   panel.append(h('header', {}, face, h('div', {}, title, h('div', { class: 'sub', style: { margin: 0, fontSize: '.8rem' } }, 'مساعدك في الدراسة')),
     h('button', { class: 'btn ghost sm', onclick: () => SP.customizeMascot() }, 'شكلي'), h('button', { class: 'btn ghost sm', 'aria-label': 'مسح المحادثة', onclick: () => { chats().length = 0; SP.save(); drawChat(); } }, 'مسح'), h('button', { class: 'btn ghost sm', 'aria-label': 'إغلاق', onclick: () => toggle(false) }, '✕')),
-    list, h('div', { class: 'm-sugg' }, SUGG.map((s) => h('button', { class: 'chip', onclick: () => send(s) }, s))), h('div', { class: 'm-input' }, input, sendBtn, stopBtn));
+    list, h('div', { class: 'm-sugg' }, skillChip, SUGG.map((s) => h('button', { class: 'chip', onclick: () => send(s) }, s))), h('div', { class: 'm-input' }, input, sendBtn, stopBtn));
   document.body.append(panel);
   input.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } });
   const toggle = (on = !panelOpen) => { panelOpen = on; panel.hidden = !on; root.classList.toggle('open', on); bubble.hidden = true; if (on) { drawChat(); input.focus(); } else chatBtn.focus(); };
@@ -329,7 +374,7 @@
     const sample = await SP.aiSample(); root.dataset.mood = 'thinking';
     if (!sample) { setTimeout(() => { const a = offline(q); c.push({ role: 'bot', text: a }); SP.save(); drawChat(); SP.react('happy'); }, 500); return; }
     ctl = new AbortController(); sendBtn.hidden = true; stopBtn.hidden = false;
-    const RULES = `أنت «${mname()}»، ${KINDS[cfg().kind] || 'بومة'} لطيف ومساعد دراسة داخل منصة دراسة عربية. تكلّم بالعربية بلهجة ودودة وواضحة، بجمل قصيرة، واستخدم إيموجي واحداً أو اثنين في كل رد بشكل طبيعي. ساعد في شرح الدروس، اختبار المستخدم بأسئلة، تنظيم الوقت، والتحفيز. لا تخترع معلومات عن ملفات لم تقرأها. ابدأ ردك دائماً بوسم المزاج بين قوسين مربعين واحد فقط من: [happy] [celebrate] [encourage] [thinking] [wave] ثم الرد. بيانات المستخدم الآن: ${JSON.stringify(brief())}`;
+    const RULES = `أنت «${mname()}»، ${KINDS[cfg().kind] || 'بومة'}: ${persona().voice}. وأنت مساعد دراسة داخل منصة دراسة عربية. تكلّم بالعربية بلهجة ودودة وواضحة، بجمل قصيرة، واستخدم إيموجي واحداً أو اثنين في كل رد بشكل طبيعي. ساعد في شرح الدروس، اختبار المستخدم بأسئلة، تنظيم الوقت، والتحفيز. لا تخترع معلومات عن ملفات لم تقرأها. ابدأ ردك دائماً بوسم المزاج بين قوسين مربعين واحد فقط من: [happy] [celebrate] [encourage] [thinking] [wave] ثم الرد. بيانات المستخدم الآن: ${JSON.stringify(brief())}`;
     const turns = [{ role: 'user', content: RULES }, ...c.slice(-16).map((m) => ({ role: m.role === 'user' ? 'user' : 'assistant', content: m.text }))];
     const clean = (t) => t.replace(/^\s*\[(happy|celebrate|encourage|thinking|wave)\]\s*/i, '');
     try {
@@ -343,5 +388,5 @@
   }
   (SP.listeners.route = SP.listeners.route || []).push(() => { updateBell(); paint(); if (panelOpen) drawChat(); });
   updateBell(); paint();
-  SP._ai = { offlineQuestions, normalize, offline, toggle, send };
+  SP._ai = { offlineQuestions, normalize, offline, toggle, send, svgFor };
 })();
