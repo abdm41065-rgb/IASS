@@ -27,16 +27,16 @@ with sync_playwright() as p:
               "study", "cards", "cards/" + pg.evaluate("SP.state.decks[0].id"), "quizzes", "tasks", "progress", "settings", "search/%D8%B1%D9%8A%D8%A7%D8%B6%D9%8A%D8%A7%D8%AA"]
     for r in routes:
         pg.evaluate(f"location.hash='#/{r}'"); pg.wait_for_timeout(60)
-        check(pg.locator("#main h1").count() >= 1 or pg.locator("#main .card").count() > 0, f"route {r} renders")
+        check(pg.locator("#main h1").count() >= 1 or pg.locator("#main .card").count() > 0 or pg.locator("#main .tg").count() == 1, f"route {r} renders")
     check(len(pg.locator("#nav a").all()) == 5, "sidebar has 5 sections")
     pg.evaluate("location.hash='#/files'"); pg.wait_for_timeout(60)
     check(pg.locator(".subnav a").count() == 4 and pg.inner_text("#nav a.on").strip() == "مكتبتي", "hub sub-tabs for library")
 
     # معلم ينشئ صفاً ويضيف فويزاً
     pg.select_option("#who", "t1"); pg.evaluate("location.hash='#/classes'")
-    pg.click("text=إنشاء صف"); pg.fill(".md input", "العلوم"); pg.click(".md button:text-is(\"إنشاء\")")
+    pg.click(".tg-list-head >> text=صف جديد"); pg.fill(".md input", "العلوم"); pg.click(".md button:text-is(\"إنشاء\")")
     check(pg.evaluate("SP.state.classes.length") == 2, "teacher creates class")
-    pg.locator("#main .card", has_text="العلوم").click(); pg.wait_for_timeout(100)
+    pg.locator(".tg-chat", has_text="العلوم").click(); pg.wait_for_timeout(100)
     check("null" not in pg.inner_text("#main"), "class page without exams renders no stray text")
     pg.evaluate("location.hash='#/quizzes'"); pg.click("#main >> text=فويز جديد")
     pg.fill(".md input[placeholder='عنوان الفويز']", "فويز العلوم"); pg.fill(".md input[placeholder='نص السؤال']", "ما عاصمة العراق؟")
@@ -202,13 +202,13 @@ with sync_playwright() as p:
     pg.evaluate("location.hash='#/classes/c1'"); pg.wait_for_timeout(100)
     check(pg.locator(".exam-banner").count() == 1 and "امتحان الكسور الشهري" in pg.inner_text(".exam-banner"), "exam banner on top of class page")
     pg.select_option("#who", "t1"); pg.evaluate("location.hash='#/classes/c1/lec'"); pg.wait_for_timeout(100)
-    pg.click(".ci-compose >> text=موعد امتحان"); pg.fill("#ci-title", "اختبار قصير: الضرب")
+    pg.click(".tg-attach"); pg.click(".attach-menu >> text=موعد امتحان"); pg.fill("#ci-title", "اختبار قصير: الضرب")
     soon = pg.evaluate("(()=>{const d=new Date();d.setDate(d.getDate()+1);return SP.today(d)})()"); pg.fill("#ci-date", soon); pg.click(".md >> text=نشر للطلاب")
     check("اختبار قصير: الضرب" in pg.inner_text(".exam-banner") and pg.locator(".exam-banner.hot").count() == 1, "nearest exam takes the banner (urgent style)")
     # ألبوم صور
     imgs = [Path(tempfile.mkdtemp()) / f"board{i}.png" for i in range(2)]
     for x in imgs: x.write_bytes(_png(60, 40))
-    pg.click(".ci-compose >> text=صور"); pg.fill("#ci-title", "صور السبورة"); pg.set_input_files("#ci-images", [str(x) for x in imgs]); pg.click(".md >> text=نشر للطلاب"); pg.wait_for_timeout(400)
+    pg.click(".tg-attach"); pg.click(".attach-menu >> text=ألبوم صور"); pg.fill("#ci-title", "صور السبورة"); pg.set_input_files("#ci-images", [str(x) for x in imgs]); pg.click(".md >> text=نشر للطلاب"); pg.wait_for_timeout(400)
     check(pg.locator(".ci-gallery .g-thumb").count() == 2, "gallery posted with 2 images")
     pg.locator(".ci-gallery .g-thumb").first.click(); pg.click(".md >> text=التالية")
     check("2 / 2" in pg.inner_text(".md"), "lightbox navigates images"); pg.click(".md button:text-is('إغلاق')")
@@ -216,7 +216,7 @@ with sync_playwright() as p:
     vb64 = pg.evaluate("""(async()=>{const c=document.createElement('canvas');c.width=160;c.height=90;const x=c.getContext('2d');const st=c.captureStream(20);const rec=new MediaRecorder(st,{mimeType:'video/webm'});const ch=[];rec.ondataavailable=e=>ch.push(e.data);rec.start();
       for(let i=0;i<30;i++){x.fillStyle=`hsl(${i*12},70%,50%)`;x.fillRect(0,0,160,90);await new Promise(res=>setTimeout(res,50));} const done=new Promise(res=>rec.onstop=res); rec.stop(); await done; const b=new Blob(ch,{type:'video/webm'}); const u=new Uint8Array(await b.arrayBuffer()); let s=''; u.forEach(c=>s+=String.fromCharCode(c)); return btoa(s);})()""")
     vid = Path(tempfile.mkdtemp()) / "lec.webm"; vid.write_bytes(base64.b64decode(vb64))
-    pg.click(".ci-compose >> text=محاضرة فيديو"); pg.fill("#ci-title", "شرح ضرب الكسور"); pg.set_input_files("#ci-video", str(vid)); pg.fill("#ci-chapters", "00:00 مقدمة\n00:01 المثال الأول")
+    pg.click(".tg-attach"); pg.click(".attach-menu >> text=محاضرة فيديو"); pg.fill("#ci-title", "شرح ضرب الكسور"); pg.set_input_files("#ci-video", str(vid)); pg.fill("#ci-chapters", "00:00 مقدمة\n00:01 المثال الأول")
     pg.click(".md >> text=نشر للطلاب"); pg.wait_for_timeout(400)
     check(pg.locator(".ci-lecture").count() == 1 and "شاهدها 0 طالب" in pg.inner_text(".ci-lecture"), "lecture posted; teacher sees watchers")
     # واجب: الطالب يسلّم والمعلم يصحح
@@ -257,11 +257,39 @@ with sync_playwright() as p:
 
 
 
+
+    # ---------- محادثة الصف (تليكرام) ----------
+    pg.select_option("#who", "s1"); pg.evaluate("location.hash='#/classes/c1'"); pg.wait_for_timeout(150)
+    check(pg.locator(".tg-list .tg-chat").count() >= 1 and pg.locator(".tg-bubble").count() >= 3, "class opens as a chat with bubbles")
+    pg.fill("#tg-input", "أستاذ، هل الامتحان يشمل القسمة؟"); pg.press("#tg-input", "Enter"); pg.wait_for_timeout(150)
+    check(pg.locator(".tg-row.me", has_text="هل الامتحان يشمل القسمة").count() == 1, "student sends a message (own bubble)")
+    pg.select_option("#who", "t1"); pg.evaluate("location.hash='#/classes/c1'"); pg.wait_for_timeout(150)
+    row = pg.locator(".tg-row", has_text="هل الامتحان يشمل القسمة"); row.locator(".tg-more").click(); pg.click(".tg-menu >> text=رد")
+    pg.fill("#tg-input", "نعم، القسمة البسيطة فقط"); pg.press("#tg-input", "Enter"); pg.wait_for_timeout(150)
+    check(pg.locator(".tg-row.me .tg-quote", has_text="هل الامتحان").count() == 1, "teacher replies with a quote")
+    pg.locator(".tg-row:not(.me)", has_text="هل الامتحان يشمل القسمة").locator(".tg-more").click(); pg.click(".tg-menu button[aria-label='تفاعل 👍']")
+    check(pg.locator(".tg-row:not(.me)", has_text="هل الامتحان يشمل القسمة").locator(".tg-rx").count() == 1, "emoji reaction on a message")
+    pg.click(".tg-attach"); pg.click(".attach-menu >> text=تصويت"); pg.fill("#poll-q", "متى نراجع؟"); pg.locator(".md .inp").nth(1).fill("الخميس"); pg.locator(".md .inp").nth(2).fill("الجمعة"); pg.click(".md button:text-is('نشر')"); pg.wait_for_timeout(150)
+    check(pg.locator(".poll").count() == 1, "teacher posts a poll")
+    pg.locator(".tg-row.me", has_text="نعم، القسمة البسيطة").locator(".tg-more").click(); pg.click(".tg-menu >> text=تثبيت")
+    check("نعم، القسمة البسيطة" in pg.inner_text(".tg-pin"), "teacher pins a message")
+    pg.click(".tg-settings"); pg.locator(".md label", has_text="قناة").locator("input").check(); pg.click(".md button:text-is('تم')")
+    pg.evaluate("location.hash='#/home'"); pg.wait_for_timeout(80); pg.select_option("#who", "s2"); pg.evaluate("location.hash='#/classes'"); pg.wait_for_timeout(150)
+    check(pg.locator("#nav .nav-badge").count() == 1 and pg.locator(".tg-chat .tg-badge").count() >= 1, "unread counts in sidebar and chat list")
+    pg.evaluate("location.hash='#/classes/c1'"); pg.wait_for_timeout(150)
+    check(pg.locator(".tg-locked").count() == 1 and pg.locator("#tg-input").count() == 0, "channel mode: students read only")
+    pg.locator(".poll-opt", has_text="الجمعة").click(); pg.wait_for_timeout(100)
+    check("100%" in pg.inner_text(".poll"), "student votes in poll")
+    check(pg.locator("#nav .nav-badge").count() == 0, "unread cleared after opening chat")
+    pg.select_option("#who", "t1"); pg.evaluate("location.hash='#/classes/c1'"); pg.wait_for_timeout(150)
+    check("👁" in pg.inner_text(".tg-row.me >> nth=-1"), "teacher sees views on own messages")
+    pg.click(".tg-settings"); pg.locator(".md label", has_text="مجموعة").locator("input").check(); pg.click(".md button:text-is('تم')")
+
     # ---------- الأستاذ ينشر · الطالب يحفظ ويرتّب ويرسل ----------
     pg.select_option("#who", "t1"); pg.evaluate("location.hash='#/classes/c1/lec'"); pg.wait_for_timeout(100)
-    pg.click(".ci-compose >> text=تبليغ"); pg.fill("#ci-title", "تغيير موعد المحاضرة"); pg.fill("#ci-text", "محاضرة الأحد صارت الساعة 10 بدل 9."); pg.check("#ci-important"); pg.click(".md >> text=نشر للطلاب"); pg.wait_for_timeout(150)
-    check(pg.locator(".ci-notice.important", has_text="تغيير موعد المحاضرة").count() == 1 and pg.locator(".ci").first.locator(".imp-flag").count() == 1, "teacher posts an important notice (pinned)")
-    pg.click(".ci-compose >> text=شرح ومعلومة"); pg.fill("#ci-title", "قاعدة ضرب الكسور"); pg.fill("#ci-text", "**القاعدة:** البسط × البسط والمقام × المقام\n- مثال: 1/2 × 2/3 = 2/6"); pg.click(".md >> text=نشر للطلاب"); pg.wait_for_timeout(150)
+    pg.click(".tg-attach"); pg.click(".attach-menu >> text=تبليغ"); pg.fill("#ci-title", "تغيير موعد المحاضرة"); pg.fill("#ci-text", "محاضرة الأحد صارت الساعة 10 بدل 9."); pg.check("#ci-important"); pg.click(".md >> text=نشر للطلاب"); pg.wait_for_timeout(150)
+    check(pg.locator(".ci-notice.important", has_text="تغيير موعد المحاضرة").count() == 1 and "تغيير موعد المحاضرة" in pg.inner_text(".tg-pin"), "teacher posts an important notice (auto-pinned)")
+    pg.click(".tg-attach"); pg.click(".attach-menu >> text=شرح ومعلومة"); pg.fill("#ci-title", "قاعدة ضرب الكسور"); pg.fill("#ci-text", "**القاعدة:** البسط × البسط والمقام × المقام\n- مثال: 1/2 × 2/3 = 2/6"); pg.click(".md >> text=نشر للطلاب"); pg.wait_for_timeout(150)
     check(pg.locator(".ci-explain .rich b").count() == 1 and pg.locator(".ci-explain .rich li").count() == 1, "teacher explanation rendered with bold and bullets")
     pg.select_option("#who", "s1"); pg.evaluate("location.hash='#/home'"); pg.wait_for_timeout(100)
     check("تغيير موعد المحاضرة" in pg.inner_text("#main"), "important notice reaches student home")
@@ -329,7 +357,7 @@ with sync_playwright() as p:
     ok_answers = p3.evaluate("SP.state.quizzes.every(q=>q.questions.every(x=>x.type==='short'?String(x.answer).length>0:x.answer>=0&&x.answer<x.options.length))")
     check(ok_answers, "all sim quiz answers valid")
     bad = []
-    for r in ["home", "calendar", "tasks", "progress", "space", "desk", "writer", "quizzes", "cards", "study", "notes", "files", "handouts", "stickers", "classes", "lectures", "share", "teachers", "students", "settings", "classes/an/lec", "classes/ph/lec", "classes/bc/over", "classes/hi/prog"]:
+    for r in ["home", "calendar", "tasks", "progress", "space", "desk", "writer", "quizzes", "cards", "study", "notes", "files", "handouts", "stickers", "classes", "lectures", "share", "teachers", "students", "settings", "classes/an/lec", "classes/ph/lec", "classes/bc/over", "classes/hi/prog", "classes/an/info", "classes/ph/info/prog"]:
         p3.evaluate(f"location.hash='#/{r}'"); p3.wait_for_timeout(120); t = p3.inner_text("#main")
         if "null" in t or "undefined" in t or "NaN" in t: bad.append(r)
     check(not bad, "sim renders cleanly on every page " + str(bad))

@@ -39,11 +39,12 @@
     SP.cleanups.splice(0).forEach((f) => f());
     const parts = location.hash.replace(/^#\/?/, '').split('/').filter(Boolean), key = SP.views[parts[0]] ? parts[0] : 'home', v = SP.views[key];
     const hub = HUBS.find((x) => x[2].includes(key));
-    navEl.replaceChildren(...HUBS.map(([k, label]) => h('a', { href: '#/' + k, class: hub && hub[0] === k ? 'on' : '', 'aria-current': hub && hub[0] === k ? 'page' : null }, icon(ICON_FOR[k]), label)));
+    const un = SP.chatUnread ? SP.chatUnread() : 0;
+    navEl.replaceChildren(...HUBS.map(([k, label]) => h('a', { href: '#/' + k, class: hub && hub[0] === k ? 'on' : '', 'aria-current': hub && hub[0] === k ? 'page' : null }, icon(ICON_FOR[k]), label, k === 'classes' && un ? h('span', { class: 'nav-badge', 'aria-label': un + ' رسالة غير مقروءة' }, un) : null)));
     const sub = hub && hub[2].length > 1 ? h('nav', { class: 'tabs subnav', 'aria-label': 'أقسام ' + hub[1] }, hub[2].map((k) => h('a', { class: 'tab' + (k === key ? ' on' : ''), href: '#/' + k, 'aria-current': k === key ? 'page' : null }, SP.views[k].label))) : null;
     document.title = v.label + ' · منصة الدراسة';
     try { main.replaceChildren(...[sub, v.render(parts.slice(1))].filter(Boolean)); } catch (e) { console.error(e); main.replaceChildren(SP.empty('حدث خطأ غير متوقع في هذه الصفحة.')); }
-    document.body.classList.remove('nav-open'); window.scrollTo(0, 0); SP.emit('route');
+    document.body.classList.remove('nav-open'); document.body.classList.toggle('in-chat', !!document.querySelector('#main .tg-compose, #main .tg-locked')); window.scrollTo(0, 0); SP.emit('route');
   };
   window.addEventListener('hashchange', SP.route);
   document.getElementById('who').addEventListener('change', (e) => { SP.state.me = e.target.value; SP.save(); SP.route(); });

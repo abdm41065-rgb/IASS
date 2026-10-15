@@ -56,7 +56,7 @@
     if (type === 'notice') {
       const text = h('textarea', { class: 'inp', id: 'ci-text', placeholder: 'نص التبليغ للطلاب', style: { minHeight: '120px' } }), imp = h('input', { type: 'checkbox', id: 'ci-important' });
       fields.push(SP.field('التبليغ', text), h('label', { class: 'row', style: { marginTop: '10px' } }, imp, ' تبليغ مهم (يُثبَّت أعلى الصف ويظهر في رئيسية الطالب)'));
-      read = async () => { if (!text.value.trim()) throw new Error('اكتب نص التبليغ'); return { text: text.value.trim(), important: imp.checked }; };
+      read = async () => { if (!text.value.trim()) throw new Error('اكتب نص التبليغ'); return { text: text.value.trim(), important: imp.checked, pinned: imp.checked }; };
     } else if (type === 'explain') {
       const text = h('textarea', { class: 'inp', id: 'ci-text', placeholder: 'اكتب الشرح أو المعلومة. استخدم **نص** للتعريض و- في بداية السطر للنقاط.', style: { minHeight: '180px' } }), imgs = h('input', { type: 'file', id: 'ci-images', accept: 'image/*', multiple: true }), file = h('input', { type: 'file', id: 'ci-attach' });
       fields.push(SP.field('الشرح', text), SP.field('صور توضيحية (اختياري)', imgs), SP.field('ملف مرفق (اختياري)', file));
@@ -170,11 +170,13 @@
     String(t || '').split('\n').forEach((line) => { const m = line.match(/^\s*[-•]\s+(.*)/); const parts = (m ? m[1] : line).split(/\*\*(.+?)\*\*/g).map((x, i) => (i % 2 ? h('b', {}, x) : x));
       if (m) { if (!ul) { ul = h('ul', {}); out.append(ul); } ul.append(h('li', {}, parts)); } else { ul = null; if (line.trim()) out.append(h('p', {}, parts)); } });
     return out; };
-  function card(it, showClass) {
-    const [label, ic] = TYPES[it.type], teacher = isTeacherOf(it.classId);
-    const body = it.type === 'notice' ? rich(it.text)
+  const ciBody = (it) => it.type === 'notice' ? rich(it.text)
       : it.type === 'explain' ? h('div', {}, rich(it.text), it.images && it.images.length ? gallery(it) : null, it.fileId ? h('button', { class: 'btn ghost sm', style: { marginTop: '8px' }, onclick: async () => { const b = await SP.idb.get(it.fileId); b ? SP.download(it.fname || 'مرفق', b) : SP.toast('الملف غير موجود', 'err'); } }, '📎 ' + (it.fname || 'المرفق')) : null)
       : it.type === 'lecture' ? lectureBody(it) : it.type === 'gallery' ? h('div', {}, it.desc ? h('p', {}, it.desc) : null, gallery(it)) : it.type === 'exam' ? examBody(it) : homeworkBody(it);
+  SP.ciBody = ciBody; SP.classComposer = (type, classId) => composer(type, classId); SP.CI_TYPES = TYPES;
+  function card(it, showClass) {
+    const [label, ic] = TYPES[it.type], teacher = isTeacherOf(it.classId);
+    const body = ciBody(it);
     return h('article', { class: 'card ci ci-' + it.type + (it.type === 'exam' ? ' ' + urgency(it) : '') + (it.important ? ' important' : '') },
       h('div', { class: 'row sp' }, h('span', { class: 'row' }, h('span', { class: 'ci-ic', 'aria-hidden': 'true' }, ic), h('span', { class: 'chip' }, label), showClass ? h('span', { class: 'chip' }, SP.className(it.classId)) : null),
         h('span', { class: 'row' }, h('small', { class: 'sub', style: { margin: 0 } }, SP.date(it.ts)), teacher ? h('span', { class: 'chip', title: 'عدد الطلاب الذين حفظوه في دراستهم' }, '📥 ' + (SP.savedBy ? SP.savedBy(it.id) : 0)) : null, !teacher && SP.saveToStudy ? h('button', { class: 'btn sm ' + (SP.isSaved(it.id) ? 'ghost' : ''), onclick: () => { SP.saveToStudy(it); SP.refresh(); } }, SP.isSaved(it.id) ? 'محفوظ ✓' : 'احفظ في دراستي') : null, teacher ? h('button', { class: 'btn ghost sm', onclick: async () => { if (await SP.confirm('حذف «' + it.title + '»؟')) { S().classItems = items().filter((x) => x.id !== it.id); SP.save(); SP.refresh(); } } }, 'حذف') : null)),
@@ -186,7 +188,7 @@
     let type = ''; const root = h('div', {}), list = h('div', { class: 'ci-list' });
     const canPost = classId ? isTeacherOf(classId) : SP.myClasses().some((c) => c.teacherId === SP.state.me);
     const draw = () => {
-      const all = items().filter((i) => visible(i) && (!classId || i.classId === classId) && (!type || i.type === type)).sort((a, b) => (!!b.important - !!a.important) || (a.type === 'exam' && b.type === 'exam' ? examAt(a) - examAt(b) : b.ts - a.ts));
+      const all = items().filter((i) => visible(i) && TYPES[i.type] && (!classId || i.classId === classId) && (!type || i.type === type)).sort((a, b) => (!!b.important - !!a.important) || (a.type === 'exam' && b.type === 'exam' ? examAt(a) - examAt(b) : b.ts - a.ts));
       list.replaceChildren(...(all.length ? all.map((i) => card(i, !classId)) : [h('div', { class: 'empty' }, h('div', { class: 'sticker', style: { fontSize: '2.4rem', marginBottom: '8px' } }, '🎓'), canPost ? 'لم تنشر شيئاً بعد. أرسل تبليغاً أو شرحاً أو صوراً أو موعد امتحان.' : 'لم يرسل الأستاذ شيئاً بعد.')]));
       chips.replaceChildren(h('button', { class: 'chip' + (!type ? ' on' : ''), onclick: () => { type = ''; draw(); } }, 'الكل'), ...Object.entries(TYPES).map(([k, [l, ic]]) => h('button', { class: 'chip' + (type === k ? ' on' : ''), onclick: () => { type = k; draw(); } }, ic + ' ' + l)));
     };

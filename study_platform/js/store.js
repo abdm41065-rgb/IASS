@@ -19,7 +19,10 @@
   SP.sampleItems = (classes) => {
     if (!classes.some((c) => c.id === 'c1')) return [];
     const d = (n) => { const x = new Date(); x.setDate(x.getDate() + n); return SP.today(x); };
+    const ago = (m) => Date.now() - m * 60000;
     return [
+      { id: SP.uid(), classId: 'c1', by: 't1', type: 'msg', title: '', text: 'أهلاً بكم في صف الرياضيات 👋 هنا أرسل لكم الشرح والتبليغات ومواعيد الامتحانات.', ts: ago(3000) },
+      { id: SP.uid(), classId: 'c1', by: 's2', type: 'msg', title: '', text: 'أهلاً أستاذ، شكراً 🙏', ts: ago(2990), reactions: { '❤️': ['t1'] } },
       { id: SP.uid(), classId: 'c1', by: 't1', type: 'exam', title: 'امتحان الكسور الشهري', ts: Date.now(), date: d(6), time: '09:00', kind: 'شهري', place: 'القاعة 3', topics: ['جمع الكسور وطرحها', 'ضرب الكسور', 'تبسيط الكسور'], quizId: '' },
       { id: SP.uid(), classId: 'c1', by: 't1', type: 'homework', title: 'حل تمارين صفحة 42', ts: Date.now(), due: d(3), max: 100, desc: 'حل التمارين من 1 إلى 8 وصوّر الحل وارفعه هنا.', fileId: '', fname: '', fmime: '', subs: {} },
     ];

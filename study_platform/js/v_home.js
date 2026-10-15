@@ -71,7 +71,7 @@
     const c = SP.classById(id);
     if (!c || !SP.canSeeClass(id)) return SP.page('الصف غير موجود', '', h('button', { class: 'btn', onclick: () => SP.go('classes') }, 'رجوع'));
     const isOwner = SP.isTeacher() && c.teacherId === SP.state.me, root = h('div', {});
-    let tab = ['lec', 'members', 'quizzes', 'files', 'posts', 'prog'].includes(startTab) ? startTab : 'lec';
+    let tab = ['members', 'quizzes', 'files', 'posts', 'prog'].includes(startTab) ? startTab : 'members';
     const draw = () => {
       const s = S(); let body;
       if (tab === 'over') {
@@ -107,10 +107,11 @@
           h('div', { class: 'row' }, isOwner ? h('span', { class: 'chip', title: 'كود الانضمام' }, 'الكود: ' + c.code) : null,
             isOwner ? h('button', { class: 'btn ghost sm', onclick: async () => { if (await SP.confirm('حذف الصف نهائياً مع فويزاته ومنشوراته؟')) { const s2 = S(); s2.classes = s2.classes.filter((x) => x.id !== id); s2.quizzes = s2.quizzes.filter((x) => x.classId !== id); s2.posts = s2.posts.filter((x) => x.classId !== id); SP.save(); SP.go('classes'); } } }, 'حذف') : null,
             !isOwner && SP.state.me ? h('button', { class: 'btn ghost sm', onclick: async () => { if (await SP.confirm('مغادرة الصف؟')) { c.memberIds = c.memberIds.filter((x) => x !== SP.state.me); SP.save(); SP.go('classes'); } } }, 'مغادرة') : null)),
-        SP.examBanner && SP.examBanner(id), SP.tabs([['lec', 'منشورات الأستاذ'], ['members', 'الأعضاء'], ['quizzes', 'الفويزات'], ['files', 'الملفات'], ['posts', 'النقاش'], ['prog', 'التقدم']], tab, (k) => { tab = k; draw(); }), body].filter(Boolean));
+        h('button', { class: 'btn ghost sm', style: { marginBottom: '10px' }, onclick: () => SP.go('classes/' + id) }, 'رجوع إلى المحادثة'), SP.tabs([['members', 'الأعضاء'], ['quizzes', 'الفويزات'], ['files', 'الملفات'], ['posts', 'النقاش'], ['prog', 'التقدم']], tab, (k) => { tab = k; draw(); }), body].filter(Boolean));
     };
     draw(); return root;
   }
+  SP.classDetail = classDetail; SP.newClassModal = newClassModal; SP.joinModal = joinModal;
   SP.reg('classes', '🏫', 'الصفوف', (p) => {
     if (p[0]) return classDetail(p[0], p[1]);
     const list = SP.myClasses();
