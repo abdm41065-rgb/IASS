@@ -232,6 +232,35 @@ with sync_playwright() as p:
     pg.screenshot(path=str(ROOT / "tests" / "mobile.png"))
     pg.set_viewport_size({"width": 1280, "height": 900}); pg.evaluate("location.hash='#/home'"); pg.screenshot(path=str(ROOT / "tests" / "home.png"))
 
+
+    # ---------- محاكاة طالب الطب ----------
+    ctx3 = b.new_context(viewport={"width": 1280, "height": 900}); p3 = ctx3.new_page()
+    p3.on("pageerror", lambda e: errors.append(str(e))); p3.on("console", lambda m: m.type == "error" and "Failed to load resource" not in m.text and errors.append(m.text))
+    p3.goto(URL); p3.wait_for_timeout(200)
+    p3.click(".sim-offer >> text=ابدأ المحاكاة"); p3.click(".md button:text-is('تأكيد')"); p3.wait_for_timeout(800)
+    check(p3.evaluate("SP.me().name") == "حسن" and p3.evaluate("SP.state.classes.length") == 4, "med sim loaded: حسن with 4 subjects")
+    check("كويز الكيمياء الحياتية" in p3.inner_text(".exam-strip") and p3.locator(".exam-card.hot").count() >= 1, "tomorrow's biochem quiz is urgent on home")
+    check(p3.inner_text("#inbox .badge") == "1", "classmate's file waiting in inbox")
+    ok_answers = p3.evaluate("SP.state.quizzes.every(q=>q.questions.every(x=>x.type==='short'?String(x.answer).length>0:x.answer>=0&&x.answer<x.options.length))")
+    check(ok_answers, "all sim quiz answers valid")
+    bad = []
+    for r in ["home", "calendar", "tasks", "progress", "desk", "quizzes", "cards", "study", "notes", "files", "handouts", "stickers", "classes", "lectures", "share", "teachers", "students", "settings", "classes/an/lec", "classes/ph/lec", "classes/bc/over", "classes/hi/prog"]:
+        p3.evaluate(f"location.hash='#/{r}'"); p3.wait_for_timeout(120); t = p3.inner_text("#main")
+        if "null" in t or "undefined" in t or "NaN" in t: bad.append(r)
+    check(not bad, "sim renders cleanly on every page " + str(bad))
+    p3.evaluate("location.hash='#/classes/an/lec'"); p3.wait_for_timeout(150)
+    check("عملي التشريح" in p3.inner_text(".exam-banner") and "محاضرة حضورية" in p3.inner_text("#main"), "anatomy: OSPE banner + in-person lecture outline")
+    p3.evaluate("location.hash='#/classes/hi/lec'"); p3.wait_for_timeout(150)
+    check("الدرجة: 88 / 100" in p3.inner_text("#main"), "graded histology homework visible")
+    p3.evaluate("location.hash='#/handouts'"); p3.wait_for_timeout(200)
+    p3.locator("#main .card", has_text="ملزمة الفسلجة").locator("button:text-is('أسئلة')").click(); p3.click(".md >> text=ولّد الأسئلة"); p3.wait_for_selector(".qsec", timeout=8000)
+    check(p3.locator(".qsec").count() == 3, "questions generated from the physiology handout")
+    p3.click(".md button:text-is('إغلاق')")
+    p3.select_option("#who", "dA"); p3.evaluate("location.hash='#/classes/an/lec'"); p3.wait_for_timeout(150)
+    p3.locator(".ci-homework >> text=التسليمات والدرجات").click()
+    check("ضفيرة-زينب.jpg" in p3.inner_text(".md") and "لم يسلّم" in p3.inner_text(".md"), "doctor sees homework submissions table")
+    ctx3.close()
+
     # ---------- محاكاة Claude (مسار المساعد الذكي) ----------
     ctx2 = b.new_context(viewport={"width": 1280, "height": 900})
     ctx2.add_init_script("""

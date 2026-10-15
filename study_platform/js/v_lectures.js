@@ -124,7 +124,7 @@
     const cls = SP.classById(it.classId) || { memberIds: [] };
     SP.modal({ title: 'تسليمات: ' + it.title, wide: true, body: cls.memberIds.length ? h('div', { style: { overflowX: 'auto' } }, h('table', {}, h('thead', {}, h('tr', {}, ['الطالب', 'الملف', 'الوقت', 'الدرجة', 'ملاحظة'].map((x) => h('th', {}, x)))),
       h('tbody', {}, cls.memberIds.map((uid) => { const s = (it.subs || {})[uid];
-        return h('tr', {}, h('td', {}, SP.user(uid).name), h('td', {}, s ? h('button', { class: 'btn ghost sm', onclick: async () => SP.download(s.name, await SP.idb.get(s.fileId)) }, s.name) : h('span', { class: 'sub' }, 'لم يسلّم')),
+        return h('tr', {}, h('td', {}, SP.user(uid).name), h('td', {}, s ? (s.fileId ? h('button', { class: 'btn ghost sm', onclick: async () => { const b = await SP.idb.get(s.fileId); b ? SP.download(s.name, b) : SP.toast('الملف غير موجود في هذا المتصفح', 'err'); } }, s.name) : h('span', {}, s.name)) : h('span', { class: 'sub' }, 'لم يسلّم')),
           h('td', {}, s ? SP.date(s.ts) + (s.late ? ' (متأخر)' : '') : '—'),
           h('td', {}, s ? h('input', { class: 'inp', type: 'number', min: 0, max: it.max, value: s.grade == null ? '' : s.grade, style: { width: '80px' }, 'aria-label': 'درجة ' + SP.user(uid).name, onchange: (e) => { s.grade = e.target.value === '' ? null : Math.min(it.max, Math.max(0, +e.target.value)); SP.save(); } }) : '—'),
           h('td', {}, s ? h('input', { class: 'inp', value: s.feedback || '', 'aria-label': 'ملاحظة', onchange: (e) => { s.feedback = e.target.value.slice(0, 300); SP.save(); } }) : '—'));
@@ -142,9 +142,10 @@
   function lectureBody(it) {
     const w = watch(it.id), pct = w.dur ? Math.min(100, Math.round((100 * w.max) / w.dur)) : 0, teacher = isTeacherOf(it.classId);
     const watchers = teacher ? (SP.classById(it.classId) || { memberIds: [] }).memberIds.filter((u) => ((S().watch || {})[u] || {})[it.id]).length : 0;
-    return h('div', {}, it.desc ? h('p', {}, it.desc) : null, it.chapters && it.chapters.length ? h('div', { class: 'sub', style: { margin: '0 0 8px' } }, it.chapters.length + ' فصول') : null,
+    return h('div', {}, it.desc ? h('p', {}, it.desc) : null, it.fileId && it.chapters && it.chapters.length ? h('div', { class: 'sub', style: { margin: '0 0 8px' } }, it.chapters.length + ' فصول') : null,
       it.fileId ? [h('div', { class: 'bar' }, h('i', { style: { width: pct + '%' } })), h('div', { class: 'row sp', style: { marginTop: '8px' } }, h('small', { class: 'sub', style: { margin: 0 } }, teacher ? `شاهدها ${watchers} طالب` : w.done ? 'شاهدتها ✓' : pct ? `شاهدت ${pct}%` : 'لم تشاهدها بعد'), h('button', { class: 'btn sm', onclick: () => SP.go('lectures/' + it.id) }, w.done ? 'أعد المشاهدة' : pct ? 'أكمل المشاهدة' : 'شاهد'))]
-        : h('a', { class: 'btn sm', href: it.url, target: '_blank', rel: 'noopener noreferrer' }, 'افتح المحاضرة ↗'));
+        : it.url ? h('a', { class: 'btn sm', href: it.url, target: '_blank', rel: 'noopener noreferrer' }, 'افتح المحاضرة ↗')
+        : h('div', {}, h('span', { class: 'chip' }, 'محاضرة حضورية'), it.chapters && it.chapters.length ? h('ol', { class: 'topics' }, it.chapters.map((c) => h('li', {}, c.label))) : null));
   }
   function card(it, showClass) {
     const [label, ic] = TYPES[it.type], teacher = isTeacherOf(it.classId);

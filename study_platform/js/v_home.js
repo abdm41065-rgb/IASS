@@ -25,7 +25,9 @@
         h('button', { class: 'btn go', onclick: () => SP.go(last ? 'desk/' + last.id : 'desk') }, last ? 'تابع الدراسة' : 'افتح درساً')),
       h('div', { class: 'ring', style: { '--p': pct }, role: 'img', 'aria-label': `دراسة اليوم ${todayMin} من ${goal} دقيقة` }, h('span', {}, h('b', { style: { fontSize: '1.6rem' } }, todayMin + 'د'), h('small', {}, 'من ' + goal + ' دقيقة اليوم'))));
     hero.querySelector('.ring').style.setProperty('--p', pct);
-    return h('div', {}, hero, SP.examStrip && SP.examStrip(),
+    const simCard = !s.sim && !s.simHide ? h('div', { class: 'card sim-offer' }, h('div', {}, h('b', {}, 'جرّب المنصة كطالب طب 🩺'), h('p', { class: 'sub', style: { margin: '2px 0 0' } }, 'محاكاة كاملة: التشريح والفسلجة والكيمياء الحياتية والأنسجة، مع امتحانات وواجبات وبطاقات.')),
+      h('div', { class: 'row' }, h('button', { class: 'btn', onclick: () => SP.offerMedSim() }, 'ابدأ المحاكاة'), h('button', { class: 'btn ghost', onclick: () => { s.simHide = true; SP.save(); SP.refresh(); } }, 'لاحقاً'))) : null;
+    return h('div', {}, simCard, hero, SP.examStrip && SP.examStrip(),
       h('div', { class: 'grid s' },
         stat(SP.myClasses().length, 'صفوفي', 'classes'), stat(myNotes.length, 'ملاحظاتي', 'notes'), stat(myFiles.length, 'ملفاتي', 'files'),
         stat(s.results.filter((r) => r.userId === uid).length, 'فويزات حللتها', 'quizzes'), stat((s.docs || []).filter((d) => d.ownerId === uid).length, 'دروسي في دراسة', 'desk')),

@@ -381,3 +381,4 @@ button.chip{border:0;cursor:pointer;font:inherit;font-size:.8rem}
 .cal-ev.exam{background:rgba(224,123,0,.16);color:#9A4F00}.cal-ev.hw{background:rgba(46,125,50,.14);color:var(--ok)}.cal-ev.task{background:var(--blue-tint);color:var(--blue)}
 .cal-legend{margin-bottom:10px;gap:6px}.cal-legend .cal-ev{cursor:default}
 .exam-strip{margin-bottom:18px}
+.sim-offer{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:16px;border-inline-start:5px solid #B91C1C}

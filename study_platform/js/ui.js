@@ -55,7 +55,7 @@
   SP.go = (p) => { location.hash = '#/' + p; };
   SP.page = (title, sub, ...kids) => h('div', {}, h('h1', {}, title), sub ? h('p', { class: 'sub' }, sub) : null, ...kids);
   SP.empty = (msg) => h('div', { class: 'empty' }, msg);
-  SP.avatar = (u, c) => h('span', { class: 'avatar', style: { background: c || SP.COLORS[(u.name.charCodeAt(0) || 0) % 8] } }, (u.name || '؟').replace(/^(المعلم|المعلمة|الطالب|الطالبة)\s*/, '').slice(0, 1));
+  SP.avatar = (u, c) => h('span', { class: 'avatar', style: { background: c || SP.COLORS[(u.name.charCodeAt(0) || 0) % 8] } }, (u.name || '؟').replace(/^(المعلم|المعلمة|الطالب|الطالبة|د\.)\s*/, '').slice(0, 1));
   SP.swatches = (cur, onPick) => {
     const box = h('span', {});
     const draw = (c) => { box.replaceChildren(...SP.COLORS.map((x) => h('span', { class: 'sw' + (x === c ? ' on' : ''), style: { background: x }, role: 'button', 'aria-label': 'لون', onclick: () => { onPick(x); draw(x); } }))); };
