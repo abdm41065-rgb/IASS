@@ -3,7 +3,7 @@
   const SP = window.SP, h = SP.h;
   const HUBS = [
     ['home', 'الرئيسية', ['home', 'calendar', 'tasks', 'progress']],
-    ['desk', 'دراسة', ['desk', 'quizzes', 'cards', 'study']],
+    ['desk', 'دراسة', ['desk', 'writer', 'quizzes', 'cards', 'study']],
     ['notes', 'مكتبتي', ['notes', 'files', 'handouts', 'stickers']],
     ['classes', 'الصفوف', ['classes', 'lectures', 'share', 'teachers', 'students']],
     ['settings', 'الإعدادات', ['settings']],

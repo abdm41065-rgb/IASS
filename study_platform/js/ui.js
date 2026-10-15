@@ -83,5 +83,8 @@
     });
     return svg;
   };
+  /* فتح PDF: بيانات الخطوط القياسية مضمّنة حتى تُرسم الملفات غير المضمِّنة لخطوطها بشكل صحيح */
+  class FontData { async fetch({ filename }) { const b = (window.PDF_STD_FONTS || {})[filename]; if (!b) throw new Error('font ' + filename); const s = atob(b), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; } }
+  SP.pdfOpen = (data) => window.pdfjsLib.getDocument({ data, isEvalSupported: false, ...(window.PDF_STD_FONTS ? { useSystemFonts: false, StandardFontDataFactory: FontData } : {}) }).promise;
   SP.beep = () => { try { const a = new AudioContext(), o = a.createOscillator(); o.connect(a.destination); o.frequency.value = 880; o.start(); o.stop(a.currentTime + 0.25); } catch (e) {} };
 })();

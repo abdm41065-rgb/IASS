@@ -382,3 +382,60 @@ button.chip{border:0;cursor:pointer;font:inherit;font-size:.8rem}
 .cal-legend{margin-bottom:10px;gap:6px}.cal-legend .cal-ev{cursor:default}
 .exam-strip{margin-bottom:18px}
 .sim-offer{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:16px;border-inline-start:5px solid #B91C1C}
+
+/* ===== تأشير النص في PDF (طبقة نص pdf.js) ===== */
+.pg .textLayer{position:absolute;inset:0;overflow:hidden;line-height:1;text-size-adjust:none;forced-color-adjust:none;transform-origin:0 0;pointer-events:none;direction:ltr}
+.pg .textLayer :is(span,br){color:transparent;position:absolute;white-space:pre;cursor:text;transform-origin:0% 0%}
+.pg .textLayer span.markedContent{top:0;height:0}
+.pg .textLayer ::selection{background:rgba(31,78,153,.3)}
+.pg .textLayer br::selection{background:transparent}
+.pg .textLayer .endOfContent{display:block;position:absolute;inset:100% 0 0;z-index:-1;cursor:default;user-select:none}
+.ed.t-texthl .textLayer{pointer-events:auto}
+.ed.t-texthl svg.ink{pointer-events:none}
+.ed.t-texthl .obj{pointer-events:none}
+.ed.t-note svg.ink{cursor:copy}
+.ed.t-note .obj:not(.note){pointer-events:none}
+.ed.t-note .obj.note,.ed.t-text .obj.note,.ed.t-select .obj.note{pointer-events:auto}
+.obj.sel{outline:2px solid var(--blue)!important;outline-offset:3px}
+.obj.text.has-bg{border-radius:4px}
+/* ملاحظة لاصقة على الصفحة */
+.obj.note{z-index:3}
+.note-pin{width:30px;height:30px;border-radius:8px;border:0;background:var(--nc,#FFE14D);box-shadow:0 2px 6px rgba(20,33,61,.3);cursor:pointer;font-size:16px;line-height:30px;padding:0}
+.note-pop{position:absolute;top:34px;left:0;width:240px;background:#FFFBE6;border-radius:10px;box-shadow:0 10px 30px rgba(20,33,61,.25);padding:10px;display:grid;gap:6px;border-top:5px solid var(--nc,#FFE14D);color:#14213D}
+.note-pop[hidden]{display:none}
+.note-text{width:100%;min-height:90px;border:0;background:transparent;resize:vertical;font:inherit;font-size:.92rem;outline:none;direction:rtl}
+/* أزرار التنسيق المشتركة */
+.wb{min-width:32px;height:32px;border:0;border-radius:8px;background:transparent;color:var(--ink);cursor:pointer;font:inherit;font-size:.86rem;padding:0 8px}
+.wb:hover{background:var(--fill)}.wb.on{background:var(--blue-tint);color:var(--blue)}
+.wb.b{font-weight:800}.wb.i{font-style:italic}.wb.u{text-decoration:underline}.wb.s{text-decoration:line-through}.wb.note{background:#FFF3B0;color:#7A5300}
+.wgroup{display:inline-flex;align-items:center;gap:4px}.wgroup small{color:var(--mute);font-size:.72rem}
+.pc.none{background:var(--card);color:var(--mute);font-size:.7rem;display:inline-grid;place-items:center}
+/* ===== المستندات ===== */
+.wbar{position:sticky;top:calc(env(safe-area-inset-top,0px) + 58px);z-index:15;background:var(--card);border-radius:14px;padding:6px 8px;display:flex;flex-wrap:wrap;gap:4px;align-items:center;outline:1px solid var(--line);outline-offset:-1px;box-shadow:var(--sh);margin-bottom:16px}
+.wbar select.inp{padding:4px 8px;height:32px}
+.wtitle{font-size:1.25rem;font-weight:700;background:transparent;flex:1;max-width:520px}
+.wlayout{display:grid;grid-template-columns:minmax(0,1fr) 260px;gap:20px;align-items:start}
+.wsheet{background:#fff;color:#14213D;border-radius:6px;box-shadow:0 1px 3px rgba(20,33,61,.12),0 10px 30px rgba(20,33,61,.08);max-width:820px;width:100%;margin:0 auto}
+.wpage{min-height:70vh;padding:56px 64px;outline:none;line-height:1.9;font-size:1.05rem;color-scheme:light}
+.wpage h1{font-size:1.9rem;margin:0 0 12px}.wpage h2{font-size:1.4rem;margin:22px 0 8px;color:#1F4E99}.wpage h3{font-size:1.15rem;margin:16px 0 6px}
+.wpage p{margin:0 0 10px}.wpage ul,.wpage ol{margin:0 0 10px;padding-inline-start:26px}
+.wpage blockquote{margin:10px 0;padding:8px 16px;border-inline-start:4px solid #1F4E99;background:#F3F6FB;border-radius:6px}
+.wpage table{border-collapse:collapse;width:100%;margin:8px 0 14px;outline:0;background:transparent;border-radius:0}
+.wpage td,.wpage th{border:1px solid #CBD5E1;padding:6px 10px;color:#14213D}.wpage th{background:#EEF2F8;font-weight:700}
+.wpage img{max-width:100%;border-radius:6px}
+.wpage hr{border:0;border-top:2px solid #E2E8F0;margin:18px 0}
+.wpage ul.chk{list-style:none;padding-inline-start:4px}.wpage ul.chk li{position:relative;padding-inline-start:30px}
+.wpage ul.chk li::before{content:"";position:absolute;inset-inline-start:0;top:.45em;width:18px;height:18px;border:2px solid #1F4E99;border-radius:5px}
+.wpage ul.chk li.done{color:#94A3B8;text-decoration:line-through}.wpage ul.chk li.done::before{background:#1F4E99}
+.wpage .cmt{background:#FFF3B0;border-bottom:2px dotted #E0A800;cursor:help}
+.wpage .cmt.flash,.wpage .cmt:hover{background:#FFE14D}
+.wnotes{position:sticky;top:140px;display:grid;gap:8px}.wnotes h3{margin:0}
+.wnote{background:#FFFBE6;border-inline-start:4px solid #E0A800;border-radius:10px;padding:10px 12px;cursor:pointer;color:#14213D}
+.wnote q{font-size:.8rem;color:#7A5300;display:block}.wnote p{margin:4px 0 6px;font-size:.9rem;white-space:pre-wrap}
+.wcard .wthumb{height:110px;border-radius:10px;background:var(--fill);padding:16px 18px;display:grid;gap:8px;margin-bottom:12px;align-content:start}
+.wcard .wthumb i{display:block;height:7px;border-radius:4px;background:var(--line)}.wcard .wthumb i:first-child{width:60%;height:10px;background:var(--blue)}.wcard .wthumb i.m{width:45%;background:#FFE14D}
+.tpl{cursor:pointer;text-align:start;border:2px solid transparent;font:inherit;color:var(--ink)}.tpl.on{border-color:var(--blue);background:var(--blue-tint)}
+@media(max-width:900px){.wlayout{grid-template-columns:1fr}.wnotes{position:static}.wpage{padding:28px 20px}}
+@media(max-width:820px){.wbar{flex-wrap:nowrap;overflow-x:auto}.wbar>*{flex:none}}
+#main .ed.t-note .obj.note,#main .ed.t-text .obj.note,#main .ed.t-select .obj.note,#main .ed.t-pen .obj.note .note-pop,#main .ed .obj.note .note-pop:not([hidden]){pointer-events:auto}
+.pg{direction:ltr}.pg canvas.bg{direction:ltr}

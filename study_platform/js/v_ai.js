@@ -12,7 +12,7 @@
   SP.fileText = async (blob, mime = '', name = '') => {
     if (/pdf/.test(mime) || /\.pdf$/i.test(name)) {
       if (!window.pdfjsLib) throw new Error('قارئ PDF لم يُحمَّل');
-      const pdf = await window.pdfjsLib.getDocument({ data: new Uint8Array(await blob.arrayBuffer()), isEvalSupported: false }).promise;
+      const pdf = await SP.pdfOpen(new Uint8Array(await blob.arrayBuffer()));
       let out = '';
       for (let i = 1; i <= Math.min(pdf.numPages, 40) && out.length < 60000; i++) out += (await (await pdf.getPage(i)).getTextContent()).items.map((x) => x.str).join(' ') + '\n';
       pdf.destroy(); return out.slice(0, 60000);
