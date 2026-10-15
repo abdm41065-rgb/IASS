@@ -75,7 +75,7 @@
     } });
     const list = mine().sort((a, b) => b.updated - a.updated);
     const label = { pdf: 'PDF', image: 'صورة', blank: 'دفتر' };
-    const root = SP.page(h('span', {}, 'دراسة ', h('span', { class: 'sticker sm-stk', 'aria-hidden': 'true' }, '📎')), 'افتح ملفات الدروس واكتب عليها: ارسم، ظلّل، أشّر بالأسهم، أضف نصوصاً وملصقات وصوراً وفيديوهات، ثم صدّرها PDF.',
+    const root = SP.page(h('span', {}, 'ملفات للتعليق ', h('span', { class: 'sticker sm-stk', 'aria-hidden': 'true' }, '📎')), 'افتح ملفات الدروس واكتب عليها: ارسم، ظلّل، أشّر بالأسهم، أضف نصوصاً وملصقات وصوراً وفيديوهات، ثم صدّرها PDF.',
       h('div', { class: 'row' }, h('button', { class: 'btn', onclick: () => input.click() }, 'أضف ملف درس (PDF، صورة، Word)'), input,
         h('button', { class: 'btn ghost', onclick: newNotebook }, 'دفتر فارغ'), h('button', { class: 'btn ghost', onclick: fromFiles }, 'من قسم الملفات')),
       h('p', { class: 'sub', style: { marginTop: '10px' } }, 'يمكنك أيضاً سحب ملف PDF أو صورة وإفلاته هنا.'),
@@ -436,7 +436,7 @@
     return root;
   }
 
-  SP.reg('desk', '', 'دراسة', (p) => {
+  SP.reg('desk', '', 'ملفات للتعليق', (p) => {
     if (!p[0]) return listView();
     const d = docs().find((x) => x.id === p[0] && x.ownerId === SP.state.me);
     return d ? editor(d) : SP.page('الدرس غير موجود', '', h('button', { class: 'btn', onclick: () => SP.go('desk') }, 'رجوع إلى دراسة'));

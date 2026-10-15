@@ -97,7 +97,7 @@
 
     const notes = [
       { id: id('n'), ownerId: 'st', title: 'خطة أسبوع الامتحانات', body: `• غداً: كويز الكيمياء الحياتية (تحلل السكر فقط)\n• بعد 4 أيام: عملي التشريح OSPE (الطرف العلوي)\n• بعد 9 أيام: شهري الفسلجة (القلب والدم)\n\nكل يوم: 3 جلسات تركيز × 25 دقيقة + مراجعة البطاقات المستحقة.\nأبدأ بالأصعب صباحاً (التشريح)، والمراجعة الخفيفة مساءً.`, color: '#B91C1C', pinned: true, tags: ['خطة', 'امتحانات'], classId: '', stickers: ['📌', '🎯'], updated: T(-1) },
-      { id: id('n'), ownerId: 'st', title: 'ملخص: الضفيرة العضدية', body: `الجذور: C5، C6، C7، C8، T1\nالجذوع: علوي (C5–C6)، متوسط (C7)، سفلي (C8–T1)\nكل جذع ينقسم إلى أمامي وخلفي\nالحبال: جانبي، إنسي، خلفي\nالفروع النهائية: العضلي الجلدي، الإبطي، الكعبري، المتوسط، الزندي\n\nللحفظ: Randy Travis Drinks Cold Beer\n(Roots, Trunks, Divisions, Cords, Branches)`, color: '#1F4E99', pinned: false, tags: ['تشريح'], classId: '', stickers: ['🧠'], updated: T(-3) },
+      { id: 'n_plexus', ownerId: 'st', title: 'ملخص: الضفيرة العضدية', body: `الجذور: C5، C6، C7، C8، T1\nالجذوع: علوي (C5–C6)، متوسط (C7)، سفلي (C8–T1)\nكل جذع ينقسم إلى أمامي وخلفي\nالحبال: جانبي، إنسي، خلفي\nالفروع النهائية: العضلي الجلدي، الإبطي، الكعبري، المتوسط، الزندي\n\nللحفظ: Randy Travis Drinks Cold Beer\n(Roots, Trunks, Divisions, Cords, Branches)`, color: '#1F4E99', pinned: false, tags: ['تشريح'], classId: '', stickers: ['🧠'], updated: T(-3) },
       { id: id('n'), ownerId: 'st', title: 'الإنزيمات المحددة للسرعة', body: `تحلل السكر: PFK-1\nاستحداث السكر: Fructose-1,6-bisphosphatase\nدورة كربس: Isocitrate dehydrogenase\nتصنيع الغلايكوجين: Glycogen synthase\nتحلل الغلايكوجين: Glycogen phosphorylase\nتصنيع الأحماض الدهنية: Acetyl-CoA carboxylase\nأكسدة بيتا: Carnitine acyltransferase I (CPT-1)\nتصنيع الكوليسترول: HMG-CoA reductase`, color: '#2E7D32', pinned: false, tags: ['كيمياء حياتية'], classId: '', stickers: ['⭐'], updated: T(-2) },
       { id: id('n'), ownerId: 'dP', title: 'نقاط مهمة للشهري (من الدكتور)', body: 'ركّزوا على: الدورة القلبية بمراحلها، موجات ECG ومعانيها، فترة PR الطبيعية، النتاج القلبي وقانون فرانك ستارلنج.', color: '#B91C1C', pinned: true, tags: ['فسلجة'], classId: 'ph', stickers: ['❗'], updated: T(-2) },
     ];
@@ -119,13 +119,15 @@
     [['تشريح (نظري)', 'تشريح (نظري)', 'فسلجة (نظري)', 'مختبر أنسجة', 'مختبر أنسجة'], ['كيمياء حياتية', 'فسلجة (نظري)', 'صالة التشريح', 'صالة التشريح', ''], ['أنسجة (نظري)', 'كيمياء حياتية', 'مختبر فسلجة', 'مختبر فسلجة', ''], ['تشريح (نظري)', 'فسلجة (نظري)', 'مختبر كيمياء حياتية', 'مختبر كيمياء حياتية', 'مراجعة جماعية'], ['أنسجة (نظري)', 'كيمياء حياتية', 'حلقة نقاش (Seminar)', '', '']].forEach((row, d) => row.forEach((v, i) => v && put(d, i + 1, v)));
 
     const posts = [
-      { id: id('p'), classId: 'an', authorId: 'dA', kind: 'announcement', text: 'الامتحان العملي (OSPE) يشمل: عظام الطرف العلوي، عضلات الكتف والذراع، والضفيرة العضدية وإصاباتها. أحضروا المعطف الأبيض.', tags: ['امتحان'], likes: ['st', 'zn'], comments: [], pinned: true, ts: T(-2, 9) },
-      { id: id('p'), classId: 'ph', authorId: 'dP', kind: 'announcement', text: 'الشهري يشمل الدورة القلبية وتخطيط القلب والدم. راجعوا ملزمة القلب المرفوعة في قسم الملفات.', tags: ['امتحان'], likes: ['ms'], comments: [], pinned: true, ts: T(-3, 9) },
       { id: id('p'), classId: 'bc', authorId: 'zn', kind: 'question', text: 'دكتورة، هل يشمل كويز الغد دورة كربس أم تحلل السكر فقط؟', tags: ['سؤال'], likes: ['st'], comments: [{ id: id('m'), authorId: 'dB', text: 'تحلل السكر وتنظيمه فقط، ودورة كربس في الامتحان القادم.', ts: T(-1, 18) }, { id: id('m'), authorId: 'st', text: 'شكراً دكتورة 🙏', ts: T(-1, 19) }], pinned: false, ts: T(-1, 17) },
       { id: id('p'), classId: 'an', authorId: 'st', kind: 'info', text: 'طريقة حفظ فروع الضفيرة العضدية: Randy Travis Drinks Cold Beer = Roots, Trunks, Divisions, Cords, Branches 🧠', tags: ['حفظ'], likes: ['zn', 'ms', 'rq'], comments: [], pinned: false, ts: T(-3, 21) },
     ];
 
     const items = [
+      { id: 'i_ntc_an', classId: 'an', by: 'dA', type: 'notice', title: 'الامتحان العملي (OSPE) وما يشمله', ts: T(-2, 9), important: true, text: 'الامتحان العملي يشمل:\n- عظام الطرف العلوي ومعالمها\n- عضلات الكتف والذراع\n- الضفيرة العضدية وإصاباتها\nأحضروا المعطف الأبيض، والحضور قبل الموعد بـ 15 دقيقة.' },
+      { id: 'i_ntc_ph', classId: 'ph', by: 'dP', type: 'notice', title: 'محتوى الشهري', ts: T(-3, 9), important: false, text: 'الشهري يشمل الدورة القلبية وتخطيط القلب والدم. راجعوا ملزمة القلب المرفوعة في قسم الملفات.' },
+      { id: 'i_exp_an', classId: 'an', by: 'dA', type: 'explain', title: 'كيف تميّز إصابات الأعصاب في اليد', ts: T(-3, 14), images: [], fileId: '', fname: '', fmime: '', text: '**القاعدة:** كل عصب له علامة سريرية مميزة.\n- **الكعبري:** هبوط الرسغ (Wrist drop)\n- **المتوسط:** يد القرد، وضعف الإبهام (ضمور البارزة الرانفية)\n- **الزندي:** اليد المخلبية، خاصة الإصبعين الرابع والخامس\n- **الإبطي:** ضعف إبعاد الكتف وفقدان الإحساس فوق العضلة الدالية\nفي العملي سيُطلب منكم ربط العلامة بالعصب وبالجذور.' },
+      { id: 'i_exp_bc', classId: 'bc', by: 'dB', type: 'explain', title: 'ملخص تنظيم تحلل السكر', ts: T(-2, 15), images: [], fileId: '', fname: '', fmime: '', text: '**PFK-1** هو نقطة التحكم الرئيسية:\n- يُنشَّط بـ AMP والفركتوز 2,6 ثنائي الفوسفات\n- يُثبَّط بـ ATP والسترات\nالإنسولين يرفع الفركتوز 2,6 ثنائي الفوسفات فيسرّع التحلل، والغلوكاغون يخفضه.' },
       { id: id('i'), classId: 'bc', by: 'dB', type: 'exam', title: 'كويز الكيمياء الحياتية: تحلل السكر', ts: T(-5), date: D(1), time: '10:00', kind: 'قصير', place: 'القاعة 2', topics: ['تفاعلات تحلل السكر العشرة', 'الإنزيمات المنظِّمة وتنظيمها', 'حساب صافي ATP', 'مصير البيروفات هوائياً ولاهوائياً'], quizId: 'qz_bc' },
       { id: id('i'), classId: 'an', by: 'dA', type: 'exam', title: 'عملي التشريح (OSPE): الطرف العلوي', ts: T(-7), date: D(4), time: '08:30', kind: 'عملي', place: 'صالة التشريح', topics: ['عظام الطرف العلوي ومعالمها', 'عضلات الكتف والذراع: المنشأ والمدغم والتعصيب', 'الضفيرة العضدية وإصاباتها السريرية', 'الحفرة المرفقية والنفق الرسغي'], quizId: 'qz_an' },
       { id: id('i'), classId: 'ph', by: 'dP', type: 'exam', title: 'الشهري: فسلجة القلب والدم', ts: T(-6), date: D(9), time: '09:00', kind: 'شهري', place: 'القاعة الكبرى', topics: ['الدورة القلبية', 'تخطيط القلب الكهربائي', 'النتاج القلبي وتنظيمه', 'مكونات الدم وتكوين الكريات الحمر'], quizId: 'qz_ph' },
@@ -146,14 +148,31 @@
       ],
       boards: { st: [{ id: id('b'), kind: 'note', text: 'OSPE بعد 4 أيام!', color: '#F2C23066', x: 40, y: 30, rot: -4 }, { id: id('b'), kind: 'emoji', text: '🫀', x: 260, y: 60, rot: 6 }, { id: id('b'), kind: 'emoji', text: '🧠', x: 360, y: 180, rot: -8 }, { id: id('b'), kind: 'note', text: 'PFK-1 = الإنزيم المحدد', color: '#9BE58B66', x: 120, y: 220, rot: 3 }] },
       sessions, tasks, timetable: { st: tt }, goalMin: 120, posts, decks, quizzes: [qAn, qPh, qBc, qHi], results,
-      docs: [{ id: id('d'), ownerId: 'st', name: 'دفتر التشريح', kind: 'blank', fileId: '', created: T(-5), updated: T(-1), pages: [{ a: [
+      docs: [{ id: 'd_anat', ownerId: 'st', name: 'دفتر التشريح', kind: 'blank', fileId: '', created: T(-5), updated: T(-1), pages: [{ a: [
         { id: id('a'), t: 'text', x: 0.55, y: 0.06, s: 0.042, c: '#1F4E99', v: 'الضفيرة العضدية' },
         { id: id('a'), t: 'text', x: 0.28, y: 0.15, s: 0.026, c: '#111827', v: 'C5 · C6 · C7 · C8 · T1\nجذور ← جذوع ← انقسامات ← حبال ← فروع' },
         { id: id('a'), t: 'mark', c: '#FFE14D', w: 0, x1: 0.27, y1: 0.145, x2: 0.92, y2: 0.19 },
         { id: id('a'), t: 'text', x: 0.4, y: 0.3, s: 0.026, c: '#C62828', v: 'شلل إرب: C5–C6 (يد النادل)\nشلل كلومبكي: C8–T1 (يد مخلبية)' },
         { id: id('a'), t: 'arrow', c: '#C62828', w: 0.004, x1: 0.3, y1: 0.42, x2: 0.42, y2: 0.34 },
         { id: id('a'), t: 'stk', x: 0.08, y: 0.05, s: 0.07, e: '🧠' }] }, { a: [] }] }],
-      classItems: items, inbox: [{ id: id('x'), from: 'zn', to: 'st', fileId: 'sim_glyco_zn', name: 'أسئلة سنوات سابقة - أيض.txt', mime: 'text/plain', note: 'هاي أسئلة السنة الماضية، تفيدك لكويز باچر', ts: T(0, 8), read: false }],
+      classItems: items, inbox: [{ id: id('x'), type: 'col', from: 'zn', to: 'st', name: '🗂️ خطة كويز الأيض', note: 'رتبتها لكويز باچر، شوفها', ts: T(0, 7), read: false, col: { name: 'خطة كويز الأيض (زينب)', emoji: '🧪', items: [
+        { id: 'zc1', kind: 'heading', text: 'اقرأ أولاً' }, { id: 'zc2', kind: 'item', ref: 'i_exp_bc', title: 'ملخص تنظيم تحلل السكر', note: 'هاي أهم شي بالكويز', tag: '#C62828' },
+        { id: 'zc3', kind: 'heading', text: 'بعدين' }, { id: 'zc4', kind: 'note', text: 'احفظ: صافي ATP = 2، وNADH = 2، والإنزيم المحدد PFK-1' }, { id: 'zc5', kind: 'note', text: 'حل فويز الكيمياء الحياتية قبل النوم' }] } },
+        { id: id('x'), from: 'zn', to: 'st', fileId: 'sim_glyco_zn', name: 'أسئلة سنوات سابقة - أيض.txt', mime: 'text/plain', note: 'هاي أسئلة السنة الماضية، تفيدك لكويز باچر', ts: T(0, 8), read: false }],
+      noticesMigrated: true,
+      cols: [
+        { id: 'col_tray', ownerId: 'st', name: 'محفوظات من الصفوف', emoji: '📥', color: '#1F4E99', tray: true, created: T(-3), updated: T(-1), items: [{ id: id('ci'), kind: 'item', ref: 'i_exp_bc', title: 'ملخص تنظيم تحلل السكر', note: '', tag: '', done: false }] },
+        { id: 'col_ospe', ownerId: 'st', name: 'مراجعة OSPE التشريح', emoji: '🦴', color: '#1F4E99', created: T(-3), updated: T(-1), items: [
+          { id: id('ci'), kind: 'heading', text: '1) اقرأ ما أرسلته الدكتورة' },
+          { id: id('ci'), kind: 'item', ref: 'i_ntc_an', title: 'الامتحان العملي (OSPE) وما يشمله', note: 'الحضور قبل 15 دقيقة!', tag: '#C62828', done: true },
+          { id: id('ci'), kind: 'item', ref: 'i_exp_an', title: 'كيف تميّز إصابات الأعصاب في اليد', note: 'أهم شي: ربط العلامة بالجذور', tag: '#E07B00', done: false },
+          { id: id('ci'), kind: 'heading', text: '2) ملاحظاتي وملفاتي' },
+          { id: id('ci'), kind: 'snote', ref: 'n_plexus', title: 'ملخص: الضفيرة العضدية', note: '', tag: '', done: false },
+          { id: id('ci'), kind: 'doc', ref: 'd_anat', title: 'دفتر التشريح', note: 'أكمل رسم الفروع النهائية', tag: '', done: false },
+          { id: id('ci'), kind: 'heading', text: '3) تدريب' },
+          { id: id('ci'), kind: 'note', text: 'حل فويز «تشريح: الضفيرة العضدية» مرتين على الأقل، والهدف 5/5', done: false },
+        ] },
+      ],
       mascot: { st: { kind: 'owl', color: '', acc: 'cap', name: 'سند' } }, chat: {}, watch: {}, vnotes: { st: {} },
     };
   };

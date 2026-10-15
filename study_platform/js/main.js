@@ -3,12 +3,12 @@
   const SP = window.SP, h = SP.h;
   const HUBS = [
     ['home', 'الرئيسية', ['home', 'calendar', 'tasks', 'progress']],
-    ['desk', 'دراسة', ['desk', 'writer', 'quizzes', 'cards', 'study']],
+    ['space', 'دراسة', ['space', 'desk', 'writer', 'quizzes', 'cards', 'study']],
     ['notes', 'مكتبتي', ['notes', 'files', 'handouts', 'stickers']],
     ['classes', 'الصفوف', ['classes', 'lectures', 'share', 'teachers', 'students']],
     ['settings', 'الإعدادات', ['settings']],
   ];
-  const ICON_FOR = { home: 'home', desk: 'desk', notes: 'files', classes: 'classes', settings: 'settings' };
+  const ICON_FOR = { home: 'home', space: 'desk', desk: 'desk', notes: 'files', classes: 'classes', settings: 'settings' };
   SP.applyTheme = () => { const r = document.documentElement; if (SP.state.dark == null) r.removeAttribute('data-theme'); else r.setAttribute('data-theme', SP.state.dark ? 'dark' : 'light'); document.documentElement.style.setProperty('--fs', (SP.state.fontSize || 16) + 'px'); };
   SP.isDark = () => (SP.state.dark == null ? matchMedia('(prefers-color-scheme: dark)').matches : SP.state.dark);
   SP.setTheme = (d) => { SP.state.dark = d; SP.save(); SP.applyTheme(); };

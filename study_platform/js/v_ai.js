@@ -148,6 +148,9 @@
   bell && bell.addEventListener('click', () => {
     const mine = inbox().filter((m) => m.to === SP.state.me).sort((a, b) => b.ts - a.ts);
     SP.modal({ title: 'الوارد', body: mine.length ? h('div', {}, mine.map((m) => { const f = S().files.find((x) => x.id === m.fileId), u = SP.user(m.from);
+      if (m.type === 'col') return h('div', { class: 'card', style: { marginBottom: '8px', outline: m.read ? '' : '2px solid var(--blue)' } }, h('div', { class: 'row sp' }, h('span', { class: 'row' }, SP.avatar(u), h('div', {}, h('b', {}, u.name), h('div', { class: 'sub', style: { margin: 0 } }, SP.date(m.ts)))), m.read ? null : h('span', { class: 'chip on' }, 'جديد')),
+        h('p', { style: { margin: '8px 0' } }, `أرسل لك ترتيبه: ${m.col.emoji || '🗂️'} «${m.col.name}» (${m.col.items.length} عنصر)`), m.note ? h('p', { class: 'sub', style: { margin: '0 0 8px' } }, '«' + m.note + '»') : null,
+        m.imported ? h('small', { class: 'sub' }, 'أُضيف إلى دراستك ✓') : h('button', { class: 'btn sm', onclick: () => { document.querySelector('.ov').remove(); SP.importCol(m); } }, 'أضف إلى دراستي'));
       return h('div', { class: 'card', style: { marginBottom: '8px', outline: m.read ? '' : '2px solid var(--blue)' } }, h('div', { class: 'row sp' }, h('span', { class: 'row' }, SP.avatar(u), h('div', {}, h('b', {}, u.name), h('div', { class: 'sub', style: { margin: 0 } }, SP.date(m.ts)))), m.read ? null : h('span', { class: 'chip on' }, 'جديد')),
         h('p', { style: { margin: '8px 0' } }, '📎 ' + m.name), m.note ? h('p', { class: 'sub', style: { margin: '0 0 8px' } }, '«' + m.note + '»') : null,
         f ? h('div', { class: 'row' }, h('button', { class: 'btn sm', onclick: () => { document.querySelector('.ov').remove(); SP.go('files'); } }, 'اذهب للملفات'), /pdf|image/.test(m.mime || '') ? h('button', { class: 'btn ghost sm', onclick: () => { document.querySelector('.ov').remove(); SP.openInDesk(f); } }, 'افتح في دراسة') : null) : h('small', { class: 'sub' }, 'حُذف الملف'));
@@ -303,7 +306,7 @@
     const uid = SP.state.me, t = SP.today(), due = S().decks.filter((d) => d.ownerId === uid).flatMap((d) => d.cards).filter((c) => (c.due || t) <= t).length;
     const tasks = S().tasks.filter((x) => x.userId === uid && !x.done && x.due && x.due <= t).length, min = SP.studyMin(uid, t), goal = S().goalMin || 60;
     const ex = SP.upcomingExams ? SP.upcomingExams()[0] : null, exSoon = ex && new Date(`${ex.date}T${ex.time || '08:00'}`) - Date.now() < 3 * 864e5;
-    const tips = [exSoon && `امتحان «${ex.title}» قريب: ${SP.countdown(new Date(`${ex.date}T${ex.time || '08:00'}`))} 📝`, exSoon && 'ذاكر الآن ولو 25 دقيقة، سأكون معك ⏱️', due && `عندك ${due} بطاقة للمراجعة اليوم 🃏`, tasks && `${tasks} مهمة موعدها اليوم ✅`, min < goal && `باقي ${goal - min} دقيقة على هدفك اليوم ⏱️`, min >= goal && 'حققت هدف اليوم! 🌟', 'جرّب: افتح درساً في «دراسة» وظلّل المهم 🖍️', 'اسألني أي سؤال عن دروسك 💬', 'استراحة قصيرة تساعد على التركيز ☕', 'أستطيع كتابة أسئلة من أي ملف 📄❓', 'تقدر تغيّر شكلي من زر 💬 ثم «شكلي» 🎨'].filter(Boolean);
+    const tips = [exSoon && `امتحان «${ex.title}» قريب: ${SP.countdown(new Date(`${ex.date}T${ex.time || '08:00'}`))} 📝`, exSoon && 'ذاكر الآن ولو 25 دقيقة، سأكون معك ⏱️', due && `عندك ${due} بطاقة للمراجعة اليوم 🃏`, tasks && `${tasks} مهمة موعدها اليوم ✅`, min < goal && `باقي ${goal - min} دقيقة على هدفك اليوم ⏱️`, min >= goal && 'حققت هدف اليوم! 🌟', 'احفظ منشورات الأساتذة في «دراسة» ورتّبها بمجموعاتك 🗂️', 'اسألني أي سؤال عن دروسك 💬', 'استراحة قصيرة تساعد على التركيز ☕', 'أستطيع كتابة أسئلة من أي ملف 📄❓', 'تقدر تغيّر شكلي من زر 💬 ثم «شكلي» 🎨'].filter(Boolean);
     say(tips[Math.floor(Math.random() * tips.length)], 5500); anim(Math.random() < 0.5 ? 'wave' : 'nod');
   };
   setInterval(tip, 75000);

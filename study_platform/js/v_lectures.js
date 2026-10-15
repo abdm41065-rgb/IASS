@@ -2,7 +2,7 @@
 (function () {
   const SP = window.SP, h = SP.h, S = () => SP.state;
   const items = () => (S().classItems = S().classItems || []);
-  const TYPES = { lecture: ['محاضرة فيديو', '🎬'], gallery: ['ألبوم صور', '🖼️'], exam: ['موعد امتحان', '📝'], homework: ['واجب', '📚'] };
+  const TYPES = { notice: ['تبليغ', '📢'], explain: ['شرح ومعلومة', '💡'], gallery: ['صور', '🖼️'], lecture: ['محاضرة فيديو', '🎬'], exam: ['موعد امتحان', '📝'], homework: ['واجب', '📚'] };
   const EXAM_KINDS = ['قصير', 'شهري', 'نصف السنة', 'نهائي', 'عملي'];
   const fmt = (s) => { s = Math.max(0, Math.floor(s)); const m = Math.floor(s / 60); return String(m).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0'); };
   const parseT = (s) => { const p = String(s).trim().split(':').map(Number); return p.some(isNaN) ? null : p.reduce((a, b) => a * 60 + b, 0); };
@@ -14,6 +14,12 @@
   const watch = (id) => { const w = ((S().watch = S().watch || {})[SP.state.me] = S().watch[SP.state.me] || {}); return (w[id] = w[id] || { pos: 0, dur: 0, max: 0, done: false }); };
   const vnotes = (id) => { const n = ((S().vnotes = S().vnotes || {})[SP.state.me] = S().vnotes[SP.state.me] || {}); return (n[id] = n[id] || []); };
 
+  SP.migrateNotices = () => {
+    const s = S(); if (s.noticesMigrated) return; s.noticesMigrated = true;
+    (s.posts || []).filter((p) => p.kind === 'announcement' && p.classId).forEach((p) => items().push({ id: 'n_' + p.id, classId: p.classId, by: p.authorId, type: 'notice', title: p.text.split(/[.!؟\n]/)[0].slice(0, 70) || 'تبليغ', text: p.text, important: !!p.pinned, ts: p.ts }));
+    s.posts = (s.posts || []).filter((p) => !(p.kind === 'announcement' && p.classId)); SP.save();
+  };
+  SP.importantNotices = () => items().filter((i) => i.type === 'notice' && i.important && visible(i)).sort((a, b) => b.ts - a.ts);
   SP.countdown = (d) => {
     const ms = d - Date.now(); if (ms <= 0) return 'حان الموعد';
     const D = Math.floor(ms / 864e5), H = Math.floor((ms % 864e5) / 36e5), M = Math.floor((ms % 36e5) / 6e4);
@@ -47,7 +53,20 @@
     const cls = h('select', { class: 'inp', id: 'ci-class' }, myCls.map((c) => h('option', { value: c.id, selected: c.id === classId }, c.name)));
     const title = h('input', { class: 'inp', id: 'ci-title', style: { width: '100%' } }), desc = h('textarea', { class: 'inp', id: 'ci-desc', placeholder: 'وصف أو تعليمات' });
     const fields = [SP.field('الصف', cls), SP.field('العنوان', title)]; let read;
-    if (type === 'lecture') {
+    if (type === 'notice') {
+      const text = h('textarea', { class: 'inp', id: 'ci-text', placeholder: 'نص التبليغ للطلاب', style: { minHeight: '120px' } }), imp = h('input', { type: 'checkbox', id: 'ci-important' });
+      fields.push(SP.field('التبليغ', text), h('label', { class: 'row', style: { marginTop: '10px' } }, imp, ' تبليغ مهم (يُثبَّت أعلى الصف ويظهر في رئيسية الطالب)'));
+      read = async () => { if (!text.value.trim()) throw new Error('اكتب نص التبليغ'); return { text: text.value.trim(), important: imp.checked }; };
+    } else if (type === 'explain') {
+      const text = h('textarea', { class: 'inp', id: 'ci-text', placeholder: 'اكتب الشرح أو المعلومة. استخدم **نص** للتعريض و- في بداية السطر للنقاط.', style: { minHeight: '180px' } }), imgs = h('input', { type: 'file', id: 'ci-images', accept: 'image/*', multiple: true }), file = h('input', { type: 'file', id: 'ci-attach' });
+      fields.push(SP.field('الشرح', text), SP.field('صور توضيحية (اختياري)', imgs), SP.field('ملف مرفق (اختياري)', file));
+      read = async () => {
+        if (!text.value.trim()) throw new Error('اكتب الشرح');
+        const images = []; for (const f of imgs.files) { if (!f.type.startsWith('image/')) continue; const k = SP.uid(); await SP.idb.put(k, f); images.push({ fileId: k, caption: f.name.replace(/\.[^.]+$/, ''), mime: f.type }); }
+        let fileId = '', fname = '', fmime = ''; const f = file.files[0]; if (f) { fileId = SP.uid(); fname = f.name; fmime = f.type; await SP.idb.put(fileId, f); }
+        return { text: text.value.trim(), images, fileId, fname, fmime };
+      };
+    } else if (type === 'lecture') {
       const file = h('input', { type: 'file', id: 'ci-video', accept: 'video/*' }), link = h('input', { class: 'inp', id: 'ci-link', placeholder: 'https://… (اختياري بدل رفع فيديو)', style: { width: '100%' } });
       const ch = h('textarea', { class: 'inp', id: 'ci-chapters', placeholder: 'الفصول، سطر لكل فصل:\n00:00 مقدمة\n05:30 الفكرة الأساسية\n12:10 أمثلة محلولة' });
       fields.push(SP.field('ملف الفيديو', file), SP.field('أو رابط المحاضرة', link), SP.field('فصول المحاضرة', ch), SP.field('الوصف', desc));
@@ -147,13 +166,19 @@
         : it.url ? h('a', { class: 'btn sm', href: it.url, target: '_blank', rel: 'noopener noreferrer' }, 'افتح المحاضرة ↗')
         : h('div', {}, h('span', { class: 'chip' }, 'محاضرة حضورية'), it.chapters && it.chapters.length ? h('ol', { class: 'topics' }, it.chapters.map((c) => h('li', {}, c.label))) : null));
   }
+  const rich = (t) => { const out = h('div', { class: 'rich' }); let ul = null;
+    String(t || '').split('\n').forEach((line) => { const m = line.match(/^\s*[-•]\s+(.*)/); const parts = (m ? m[1] : line).split(/\*\*(.+?)\*\*/g).map((x, i) => (i % 2 ? h('b', {}, x) : x));
+      if (m) { if (!ul) { ul = h('ul', {}); out.append(ul); } ul.append(h('li', {}, parts)); } else { ul = null; if (line.trim()) out.append(h('p', {}, parts)); } });
+    return out; };
   function card(it, showClass) {
     const [label, ic] = TYPES[it.type], teacher = isTeacherOf(it.classId);
-    const body = it.type === 'lecture' ? lectureBody(it) : it.type === 'gallery' ? h('div', {}, it.desc ? h('p', {}, it.desc) : null, gallery(it)) : it.type === 'exam' ? examBody(it) : homeworkBody(it);
-    return h('article', { class: 'card ci ci-' + it.type + (it.type === 'exam' ? ' ' + urgency(it) : '') },
+    const body = it.type === 'notice' ? rich(it.text)
+      : it.type === 'explain' ? h('div', {}, rich(it.text), it.images && it.images.length ? gallery(it) : null, it.fileId ? h('button', { class: 'btn ghost sm', style: { marginTop: '8px' }, onclick: async () => { const b = await SP.idb.get(it.fileId); b ? SP.download(it.fname || 'مرفق', b) : SP.toast('الملف غير موجود', 'err'); } }, '📎 ' + (it.fname || 'المرفق')) : null)
+      : it.type === 'lecture' ? lectureBody(it) : it.type === 'gallery' ? h('div', {}, it.desc ? h('p', {}, it.desc) : null, gallery(it)) : it.type === 'exam' ? examBody(it) : homeworkBody(it);
+    return h('article', { class: 'card ci ci-' + it.type + (it.type === 'exam' ? ' ' + urgency(it) : '') + (it.important ? ' important' : '') },
       h('div', { class: 'row sp' }, h('span', { class: 'row' }, h('span', { class: 'ci-ic', 'aria-hidden': 'true' }, ic), h('span', { class: 'chip' }, label), showClass ? h('span', { class: 'chip' }, SP.className(it.classId)) : null),
-        h('span', { class: 'row' }, h('small', { class: 'sub', style: { margin: 0 } }, SP.date(it.ts)), teacher ? h('button', { class: 'btn ghost sm', onclick: async () => { if (await SP.confirm('حذف «' + it.title + '»؟')) { S().classItems = items().filter((x) => x.id !== it.id); SP.save(); SP.refresh(); } } }, 'حذف') : null)),
-      h('h3', { style: { margin: '10px 0 8px' } }, it.title), body);
+        h('span', { class: 'row' }, h('small', { class: 'sub', style: { margin: 0 } }, SP.date(it.ts)), teacher ? h('span', { class: 'chip', title: 'عدد الطلاب الذين حفظوه في دراستهم' }, '📥 ' + (SP.savedBy ? SP.savedBy(it.id) : 0)) : null, !teacher && SP.saveToStudy ? h('button', { class: 'btn sm ' + (SP.isSaved(it.id) ? 'ghost' : ''), onclick: () => { SP.saveToStudy(it); SP.refresh(); } }, SP.isSaved(it.id) ? 'محفوظ ✓' : 'احفظ في دراستي') : null, teacher ? h('button', { class: 'btn ghost sm', onclick: async () => { if (await SP.confirm('حذف «' + it.title + '»؟')) { S().classItems = items().filter((x) => x.id !== it.id); SP.save(); SP.refresh(); } } }, 'حذف') : null)),
+      it.important ? h('div', { class: 'imp-flag' }, '📌 تبليغ مهم') : null, h('h3', { style: { margin: '10px 0 8px' } }, it.title), body);
   }
 
   /* ---------- لوحة المحاضرات (داخل الصف وعلى مستوى كل الصفوف) ---------- */
@@ -161,8 +186,8 @@
     let type = ''; const root = h('div', {}), list = h('div', { class: 'ci-list' });
     const canPost = classId ? isTeacherOf(classId) : SP.myClasses().some((c) => c.teacherId === SP.state.me);
     const draw = () => {
-      const all = items().filter((i) => visible(i) && (!classId || i.classId === classId) && (!type || i.type === type)).sort((a, b) => (a.type === 'exam' && b.type === 'exam' ? examAt(a) - examAt(b) : b.ts - a.ts));
-      list.replaceChildren(...(all.length ? all.map((i) => card(i, !classId)) : [h('div', { class: 'empty' }, h('div', { class: 'sticker', style: { fontSize: '2.4rem', marginBottom: '8px' } }, '🎓'), canPost ? 'لم تنشر شيئاً بعد. أرسل محاضرة أو صوراً أو موعد امتحان.' : 'لم يرسل المعلم شيئاً بعد.')]));
+      const all = items().filter((i) => visible(i) && (!classId || i.classId === classId) && (!type || i.type === type)).sort((a, b) => (!!b.important - !!a.important) || (a.type === 'exam' && b.type === 'exam' ? examAt(a) - examAt(b) : b.ts - a.ts));
+      list.replaceChildren(...(all.length ? all.map((i) => card(i, !classId)) : [h('div', { class: 'empty' }, h('div', { class: 'sticker', style: { fontSize: '2.4rem', marginBottom: '8px' } }, '🎓'), canPost ? 'لم تنشر شيئاً بعد. أرسل تبليغاً أو شرحاً أو صوراً أو موعد امتحان.' : 'لم يرسل الأستاذ شيئاً بعد.')]));
       chips.replaceChildren(h('button', { class: 'chip' + (!type ? ' on' : ''), onclick: () => { type = ''; draw(); } }, 'الكل'), ...Object.entries(TYPES).map(([k, [l, ic]]) => h('button', { class: 'chip' + (type === k ? ' on' : ''), onclick: () => { type = k; draw(); } }, ic + ' ' + l)));
     };
     const chips = h('div', { class: 'row', style: { gap: '4px' } });
@@ -201,9 +226,9 @@
         h('aside', {}, it.chapters && it.chapters.length ? [h('h2', { style: { marginTop: 0 } }, 'الفصول'), chapList] : null,
           watchers ? [h('h2', {}, 'من شاهد'), h('table', {}, h('tbody', {}, watchers.map(([n, p]) => h('tr', {}, h('td', {}, n), h('td', {}, h('div', { class: 'bar', style: { width: '90px' } }, h('i', { style: { width: p + '%' } }))), h('td', {}, p + '%')))))] : null)));
   }
-  SP.reg('lectures', '', 'المحاضرات', (p) => {
+  SP.reg('lectures', '', 'منشورات الأساتذة', (p) => {
     if (p[0]) { const it = items().find((x) => x.id === p[0] && x.type === 'lecture' && visible(x)); return it ? lecturePage(it) : SP.page('المحاضرة غير موجودة', '', h('button', { class: 'btn', onclick: () => SP.go('lectures') }, 'رجوع')); }
-    return SP.page('المحاضرات', SP.isTeacher() ? 'أرسل لطلابك محاضرات فيديو وصوراً ومواعيد امتحانات وواجبات.' : 'كل ما أرسله معلموك في كل صفوفك.', SP.examBanner(), SP.classItemsPanel(''));
+    return SP.page('منشورات الأساتذة', SP.isTeacher() ? 'أرسل لطلابك تبليغات وشرحاً وصوراً ومحاضرات ومواعيد امتحانات وواجبات.' : 'كل ما أرسله أساتذتك في كل صفوفك. احفظ ما يهمك في «دراسة».', SP.examBanner(), SP.classItemsPanel(''));
   });
 
   /* ---------- التقويم ---------- */

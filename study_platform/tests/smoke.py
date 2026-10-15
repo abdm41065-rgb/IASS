@@ -66,8 +66,8 @@ with sync_playwright() as p:
     # ملصقات + مشاركة + بطاقات + بحث
     pg.evaluate("location.hash='#/stickers'"); pg.click("#main button.emo >> nth=0"); pg.click("text=＋ >> nth=0")
     check(pg.evaluate("SP.state.boards.s1.length") == 2, "stickers added")
-    pg.evaluate("location.hash='#/share'"); pg.fill("#main textarea", "معلومة: π ≈ 3.14"); pg.click("#main >> text=نشر")
-    check(pg.evaluate("SP.state.posts.length") == 2, "post shared")
+    pg.evaluate("location.hash='#/share'"); n_posts = pg.evaluate("SP.state.posts.length"); pg.fill("#main textarea", "معلومة: π ≈ 3.14"); pg.click("#main >> text=نشر")
+    check(pg.evaluate("SP.state.posts.length") == n_posts + 1, "post shared")
     pg.evaluate("location.hash='#/cards/" + pg.evaluate("SP.state.decks[0].id") + "/study'"); pg.click(".flash"); pg.click("text=عرفتها")
     check(pg.evaluate("SP.state.decks[0].cards.filter(c=>c.box===2).length") == 1, "flashcard leitner box advanced")
     pg.fill("#gsearch", "الجبر"); pg.press("#gsearch", "Enter"); pg.wait_for_timeout(100)
@@ -208,7 +208,7 @@ with sync_playwright() as p:
     # ألبوم صور
     imgs = [Path(tempfile.mkdtemp()) / f"board{i}.png" for i in range(2)]
     for x in imgs: x.write_bytes(_png(60, 40))
-    pg.click(".ci-compose >> text=ألبوم صور"); pg.fill("#ci-title", "صور السبورة"); pg.set_input_files("#ci-images", [str(x) for x in imgs]); pg.click(".md >> text=نشر للطلاب"); pg.wait_for_timeout(400)
+    pg.click(".ci-compose >> text=صور"); pg.fill("#ci-title", "صور السبورة"); pg.set_input_files("#ci-images", [str(x) for x in imgs]); pg.click(".md >> text=نشر للطلاب"); pg.wait_for_timeout(400)
     check(pg.locator(".ci-gallery .g-thumb").count() == 2, "gallery posted with 2 images")
     pg.locator(".ci-gallery .g-thumb").first.click(); pg.click(".md >> text=التالية")
     check("2 / 2" in pg.inner_text(".md"), "lightbox navigates images"); pg.click(".md button:text-is('إغلاق')")
@@ -237,7 +237,7 @@ with sync_playwright() as p:
     pg.evaluate("location.hash='#/calendar'"); pg.wait_for_timeout(100)
     check("امتحان: امتحان الكسور الشهري" in pg.inner_text(".cal") or pg.locator(".cal-ev.exam").count() >= 1, "calendar shows exams")
     pg.click("#nav a >> text=الصفوف"); pg.wait_for_timeout(60)
-    check(pg.locator(".subnav a", has_text="المحاضرات").count() == 1, "lectures sub-tab in classes hub")
+    check(pg.locator(".subnav a", has_text="منشورات الأساتذة").count() == 1, "lectures sub-tab in classes hub")
 
     # عزل: مريم لا ترى ملاحظات/ملفات علي الشخصية
     pg.select_option("#who", "s2"); pg.evaluate("location.hash='#/notes'")
@@ -255,6 +255,41 @@ with sync_playwright() as p:
     pg.set_viewport_size({"width": 1280, "height": 900}); pg.evaluate("location.hash='#/home'"); pg.screenshot(path=str(ROOT / "tests" / "home.png"))
 
 
+
+
+    # ---------- الأستاذ ينشر · الطالب يحفظ ويرتّب ويرسل ----------
+    pg.select_option("#who", "t1"); pg.evaluate("location.hash='#/classes/c1/lec'"); pg.wait_for_timeout(100)
+    pg.click(".ci-compose >> text=تبليغ"); pg.fill("#ci-title", "تغيير موعد المحاضرة"); pg.fill("#ci-text", "محاضرة الأحد صارت الساعة 10 بدل 9."); pg.check("#ci-important"); pg.click(".md >> text=نشر للطلاب"); pg.wait_for_timeout(150)
+    check(pg.locator(".ci-notice.important", has_text="تغيير موعد المحاضرة").count() == 1 and pg.locator(".ci").first.locator(".imp-flag").count() == 1, "teacher posts an important notice (pinned)")
+    pg.click(".ci-compose >> text=شرح ومعلومة"); pg.fill("#ci-title", "قاعدة ضرب الكسور"); pg.fill("#ci-text", "**القاعدة:** البسط × البسط والمقام × المقام\n- مثال: 1/2 × 2/3 = 2/6"); pg.click(".md >> text=نشر للطلاب"); pg.wait_for_timeout(150)
+    check(pg.locator(".ci-explain .rich b").count() == 1 and pg.locator(".ci-explain .rich li").count() == 1, "teacher explanation rendered with bold and bullets")
+    pg.select_option("#who", "s1"); pg.evaluate("location.hash='#/home'"); pg.wait_for_timeout(100)
+    check("تغيير موعد المحاضرة" in pg.inner_text("#main"), "important notice reaches student home")
+    pg.evaluate("location.hash='#/classes/c1/lec'"); pg.wait_for_timeout(100)
+    pg.locator(".ci-explain >> text=احفظ في دراستي").click(); pg.locator(".ci-notice", has_text="تغيير موعد المحاضرة").locator("text=احفظ في دراستي").click(); pg.wait_for_timeout(100)
+    check(pg.locator(".ci-explain >> text=محفوظ ✓").count() == 1, "student saves teacher posts to study")
+    pg.evaluate("location.hash='#/space'"); pg.wait_for_timeout(100)
+    check(pg.locator(".colcard.tray").count() == 1 and "قاعدة ضرب الكسور" in pg.inner_text(".colcard.tray"), "saved items land in the study tray")
+    pg.click("#main >> text=مجموعة جديدة"); pg.fill("#col-name", "مراجعة الكسور"); pg.click(".md button:text-is('إنشاء')"); pg.wait_for_timeout(150)
+    pg.click(".col-tools >> text=عنوان قسم"); pg.keyboard.type("أولاً: القواعد")
+    pg.click(".col-tools >> text=أضف من الصفوف والملفات"); pg.locator(".pick-item", has_text="قاعدة ضرب الكسور").locator("input").check(); pg.locator(".pick-item", has_text="تغيير موعد المحاضرة").locator("input").check(); pg.click(".md button:text-is('أضف')")
+    pg.click(".col-tools >> text=ملاحظة"); pg.keyboard.type("أحل 10 تمارين")
+    check(pg.locator(".col-item").count() == 4, "collection has heading, two items and a note")
+    pg.locator(".col-item").nth(1).locator(".col-mynote").fill("أهم قاعدة للامتحان")
+    order = lambda: pg.evaluate("SP.state.cols.find(c=>c.name==='مراجعة الكسور').items.map(i=>i.kind+':'+(i.title||i.text||''))")
+    before = order(); pg.locator(".col-item").nth(2).locator("button[aria-label='أعلى']").click(); after = order()
+    check(after[1] == before[2] and after[2] == before[1], "reorder with arrow buttons")
+    pg.locator(".col-item").nth(3).drag_to(pg.locator(".col-item").nth(0)); pg.wait_for_timeout(150)
+    check(order()[0].startswith("note:"), "reorder by drag and drop")
+    c = pg.evaluate("SP.state.cols.find(c=>c.name==='مراجعة الكسور')")
+    check(any(i.get("note") == "أهم قاعدة للامتحان" for i in c["items"]), "personal note saved on item")
+    pg.click(".col-tools >> text=أرسل الترتيب لزملائي"); pg.locator(".md label", has_text="مريم").locator("input").check(); pg.fill("#share-note", "رتبتها لك"); pg.click(".md button:text-is('إرسال')"); pg.wait_for_timeout(150)
+    pg.select_option("#who", "s2"); pg.wait_for_timeout(150); pg.click("#inbox"); pg.click(".md >> text=أضف إلى دراستي"); pg.wait_for_timeout(400)
+    got = pg.evaluate("SP.state.cols.find(c=>c.ownerId==='s2'&&c.from==='s1')")
+    check(bool(got) and len(got["items"]) == 4 and pg.locator(".col-item").count() == 4, "classmate imports the shared arrangement")
+    check("سند" not in pg.inner_text(".col-list") and "⚠️" not in pg.inner_text(".col-list"), "shared items resolve for the classmate")
+    pg.select_option("#who", "t1"); pg.evaluate("location.hash='#/classes/c1/lec'"); pg.wait_for_timeout(100)
+    check("📥 2" in pg.inner_text(".ci-explain"), "teacher sees how many students saved the post")
 
     # ---------- المستندات ----------
     pg.evaluate("location.hash='#/writer'"); pg.wait_for_timeout(100)
@@ -290,14 +325,18 @@ with sync_playwright() as p:
     p3.click(".sim-offer >> text=ابدأ المحاكاة"); p3.click(".md button:text-is('تأكيد')"); p3.wait_for_timeout(800)
     check(p3.evaluate("SP.me().name") == "حسن" and p3.evaluate("SP.state.classes.length") == 4, "med sim loaded: حسن with 4 subjects")
     check("كويز الكيمياء الحياتية" in p3.inner_text(".exam-strip") and p3.locator(".exam-card.hot").count() >= 1, "tomorrow's biochem quiz is urgent on home")
-    check(p3.inner_text("#inbox .badge") == "1", "classmate's file waiting in inbox")
+    check(p3.inner_text("#inbox .badge") == "2", "classmate's file and arrangement waiting in inbox")
     ok_answers = p3.evaluate("SP.state.quizzes.every(q=>q.questions.every(x=>x.type==='short'?String(x.answer).length>0:x.answer>=0&&x.answer<x.options.length))")
     check(ok_answers, "all sim quiz answers valid")
     bad = []
-    for r in ["home", "calendar", "tasks", "progress", "desk", "writer", "quizzes", "cards", "study", "notes", "files", "handouts", "stickers", "classes", "lectures", "share", "teachers", "students", "settings", "classes/an/lec", "classes/ph/lec", "classes/bc/over", "classes/hi/prog"]:
+    for r in ["home", "calendar", "tasks", "progress", "space", "desk", "writer", "quizzes", "cards", "study", "notes", "files", "handouts", "stickers", "classes", "lectures", "share", "teachers", "students", "settings", "classes/an/lec", "classes/ph/lec", "classes/bc/over", "classes/hi/prog"]:
         p3.evaluate(f"location.hash='#/{r}'"); p3.wait_for_timeout(120); t = p3.inner_text("#main")
         if "null" in t or "undefined" in t or "NaN" in t: bad.append(r)
     check(not bad, "sim renders cleanly on every page " + str(bad))
+    p3.evaluate("location.hash='#/space'"); p3.wait_for_timeout(150)
+    check(p3.locator(".share-in").count() == 1 and "خطة كويز الأيض" in p3.inner_text(".share-in"), "sim: arrangement from زينب waiting in study")
+    p3.locator(".colcard", has_text="مراجعة OSPE").click(); p3.wait_for_timeout(150)
+    check(p3.locator(".col-item").count() == 8 and "⚠️" not in p3.inner_text(".col-list"), "sim: OSPE review collection resolves all items")
     p3.evaluate("location.hash='#/classes/an/lec'"); p3.wait_for_timeout(150)
     check("عملي التشريح" in p3.inner_text(".exam-banner") and "محاضرة حضورية" in p3.inner_text("#main"), "anatomy: OSPE banner + in-person lecture outline")
     p3.evaluate("location.hash='#/classes/hi/lec'"); p3.wait_for_timeout(150)

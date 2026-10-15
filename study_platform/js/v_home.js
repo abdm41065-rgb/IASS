@@ -11,7 +11,8 @@
     const todayMin = SP.studyMin(uid, t), goal = s.goalMin || 60;
     const stat = (n, l, go) => h('div', { class: 'card stat click', onclick: () => go && SP.go(go) }, h('b', {}, n), h('span', {}, l));
     const tasks = s.tasks.filter((x) => x.userId === uid && !x.done).sort((a, b) => (a.due || '9').localeCompare(b.due || '9')).slice(0, 5);
-    const anns = s.posts.filter((p) => p.kind === 'announcement' && SP.canSeeClass(p.classId)).sort((a, b) => b.ts - a.ts).slice(0, 3);
+    SP.migrateNotices && SP.migrateNotices();
+    const anns = (s.classItems || []).filter((i) => i.type === 'notice' && SP.canSeeClass(i.classId)).sort((a, b) => (!!b.important - !!a.important) || b.ts - a.ts).slice(0, 3);
     const act = (ic, l, go) => h('button', { class: 'btn ghost', onclick: () => SP.go(go) }, l);
     const hr = new Date().getHours(), greet = hr < 12 ? 'صباح الخير' : hr < 18 ? 'نهارك سعيد' : 'مساء الخير';
     const last = (s.docs || []).filter((d) => d.ownerId === uid).sort((a, b) => b.updated - a.updated)[0];
@@ -34,7 +35,7 @@
       h('h2', {}, 'إجراءات سريعة'),
       h('div', { class: 'row' }, act('', 'افتح درساً', 'desk'), act('', 'ملاحظة جديدة', 'notes'), act('', 'رفع ملف', 'files'), act('', 'جلسة تركيز', 'study'), act('', 'راجع البطاقات', 'cards'), act('', 'الفويزات', 'quizzes'), act('', 'شارك معلومة', 'share')),
       h('div', { class: 'grid', style: { marginTop: '10px' } },
-        h('div', {}, h('h2', {}, 'آخر الإعلانات'), anns.length ? anns.map((p) => h('div', { class: 'card', style: { marginBottom: '8px' } }, h('b', {}, SP.className(p.classId) || 'عام'), h('p', {}, p.text))) : SP.empty('لا توجد إعلانات')),
+        h('div', {}, h('h2', {}, 'تبليغات الأساتذة'), anns.length ? anns.map((p) => h('div', { class: 'card click' + (p.important ? ' important' : ''), style: { marginBottom: '8px' }, onclick: () => SP.go('classes/' + p.classId + '/lec') }, h('div', { class: 'row sp' }, h('b', {}, (p.important ? '📌 ' : '📢 ') + p.title), h('span', { class: 'chip' }, SP.className(p.classId))), h('p', { style: { margin: '6px 0 0' } }, p.text.slice(0, 160)))) : SP.empty('لا توجد تبليغات')),
         h('div', {}, h('h2', {}, 'مهام قادمة'), tasks.length ? tasks.map((x) => h('div', { class: 'card', style: { marginBottom: '8px' } }, x.text, ' ', h('span', { class: 'chip' }, x.due || 'بلا موعد'))) : SP.empty('لا مهام معلّقة'))));
   });
 
@@ -70,7 +71,7 @@
     const c = SP.classById(id);
     if (!c || !SP.canSeeClass(id)) return SP.page('الصف غير موجود', '', h('button', { class: 'btn', onclick: () => SP.go('classes') }, 'رجوع'));
     const isOwner = SP.isTeacher() && c.teacherId === SP.state.me, root = h('div', {});
-    let tab = ['over', 'lec', 'members', 'quizzes', 'files', 'posts', 'prog'].includes(startTab) ? startTab : 'lec';
+    let tab = ['lec', 'members', 'quizzes', 'files', 'posts', 'prog'].includes(startTab) ? startTab : 'lec';
     const draw = () => {
       const s = S(); let body;
       if (tab === 'over') {
@@ -106,7 +107,7 @@
           h('div', { class: 'row' }, isOwner ? h('span', { class: 'chip', title: 'كود الانضمام' }, 'الكود: ' + c.code) : null,
             isOwner ? h('button', { class: 'btn ghost sm', onclick: async () => { if (await SP.confirm('حذف الصف نهائياً مع فويزاته ومنشوراته؟')) { const s2 = S(); s2.classes = s2.classes.filter((x) => x.id !== id); s2.quizzes = s2.quizzes.filter((x) => x.classId !== id); s2.posts = s2.posts.filter((x) => x.classId !== id); SP.save(); SP.go('classes'); } } }, 'حذف') : null,
             !isOwner && SP.state.me ? h('button', { class: 'btn ghost sm', onclick: async () => { if (await SP.confirm('مغادرة الصف؟')) { c.memberIds = c.memberIds.filter((x) => x !== SP.state.me); SP.save(); SP.go('classes'); } } }, 'مغادرة') : null)),
-        SP.examBanner && SP.examBanner(id), SP.tabs([['lec', 'المحاضرات'], ['over', 'الإعلانات'], ['members', 'الأعضاء'], ['quizzes', 'الفويزات'], ['files', 'الملفات'], ['posts', 'المنشورات'], ['prog', 'التقدم']], tab, (k) => { tab = k; draw(); }), body].filter(Boolean));
+        SP.examBanner && SP.examBanner(id), SP.tabs([['lec', 'منشورات الأستاذ'], ['members', 'الأعضاء'], ['quizzes', 'الفويزات'], ['files', 'الملفات'], ['posts', 'النقاش'], ['prog', 'التقدم']], tab, (k) => { tab = k; draw(); }), body].filter(Boolean));
     };
     draw(); return root;
   }
