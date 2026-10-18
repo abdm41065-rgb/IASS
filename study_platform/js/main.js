@@ -3,18 +3,19 @@
   const SP = window.SP, h = SP.h;
   const HUBS = [
     ['home', 'الرئيسية', ['home', 'calendar', 'tasks', 'progress']],
-    ['space', 'دراسة', ['space', 'desk', 'writer', 'quizzes', 'cards', 'study']],
+    ['flow', 'دراسة', ['flow', 'space', 'desk', 'writer', 'quizzes', 'cards', 'study']],
     ['notes', 'مكتبتي', ['notes', 'files', 'handouts', 'stickers']],
     ['classes', 'الصفوف', ['classes', 'lectures', 'share', 'teachers', 'students']],
     ['settings', 'الإعدادات', ['settings']],
   ];
-  const ICON_FOR = { home: 'home', space: 'desk', desk: 'desk', notes: 'files', classes: 'classes', settings: 'settings' };
+  const ICON_FOR = { home: 'home', flow: 'flow', space: 'desk', desk: 'desk', notes: 'files', classes: 'classes', settings: 'settings' };
   SP.applyTheme = () => { const r = document.documentElement; if (SP.state.dark == null) r.removeAttribute('data-theme'); else r.setAttribute('data-theme', SP.state.dark ? 'dark' : 'light'); document.documentElement.style.setProperty('--fs', (SP.state.fontSize || 16) + 'px'); };
   SP.isDark = () => (SP.state.dark == null ? matchMedia('(prefers-color-scheme: dark)').matches : SP.state.dark);
   SP.setTheme = (d) => { SP.state.dark = d; SP.save(); SP.applyTheme(); };
   SP.toggleTheme = () => SP.setTheme(!SP.isDark());
   SP.fillWho = () => { const w = document.getElementById('who'); w.replaceChildren(...SP.state.users.map((u) => h('option', { value: u.id, selected: u.id === SP.state.me }, u.name + (u.role === 'teacher' ? ' · معلم' : ' · طالب')))); };
   const P = {
+    flow: '<rect x="14" y="3" width="7" height="6" rx="1.5"/><rect x="3" y="15" width="7" height="6" rx="1.5"/><path d="M14 6H9a3 3 0 0 0-3 3v6"/><circle cx="18" cy="18" r="3"/><path d="M10 18h5"/>',
     desk: '<path d="M5 3h9l5 5v13H5z"/><path d="M9 17l5.5-5.5 2 2L11 19H9z"/>',
     home: '<path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
     classes: '<path d="M3 21h18M5 21V8l7-4 7 4v13M9 21v-5h6v5"/>',
@@ -44,7 +45,7 @@
     const sub = hub && hub[2].length > 1 ? h('nav', { class: 'tabs subnav', 'aria-label': 'أقسام ' + hub[1] }, hub[2].map((k) => h('a', { class: 'tab' + (k === key ? ' on' : ''), href: '#/' + k, 'aria-current': k === key ? 'page' : null }, SP.views[k].label))) : null;
     document.title = v.label + ' · منصة الدراسة';
     try { main.replaceChildren(...[sub, v.render(parts.slice(1))].filter(Boolean)); } catch (e) { console.error(e); main.replaceChildren(SP.empty('حدث خطأ غير متوقع في هذه الصفحة.')); }
-    document.body.classList.remove('nav-open'); document.body.classList.toggle('in-chat', !!document.querySelector('#main .tg-compose, #main .tg-locked')); window.scrollTo(0, 0); SP.emit('route');
+    document.body.classList.remove('nav-open'); document.body.classList.toggle('in-chat', !!document.querySelector('#main .tg-compose, #main .tg-locked')); window.scrollTo(0, 0); SP.motion && SP.motion(main); SP.emit('route');
   };
   window.addEventListener('hashchange', SP.route);
   document.getElementById('who').addEventListener('change', (e) => { SP.state.me = e.target.value; SP.save(); SP.route(); });

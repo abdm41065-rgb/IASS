@@ -75,6 +75,7 @@
       (s.students || teacher) ? act('↩️ رد', () => ui.reply(m)) : null,
       m.text ? act('📋 نسخ النص', () => navigator.clipboard && navigator.clipboard.writeText(m.text).then(() => SP.toast('نُسخ'), () => {})) : null,
       !teacher && m.type !== 'msg' && SP.saveToStudy ? act('🔖 احفظ في دراستي', () => { SP.saveToStudy(m); SP.refresh(); }) : null,
+      m.type !== 'msg' && m.type !== 'poll' && SP.addToFlow ? act('🧭 أضف لمسار دراسة', () => SP.addToFlow(m.type === 'exam' ? 'exam' : 'item', m.id, m.title || (m.text || '').slice(0, 40))) : null,
       teacher ? act(m.pinned ? '📌 إلغاء التثبيت' : '📌 تثبيت', () => { m.pinned = !m.pinned; SP.save(); SP.refresh(); }) : null,
       teacher && m.type === 'poll' && !m.closed ? act('🔒 إغلاق التصويت', () => { m.closed = true; SP.save(); SP.refresh(); }) : null,
       (me && (m.type === 'msg' || m.type === 'notice' || m.type === 'explain')) ? act('✏️ تعديل', () => edit(m)) : null,

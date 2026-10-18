@@ -7,7 +7,7 @@
     for (const [k, v] of Object.entries(props || {})) {
       if (v == null || v === false) continue;
       if (k === 'class') e.className = v;
-      else if (k === 'style' && typeof v === 'object') Object.assign(e.style, v);
+      else if (k === 'style' && typeof v === 'object') for (const [sk, sv] of Object.entries(v)) { if (sk.startsWith('--')) e.style.setProperty(sk, sv); else e.style[sk] = sv; }
       else if (k.startsWith('on')) e.addEventListener(k.slice(2), v);
       else if (PROP.has(k)) e[k] = v;
       else e.setAttribute(k, v === true ? '' : v);
@@ -87,4 +87,26 @@
   class FontData { async fetch({ filename }) { const b = (window.PDF_STD_FONTS || {})[filename]; if (!b) throw new Error('font ' + filename); const s = atob(b), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; } }
   SP.pdfOpen = (data) => window.pdfjsLib.getDocument({ data, isEvalSupported: false, ...(window.PDF_STD_FONTS ? { useSystemFonts: false, StandardFontDataFactory: FontData } : {}) }).promise;
   SP.beep = () => { try { const a = new AudioContext(), o = a.createOscillator(); o.connect(a.destination); o.frequency.value = 880; o.start(); o.stop(a.currentTime + 0.25); } catch (e) {} };
+
+  /* حركة التطبيق: دخول الصفحة، ظهور متتابع للعناصر، عدّاد للأرقام */
+  const calm = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
+  SP.countUp = (el, to, suffix = '', ms = 800) => {
+    if (calm() || to < 2) { el.textContent = to + suffix; return; }
+    const t0 = performance.now(), ease = (t) => 1 - Math.pow(1 - t, 3);
+    const step = (now) => { const k = Math.min(1, (now - t0) / ms); el.textContent = Math.round(to * ease(k)) + suffix; if (k < 1 && el.isConnected) requestAnimationFrame(step); };
+    requestAnimationFrame(step);
+  };
+  SP.motion = (root) => {
+    root.classList.remove('enter'); void root.offsetWidth; root.classList.add('enter');
+    if (calm()) return;
+    root.querySelectorAll('.grid, .stagger').forEach((g) => [...g.children].slice(0, 18).forEach((c, i) => c.style.setProperty('--i', i)));
+    root.querySelectorAll('.stat b, .hero .meta b').forEach((b) => { const m = b.textContent.trim().match(/^(\d+)(%?)$/); if (m) SP.countUp(b, +m[1], m[2]); });
+  };
+  /* تموّج عند الضغط على الأزرار */
+  document.addEventListener('pointerdown', (e) => {
+    const b = e.target.closest && e.target.closest('.btn, .tab, .chip, .fl-pi'); if (!b || calm()) return;
+    const r = b.getBoundingClientRect(), d = Math.max(r.width, r.height) * 2, w = document.createElement('span');
+    w.className = 'ripple'; w.style.cssText = `width:${d}px;height:${d}px;left:${e.clientX - r.left - d / 2}px;top:${e.clientY - r.top - d / 2}px`;
+    b.append(w); setTimeout(() => w.remove(), 600);
+  });
 })();

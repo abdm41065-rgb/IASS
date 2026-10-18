@@ -357,7 +357,7 @@ with sync_playwright() as p:
     ok_answers = p3.evaluate("SP.state.quizzes.every(q=>q.questions.every(x=>x.type==='short'?String(x.answer).length>0:x.answer>=0&&x.answer<x.options.length))")
     check(ok_answers, "all sim quiz answers valid")
     bad = []
-    for r in ["home", "calendar", "tasks", "progress", "space", "desk", "writer", "quizzes", "cards", "study", "notes", "files", "handouts", "stickers", "classes", "lectures", "share", "teachers", "students", "settings", "classes/an/lec", "classes/ph/lec", "classes/bc/over", "classes/hi/prog", "classes/an/info", "classes/ph/info/prog"]:
+    for r in ["home", "calendar", "tasks", "progress", "space", "desk", "writer", "quizzes", "cards", "study", "notes", "files", "handouts", "stickers", "classes", "lectures", "share", "teachers", "students", "settings", "classes/an/lec", "classes/ph/lec", "classes/bc/over", "classes/hi/prog", "classes/an/info", "classes/ph/info/prog", "flow", "flow/fl_ospe"]:
         p3.evaluate(f"location.hash='#/{r}'"); p3.wait_for_timeout(120); t = p3.inner_text("#main")
         if "null" in t or "undefined" in t or "NaN" in t: bad.append(r)
     check(not bad, "sim renders cleanly on every page " + str(bad))
@@ -376,6 +376,59 @@ with sync_playwright() as p:
     p3.select_option("#who", "dA"); p3.evaluate("location.hash='#/classes/an/lec'"); p3.wait_for_timeout(150)
     p3.locator(".ci-homework >> text=التسليمات والدرجات").click()
     check("ضفيرة-زينب.jpg" in p3.inner_text(".md") and "لم يسلّم" in p3.inner_text(".md"), "doctor sees homework submissions table")
+
+    # ---- مسارات الدراسة (منشئ المسارات) ----
+    p3.evaluate("document.querySelectorAll('.ov').forEach(o=>o.remove())")
+    p3.select_option("#who", "st"); p3.evaluate("location.hash='#/home'"); p3.wait_for_timeout(200)
+    check(p3.locator(".fl-home").count() == 1 and "تحضير OSPE" in p3.inner_text(".fl-home"), "flow: active flow card on home")
+    p3.click("#nav >> text=دراسة"); p3.wait_for_timeout(300)
+    check(p3.evaluate("location.hash") == "#/flow" and p3.locator(".fl-card").count() == 1, "flow: study hub opens the flows list")
+    p3.click(".fl-card"); p3.wait_for_timeout(500)
+    check(p3.locator(".fl-node").count() == 9 and p3.locator(".fl-edge").count() == 8, "flow: OSPE flow renders nodes + edges")
+    nxt = p3.inner_text(".fl-next")
+    check("بطاقات أعصاب" in nxt and "جلسة رسم" in nxt and p3.locator(".fl-node.next").count() == 2, "flow: next steps highlighted")
+    check(p3.locator(".fl-node[data-id=fn_a].s-src").count() == 1 and "شرح د. سارة" in p3.inner_text(".fl-node[data-id=fn_a]"), "flow: library source linked")
+    p3.evaluate("SP.state.results.push({id:'rx',quizId:'qz_an',userId:'st',score:SP.state.quizzes.find(q=>q.id==='qz_an').questions.length,total:SP.state.quizzes.find(q=>q.id==='qz_an').questions.length,secs:60,ts:Date.now()}); SP.save(); SP.refresh()"); p3.wait_for_timeout(400)
+    check(p3.locator(".fl-node[data-id=fn_f].s-done").count() == 1 and p3.locator(".fl-node[data-id=fn_g].s-done").count() == 1, "flow: quiz + checkpoint auto-complete from result")
+    check(p3.locator(".fl-node[data-id=fn_h].next").count() == 1 and p3.locator(".fl-edge.hot").count() >= 1, "flow: exam becomes next, edge animates")
+    p3.click(".fl-node[data-id=fn_e]"); p3.wait_for_timeout(200)
+    check(p3.locator(".fl-insp.open").count() == 1, "flow: inspector opens on select")
+    p3.click(".fl-insp .fl-stat >> text=تم"); p3.wait_for_timeout(200)
+    check(p3.locator(".fl-node[data-id=fn_e].s-done").count() == 1 and p3.evaluate("SP.state.flows[0].nodes.find(n=>n.id==='fn_e').status") == "done", "flow: manual status saved")
+    # مسار جديد فارغ: إضافة بالنقر والسحب، ربط، منع الحلقات
+    p3.click("text=رجوع"); p3.click("#main >> text=مسار جديد"); p3.click(".md >> text=لوحة فارغة"); p3.click(".md button:text-is('إنشاء')"); p3.wait_for_timeout(500)
+    fid = p3.evaluate("location.hash.split('/')[2]")
+    p3.click(".fl-pi:has-text('قراءة ومراجعة')"); p3.click(".fl-pi:has-text('فويز')"); p3.wait_for_timeout(300)
+    F = f"SP.state.flows.find(f=>f.id==='{fid}')"
+    check(p3.evaluate(F + ".nodes.length") == 3, "flow: palette click adds nodes")
+    p3.drag_and_drop(".fl-pi:has-text('بطاقات')", ".fl-canvas", target_position={"x": 560, "y": 120}); p3.wait_for_timeout(300)
+    check(p3.evaluate(F + ".nodes.some(n=>n.t==='cards')"), "flow: drag from palette drops a node")
+    p3.click("text=ترتيب تلقائي"); p3.wait_for_timeout(700)
+    rid, qid = p3.evaluate(F + ".nodes.find(n=>n.t==='read').id"), p3.evaluate(F + ".nodes.find(n=>n.t==='quiz').id")
+    def link(a, b):
+        po = p3.locator(f".fl-node[data-id='{a}'] .fl-port.out").bounding_box(); tb = p3.locator(f".fl-node[data-id='{b}'] .fl-title").bounding_box()
+        p3.mouse.move(po["x"] + po["width"] / 2, po["y"] + po["height"] / 2); p3.mouse.down()
+        p3.mouse.move(tb["x"] + 10, tb["y"] + 5, steps=8); p3.mouse.up(); p3.wait_for_timeout(250)
+    p3.click(".fl-insp button[aria-label='إغلاق']"); p3.wait_for_timeout(350)
+    link(rid, qid)
+    check(p3.evaluate(F + ".edges.length") == 1 and p3.locator(".fl-edge").count() == 1, "flow: ports connect two nodes")
+    link(qid, rid)
+    check(p3.evaluate(F + ".edges.length") == 1, "flow: cycle prevented")
+    check(p3.locator(".fl-node.next").count() == 2, "flow: read is next (and unlinked cards)")
+    # ربط المكتبة: أضف ملاحظة لمسار
+    p3.evaluate("location.hash='#/notes'"); p3.wait_for_timeout(250)
+    p3.locator("#main .note", has_text="الضفيرة").first.locator(".fl-add").click(); p3.locator(".md .tpl", has_text="تحضير OSPE").click(); p3.wait_for_timeout(400)
+    check(p3.evaluate("location.hash") == "#/flow/fl_ospe" and p3.evaluate("SP.state.flows.find(f=>f.id==='fl_ospe').nodes.filter(n=>n.t==='src_note').length") == 2, "flow: library note added to flow")
+    p3.evaluate("location.hash='#/notes'"); p3.wait_for_timeout(250)
+    check(p3.locator("#main .fl-in-chip").count() >= 1, "flow: library shows 'in flow' chip")
+    # مشاركة المسار
+    p3.evaluate("location.hash='#/flow/fl_ospe'"); p3.wait_for_timeout(300); p3.click("text=شارك المسار")
+    p3.locator(".md label", has_text="زينب").locator("input").check(); p3.click(".md button:text-is('إرسال')")
+    p3.select_option("#who", "zn"); p3.evaluate("location.hash='#/flow'"); p3.wait_for_timeout(300)
+    check(p3.locator(".share-in").count() == 1, "flow: shared flow waiting for classmate")
+    p3.click(".share-in >> text=أضف إلى دراستي"); p3.wait_for_timeout(400)
+    check(p3.evaluate("SP.state.flows.filter(f=>f.ownerId==='zn').length") == 1 and p3.locator(".fl-node").count() >= 9, "flow: classmate imports flow")
+    p3.select_option("#who", "st")
     ctx3.close()
 
     # ---------- محاكاة Claude (مسار المساعد الذكي) ----------

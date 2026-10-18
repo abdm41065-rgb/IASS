@@ -154,8 +154,19 @@
       { id: id('i'), classId: 'hi', by: 'dH', type: 'homework', title: 'تعريف 6 شرائح ظهارة', ts: T(-10), due: D(-3), max: 100, desc: 'عرّف نوع الظهارة ومكانها في كل شريحة.', fileId: '', fname: '', fmime: '', subs: { st: { fileId: 'sim_sub_st', name: 'شرائح-الظهارة-حسن.txt', mime: 'text/plain', ts: T(-4), late: false, grade: 88, feedback: 'تمييز ممتاز، راجع الظهارة الانتقالية في المثانة.' } } },
     ];
 
+    /* مسار دراسة جاهز يربط مكتبة حسن بخطوات التحضير لـ OSPE */
+    const ospe = items.find((i) => i.type === 'exam' && i.classId === 'an');
+    const fn = (k, t, x, y, title, extra = {}) => ({ id: 'fn_' + k, t, x, y, title, min: { read: 30, cards: 15, quiz: 10, focus: 25 }[t] || 0, ...extra });
+    const flowNodes = [fn('a', 'src_post', 1520, 80, 'شرح د. سارة', { ref: 'i_exp_an' }), fn('b', 'src_note', 1520, 300, 'ملخص الضفيرة', { ref: 'n_plexus' }),
+      fn('c', 'read', 1240, 190, 'راجع الضفيرة وإصابات الأعصاب', { status: 'done' }), fn('d', 'cards', 960, 80, 'بطاقات أعصاب الطرف العلوي', { ref: 'dk_an' }),
+      fn('e', 'focus', 960, 300, 'جلسة رسم الفروع النهائية', { status: 'doing', note: 'ارسمها بدفتر التشريح' }), fn('f', 'quiz', 680, 190, 'فويز الضفيرة العضدية', { ref: 'qz_an', target: 90 }),
+      fn('g', 'check', 680, 420, 'هل وصلت 90%؟', { target: 90 }), fn('h', 'exam', 400, 190, 'OSPE التشريح', { ref: ospe ? ospe.id : '' }),
+      fn('s', 'sticky', 1240, 440, 'زينب: ركّز على اليد المخلبية وشلل إرب، دائماً يجون بالعملي 😉')];
+    const flowEdges = [['a', 'c'], ['b', 'c'], ['c', 'd'], ['c', 'e'], ['d', 'f'], ['e', 'f'], ['f', 'g'], ['g', 'h']].map(([a, b]) => ({ id: 'fe_' + a + b, from: 'fn_' + a, to: 'fn_' + b }));
+    const flows = [{ id: 'fl_ospe', ownerId: 'st', name: 'تحضير OSPE التشريح', created: T(-3), updated: T(0, 6), view: { x: 0, y: 0, z: 0.8 }, fit: true, nodes: flowNodes, edges: flowEdges }];
+
     return {
-      v: 1, me: 'st', dark: null, fontSize: 16, sim: 'med', users, classes, notes,
+      v: 1, me: 'st', dark: null, fontSize: 16, sim: 'med', flows, users, classes, notes,
       files: [
         { id: 'sim_heart', ownerId: 'dP', name: 'ملزمة الفسلجة - القلب.txt', mime: 'text/plain', size: HEART.length * 2, tags: ['فسلجة', 'قلب'], color: '#B91C1C', star: true, stickers: ['❤️'], kind: 'handout', classId: 'ph', added: T(-3), desc: 'ملزمة الشهري. جرّب زر «أسئلة» لتوليد اختبار منها.', pages: 12, readPages: 7 },
         { id: 'sim_glyco', ownerId: 'st', name: 'ملخص تحلل السكر.txt', mime: 'text/plain', size: GLYCO.length * 2, tags: ['كيمياء حياتية'], color: '#2E7D32', star: false, stickers: ['⭐'], kind: 'file', classId: '', added: T(-2), desc: 'ملخصي لكويز الغد', pages: 0, readPages: 0 },

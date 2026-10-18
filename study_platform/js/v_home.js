@@ -19,7 +19,7 @@
     const next = tasks[0], pct = Math.min(100, Math.round((100 * todayMin) / goal));
     const ex = SP.upcomingExams ? SP.upcomingExams()[0] : null;
     const line = ex && (new Date(`${ex.date}T${ex.time || '08:00'}`) - Date.now()) < 7 * 864e5 ? `امتحان «${ex.title}»: ${SP.countdown(new Date(`${ex.date}T${ex.time || '08:00'}`))}` : next ? `أقرب مهمة: ${next.text}${next.due ? ' (' + next.due + ')' : ''}` : last ? `آخر ما فتحته: «${last.name}»` : 'ابدأ بفتح درس في «دراسة» أو جلسة تركيز قصيرة.';
-    const hero = h('section', { class: 'hero', 'aria-label': 'ملخص اليوم' }, h('span', { class: 'sticker hero-stk', 'aria-hidden': 'true' }, SP.streak(uid) >= 3 ? '🔥' : pct >= 100 ? '🌟' : '✏️'),
+    const hero = h('section', { class: 'hero', 'aria-label': 'ملخص اليوم' }, h('div', { class: 'hero-fx', 'aria-hidden': 'true' }, ['✦', '✎', '★', '∑', '⌁', '✦', '◯', 'π'].map((c, i) => h('i', { style: `--k:${i}` }, c))), h('span', { class: 'sticker hero-stk', 'aria-hidden': 'true' }, SP.streak(uid) >= 3 ? '🔥' : pct >= 100 ? '🌟' : '✏️'),
       h('div', {}, h('div', { class: 'day' }, new Date().toLocaleDateString('ar', { weekday: 'long', day: 'numeric', month: 'long' })),
         h('h1', {}, `${greet}، ${me.name}`), h('p', { class: 'line' }, line),
         h('div', { class: 'meta' }, h('div', {}, h('b', {}, SP.streak(uid)), h('span', {}, 'أيام متتالية')), h('div', {}, h('b', {}, SP.xp(uid)), h('span', {}, 'نقاط')), h('div', {}, h('b', {}, SP.myClasses().length), h('span', {}, 'صفوف'))),
@@ -28,7 +28,7 @@
     hero.querySelector('.ring').style.setProperty('--p', pct);
     const simCard = !s.sim && !s.simHide ? h('div', { class: 'card sim-offer' }, h('div', {}, h('b', {}, 'جرّب المنصة كطالب طب 🩺'), h('p', { class: 'sub', style: { margin: '2px 0 0' } }, 'محاكاة كاملة: التشريح والفسلجة والكيمياء الحياتية والأنسجة، مع امتحانات وواجبات وبطاقات.')),
       h('div', { class: 'row' }, h('button', { class: 'btn', onclick: () => SP.offerMedSim() }, 'ابدأ المحاكاة'), h('button', { class: 'btn ghost', onclick: () => { s.simHide = true; SP.save(); SP.refresh(); } }, 'لاحقاً'))) : null;
-    return h('div', {}, simCard, hero, SP.examStrip && SP.examStrip(),
+    return h('div', {}, simCard, hero, SP.examStrip && SP.examStrip(), SP.flowHomeCard && SP.flowHomeCard(),
       h('div', { class: 'grid s' },
         stat(SP.myClasses().length, 'صفوفي', 'classes'), stat(myNotes.length, 'ملاحظاتي', 'notes'), stat(myFiles.length, 'ملفاتي', 'files'),
         stat(s.results.filter((r) => r.userId === uid).length, 'فويزات حللتها', 'quizzes'), stat((s.docs || []).filter((d) => d.ownerId === uid).length, 'دروسي في دراسة', 'desk')),
