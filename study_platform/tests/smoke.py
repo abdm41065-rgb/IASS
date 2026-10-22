@@ -516,8 +516,16 @@ with sync_playwright() as p:
     p4.click(".m-undo"); p4.wait_for_timeout(300)
     check("سطر أضافه المساعد" not in p4.evaluate("SP.state.notes.find(n=>n.id==='n_plexus').body") and not p4.evaluate("SP.state.decks.some(d=>d.name==='بطاقات المساعد')") and "رجّعت" in p4.inner_text(".m-list"), "undo restores the work and keeps the chat")
     check(p4.evaluate("window.__tiers[0]") == "default", "work requests use the stronger model tier")
+    # الصوت: مايك (تعرّف كلام وهمي) وقراءة الرد
+    p4.evaluate("""() => { window.__spoken = []; window.speechSynthesis.speak = (u) => { window.__spoken.push(u.text); setTimeout(() => u.onend && u.onend(), 10); };
+      window.webkitSpeechRecognition = class { start() { setTimeout(() => { this.onresult && this.onresult({ resultIndex: 0, results: [Object.assign([{ transcript: 'ما مهامي اليوم؟' }], { isFinal: true })] }); this.onend && this.onend(); }, 50); } stop() { this.onend && this.onend(); } }; window.SpeechRecognition = window.webkitSpeechRecognition; }""")
+    check(p4.locator(".m-mic").count() == 1 and p4.locator(".m-spk").count() == 1 and p4.locator(".m-talk").count() == 1, "chat has mic, speaker and voice-chat controls")
     p4.evaluate("window.__failTools = true"); p4.fill("#sanad-input", "مرحبا"); p4.press("#sanad-input", "Enter"); p4.wait_for_timeout(500)
     check("أهلاً بك" in p4.inner_text(".m-list") and p4.evaluate("window.__tiers.at(-1)") == "quick", "assistant still replies when tools are refused")
+    p4.click(".m-spk"); n_msgs = p4.locator(".m-msg.me").count()
+    p4.click(".m-mic"); p4.wait_for_function("window.__spoken.length > 0", timeout=5000)
+    check(p4.locator(".m-msg.me").count() == n_msgs + 1 and "ما مهامي اليوم" in p4.locator(".m-msg.me").last.inner_text(), "spoken question becomes a sent message")
+    check("أهلاً بك" in " ".join(p4.evaluate("window.__spoken")) and "🙂" not in "".join(p4.evaluate("window.__spoken")), "reply read aloud (emoji stripped)")
     ctx4.close()
 
 

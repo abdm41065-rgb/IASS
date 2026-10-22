@@ -344,10 +344,58 @@
     list, h('div', { class: 'm-sugg' }, skillChip, SUGG.map((s) => h('button', { class: 'chip', onclick: () => send(s) }, s))), h('div', { class: 'm-input' }, input, sendBtn, stopBtn));
   document.body.append(panel);
   input.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } });
-  const toggle = (on = !panelOpen) => { panelOpen = on; panel.hidden = !on; root.classList.toggle('open', on); bubble.hidden = true; if (on) { drawChat(); input.focus(); } else chatBtn.focus(); };
+
+  /* ---------- الصوت: تكلّم بالمايك، واسمع الردود بصوت ---------- */
+  const vcfg = () => ((S().voice = S().voice || {})[SP.state.me] = S().voice[SP.state.me] || { speak: false, talk: false });
+  const SRc = () => window.SpeechRecognition || window.webkitSpeechRecognition;
+  let rec = null, listening = false;
+  const micBtn = h('button', { class: 'btn ghost m-mic', type: 'button', 'aria-label': 'تكلّم بالمايك', title: 'تكلّم بالمايك', onclick: () => (listening ? stopListen() : listen()) }, '🎙️');
+  const voiceBar = h('div', { class: 'm-voice', hidden: true, 'aria-live': 'polite' }, h('span', { class: 'm-wave', 'aria-hidden': 'true' }, h('i'), h('i'), h('i'), h('i'), h('i')), h('span', { class: 'm-vtext' }, 'أسمعك… تكلّم'), h('button', { class: 'btn ghost sm', onclick: () => stopListen(true) }, 'إلغاء'));
+  const vText = voiceBar.querySelector('.m-vtext');
+  function listen() {
+    const SR = SRc(); if (!SR) return voiceHelp();
+    if (ctl) return SP.toast('انتظر حتى ينتهي الرد', 'err');
+    hush(); rec = new SR(); rec.lang = 'ar'; rec.interimResults = true; rec.continuous = false; rec.maxAlternatives = 1;
+    let finalText = '', cancelled = false;
+    rec.onresult = (e) => { let interim = ''; for (let i = e.resultIndex; i < e.results.length; i++) { const t = e.results[i][0].transcript; if (e.results[i].isFinal) finalText += t; else interim += t; } input.value = (finalText + interim).trim(); vText.textContent = input.value || 'أسمعك… تكلّم'; };
+    rec.onerror = (e) => { cancelled = true; listening = false; paintMic(); if (e.error === 'not-allowed' || e.error === 'service-not-allowed' || e.error === 'audio-capture') voiceHelp(true); else if (e.error !== 'aborted' && e.error !== 'no-speech') SP.toast('ما قدرت أسمعك، جرّب مرة ثانية', 'err'); else if (e.error === 'no-speech') SP.toast('ما سمعت شي 🤫'); };
+    rec.onend = () => { const was = listening; listening = false; rec = null; paintMic(); if (!cancelled && was && input.value.trim()) send(); };
+    rec._cancel = () => { cancelled = true; input.value = ''; };
+    try { rec.start(); listening = true; paintMic(); root.dataset.mood = 'listen'; } catch (e) { listening = false; paintMic(); voiceHelp(true); }
+  }
+  function stopListen(cancel) { if (!rec) return; if (cancel) rec._cancel(); try { rec.stop(); } catch (e) {} }
+  const paintMic = () => { micBtn.classList.toggle('on', listening); micBtn.setAttribute('aria-pressed', String(listening)); voiceBar.hidden = !listening; if (!listening) vText.textContent = 'أسمعك… تكلّم'; };
+  function voiceHelp(denied) {
+    SP.modal({ title: '🎙️ الكلام بالمايك', body: h('div', {}, h('p', {}, denied ? 'المتصفح منع الوصول للمايك هنا.' : 'هذا المتصفح لا يدعم تحويل الكلام لنص داخل الصفحة.'),
+      h('p', { class: 'sub' }, 'البدائل:'), h('ul', {}, h('li', {}, 'على الهاتف: اضغط على خانة الكتابة ثم زر المايك 🎤 في لوحة المفاتيح وتكلّم، النص يُكتب وحده.'), h('li', {}, 'على الكمبيوتر: افتح المنصة في Chrome أو Edge واسمح بالمايك عند السؤال.'), denied ? h('li', {}, 'إذا رفضت الإذن سابقاً: من رمز القفل بجانب العنوان اسمح بالميكروفون.') : null)),
+      actions: [{ label: 'حسناً', primary: true, onclick: (c) => { c(); input.focus(); } }] });
+  }
+  /* قراءة الردود بصوت */
+  const TTS = 'speechSynthesis' in window ? window.speechSynthesis : null;
+  const arVoice = () => { const vs = TTS ? TTS.getVoices() : []; return vs.find((v) => /^ar/i.test(v.lang) && /google|natural|online/i.test(v.name)) || vs.find((v) => /^ar/i.test(v.lang)) || null; };
+  const RATE = { owl: 0.9, cat: 1.1, robot: 1, bear: 0.85, fox: 1.15, penguin: 1.05 }, PITCH = { owl: 0.9, cat: 1.4, robot: 0.7, bear: 0.6, fox: 1.2, penguin: 1.3 };
+  const speakable = (t) => String(t).replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}️]/gu, '').replace(/[*#_`>•]/g, ' ').replace(/https?:\S+/g, '').trim();
+  function speak(text, then) {
+    if (!TTS) return SP.toast('القراءة بالصوت غير مدعومة في هذا المتصفح', 'err');
+    hush(); const parts = speakable(text).match(/[^.!؟?\n]+[.!؟?\n]*/g) || []; if (!parts.length) return then && then();
+    const k = cfg().kind, v = arVoice(); root.classList.add('talking');
+    parts.forEach((p, i) => { const u = new SpeechSynthesisUtterance(p.trim()); u.lang = v ? v.lang : 'ar-SA'; if (v) u.voice = v; u.rate = RATE[k] || 1; u.pitch = PITCH[k] || 1;
+      if (i === parts.length - 1) { u.onend = () => { root.classList.remove('talking'); then && then(); }; u.onerror = () => root.classList.remove('talking'); } TTS.speak(u); });
+  }
+  const hush = () => { if (TTS && (TTS.speaking || TTS.pending)) TTS.cancel(); root.classList.remove('talking'); };
+  const speakBtn = h('button', { class: 'btn ghost sm m-spk', 'aria-label': 'قراءة الردود بصوت', title: 'قراءة الردود بصوت', onclick: () => { const v = vcfg(); v.speak = !v.speak; if (!v.speak) { v.talk = false; hush(); } SP.save(); paintVoice(); SP.toast(v.speak ? 'سأقرأ ردودي بصوت 🔊' : 'أُوقفت القراءة بالصوت'); } });
+  const talkBtn = h('button', { class: 'chip m-talk', 'aria-pressed': 'false', onclick: () => { const v = vcfg(); v.talk = !v.talk; if (v.talk) v.speak = true; SP.save(); paintVoice(); if (v.talk) { SP.toast('محادثة صوتية: تكلّم، وأرد بصوت، ثم أسمعك من جديد 🎧'); listen(); } else { stopListen(true); hush(); } } }, '🎧 محادثة صوتية');
+  const paintVoice = () => { const v = vcfg(); speakBtn.textContent = v.speak ? '🔊' : '🔈'; speakBtn.setAttribute('aria-pressed', String(v.speak)); talkBtn.classList.toggle('on', !!v.talk); talkBtn.setAttribute('aria-pressed', String(!!v.talk)); };
+  const afterReply = (text) => { const v = vcfg(); if (v.speak && text) speak(text, () => { if (vcfg().talk && panelOpen) setTimeout(listen, 350); }); };
+  panel.querySelector('header .btn').before(speakBtn);
+  panel.querySelector('.m-input').prepend(micBtn); panel.querySelector('.m-input').before(voiceBar);
+  panel.querySelector('.m-sugg').prepend(talkBtn);
+  paintVoice();
+  (SP.listeners.route = SP.listeners.route || []).push(paintVoice);
+  const toggle = (on = !panelOpen) => { panelOpen = on; if (!on && typeof hush === 'function') { hush(); stopListen(true); } panel.hidden = !on; root.classList.toggle('open', on); bubble.hidden = true; if (on) { drawChat(); input.focus(); } else chatBtn.focus(); };
   const msgEl = (m) => m.role === 'act' ? h('div', { class: 'm-msg act' }, h('small', {}, '⚙️ ما نفّذته'), m.acts.map((a) => h('div', { class: 'm-act' }, h('span', {}, a.icon + ' ' + a.text), a.route ? h('button', { class: 'chip', onclick: () => SP.go(a.route) }, 'افتح') : null)),
       m.acts[0].undo && !m.undone && SP.aiCanUndo && SP.aiCanUndo(m.acts[0].undo) ? h('button', { class: 'btn ghost sm m-undo', onclick: async () => { if (await SP.aiUndo(m.acts[0].undo)) { const c = chats(); const mm = c.find((x) => x.role === 'act' && x.acts[0].undo === m.acts[0].undo); if (mm) mm.undone = true; c.push({ role: 'bot', text: 'رجّعت كل شي مثل ما كان ↩️' }); SP.save(); drawChat(); } } }, '↩️ تراجع عن هذه التغييرات') : m.undone ? h('small', { class: 'sub' }, 'تم التراجع') : null)
-    : h('div', { class: 'm-msg ' + (m.role === 'user' ? 'me' : 'bot') }, m.text);
+    : m.role === 'user' ? h('div', { class: 'm-msg me' }, m.text) : h('div', { class: 'm-msg bot' }, m.text, h('button', { class: 'm-say', 'aria-label': 'اقرأها بصوت', title: 'اقرأها بصوت', onclick: () => speak(m.text) }, '🔊'));
   function drawChat() {
     const c = chats();
     list.replaceChildren(...(c.length ? c.map(msgEl) : [h('div', { class: 'm-msg bot' }, `أهلاً ${SP.me().name}! أنا ${mname()}، مساعدك في الدراسة. أقدر أوصل لكل أعمالك وأعدّل عليها: ملاحظاتك ومستنداتك وبطاقاتك وفويزاتك ومهامك ومجموعاتك ومساراتك. اطلب مثلاً «لخّص ملزمة القلب في ملاحظة» أو «أضف 5 بطاقات لمجموعة التشريح». وكل تعديل تقدر تتراجع عنه.`)]));
@@ -381,7 +429,7 @@
     input.value = ''; const c = chats(); c.push({ role: 'user', text: q }); while (c.length > 40) c.shift(); SP.save(); drawChat();
     const bot = h('div', { class: 'm-msg bot typing' }, 'سند يكتب…'); list.append(bot); list.scrollTop = list.scrollHeight;
     const sample = await SP.aiSample(); root.dataset.mood = 'thinking';
-    if (!sample) { setTimeout(() => { const a = offline(q); c.push({ role: 'bot', text: a }); SP.save(); drawChat(); SP.react('happy'); }, 500); return; }
+    if (!sample) { setTimeout(() => { const a = offline(q); c.push({ role: 'bot', text: a }); SP.save(); drawChat(); SP.react('happy'); afterReply(a); }, 500); return; }
     ctl = new AbortController(); sendBtn.hidden = true; stopBtn.hidden = false; SP.aiBeginTurn && SP.aiBeginTurn();
     const RULES = `أنت «${mname()}»، ${KINDS[cfg().kind] || 'بومة'}: ${persona().voice}. وأنت مساعد دراسة داخل منصة دراسة عربية. تكلّم بالعربية بلهجة ودودة وواضحة، بجمل قصيرة، واستخدم إيموجي واحداً أو اثنين في كل رد بشكل طبيعي. ساعد في شرح الدروس، اختبار المستخدم بأسئلة، تنظيم الوقت، والتحفيز. لا تخترع معلومات عن ملفات لم تقرأها. عندك أدوات للوصول إلى كل أعمال المستخدم (ملاحظات، مستندات، ملفات، بطاقات، فويزات، مهام، مجموعات، مسارات، صفوف) وتعديلها: استخدم list_my_work أو search_my_work لتجد العنصر، واقرأه بـ read_item قبل أي تعديل، ثم نفّذ ما طلبه المستخدم بالضبط بلا تعديلات لم يطلبها. لا تحذف إلا إذا طلب الحذف صراحة. عندما يطلب كتابة ملف أو مستند أو ملخص أو بطاقات أو أسئلة: نفّذ فوراً بالأداة المناسبة (مثل create_document بمحتوى كامل ومفصّل ومنظم بعناوين ونقاط) ولا تكتفِ بالترحيب أو الوعد. شخصيتك تظهر في جملة قصيرة فقط ولا تؤخر العمل. بعد التنفيذ اذكر باختصار ما غيّرته، والمستخدم يقدر يتراجع بزر «تراجع». إذا كان الطلب غامضاً (أي ملاحظة؟ أي مستند؟) اسأله أولاً. ابدأ ردك دائماً بوسم المزاج بين قوسين مربعين واحد فقط من: [happy] [celebrate] [encourage] [thinking] [wave] ثم الرد. بيانات المستخدم الآن: ${JSON.stringify(brief())}`;
     const turns = [{ role: 'user', content: RULES }, ...c.slice(-16).map((m) => ({ role: m.role === 'user' ? 'user' : 'assistant', content: m.role === 'act' ? '(نفّذتُ: ' + m.acts.map((a) => a.text).join('، ') + ')' : m.text }))];
@@ -400,7 +448,7 @@
       let out;
       try { out = (await call(!!tools)).text; }
       catch (e) { if (tools && ['invalid_request', 'tools_unavailable', 'transform_error', 'prompt_too_large'].includes(e.code) && !e.text) { console.warn('assistant tools failed, answering without them:', e.code, e.message); out = (await call(false)).text; } else throw e; }
-      const mood = (out.match(/\[(\w+)\]/) || [])[1]; c.push({ role: 'bot', text: clean(out) || 'تم ✅' }); SP.save(); drawChat(); SP.react(MOODS[mood] ? mood : 'happy');
+      const mood = (out.match(/\[(\w+)\]/) || [])[1]; c.push({ role: 'bot', text: clean(out) || 'تم ✅' }); SP.save(); drawChat(); SP.react(MOODS[mood] ? mood : 'happy'); afterReply(clean(out));
     } catch (e) {
       bot.classList.remove('typing'); const msg = (e.text ? clean(e.text) + '\n\n' : '') + (e.code === 'cancelled' ? '(أُوقف الرد)' : aiErr(e));
       c.push({ role: 'bot', text: msg }); SP.save(); drawChat();
