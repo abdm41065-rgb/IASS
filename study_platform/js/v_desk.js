@@ -374,38 +374,6 @@
     document.addEventListener('paste', onPaste); SP.cleanups.push(() => document.removeEventListener('paste', onPaste));
 
     /* تصدير PDF: الصفحات الأصلية + كل ما أضفته مدموجاً فوقها */
-    async function overlayPng(pg, Wc, Hc) {
-      const c = h('canvas', {}); c.width = Wc; c.height = Hc; const ctx = c.getContext('2d');
-      for (const a of pg.a) {
-        ctx.save(); ctx.strokeStyle = ctx.fillStyle = a.c || '#000'; ctx.lineWidth = Math.max(1, (a.w || 0) * Wc); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
-        if (a.t === 'pen' || a.t === 'hl') {
-          if (a.t === 'hl') { ctx.globalAlpha = 0.45; ctx.globalCompositeOperation = 'multiply'; ctx.lineCap = 'butt'; }
-          ctx.beginPath(); a.p.forEach((q, i) => (i ? ctx.lineTo(q[0] * Wc, q[1] * Hc) : ctx.moveTo(q[0] * Wc, q[1] * Hc))); if (a.p.length === 1) ctx.lineTo(a.p[0][0] * Wc + 0.1, a.p[0][1] * Hc); ctx.stroke();
-        } else if (['mark', 'rect', 'oval', 'arrow'].includes(a.t)) {
-          const x1 = a.x1 * Wc, y1 = a.y1 * Hc, x2 = a.x2 * Wc, y2 = a.y2 * Hc;
-          if (a.t === 'mark') { ctx.globalAlpha = 0.4; ctx.globalCompositeOperation = 'multiply'; ctx.fillRect(Math.min(x1, x2), Math.min(y1, y2), Math.abs(x2 - x1), Math.abs(y2 - y1)); }
-          else if (a.t === 'rect') ctx.strokeRect(Math.min(x1, x2), Math.min(y1, y2), Math.abs(x2 - x1), Math.abs(y2 - y1));
-          else if (a.t === 'oval') { ctx.beginPath(); ctx.ellipse((x1 + x2) / 2, (y1 + y2) / 2, Math.abs(x2 - x1) / 2, Math.abs(y2 - y1) / 2, 0, 0, Math.PI * 2); ctx.stroke(); }
-          else { const ang = Math.atan2(y2 - y1, x2 - x1), L = Math.max(10, a.w * Wc * 4); ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.moveTo(x2 - L * Math.cos(ang - 0.45), y2 - L * Math.sin(ang - 0.45)); ctx.lineTo(x2, y2); ctx.lineTo(x2 - L * Math.cos(ang + 0.45), y2 - L * Math.sin(ang + 0.45)); ctx.stroke(); }
-        } else if (a.t === 'thl') {
-          a.r.forEach(([x, y, w, hh]) => { if (a.st === 'hl') { ctx.globalAlpha = 0.45; ctx.globalCompositeOperation = 'multiply'; ctx.fillRect(x * Wc, y * Hc, w * Wc, hh * Hc); } else { ctx.lineWidth = Math.max(1.5, hh * Hc * 0.09); const yy = (a.st === 'ul' ? y + hh * 0.96 : y + hh * 0.55) * Hc; ctx.beginPath(); ctx.moveTo(x * Wc, yy); ctx.lineTo((x + w) * Wc, yy); ctx.stroke(); } });
-        } else if (a.t === 'note') {
-          const x = a.x * Wc, y = a.y * Hc, fs = Wc * 0.016; ctx.font = `${fs * 1.6}px sans-serif`; ctx.textBaseline = 'top'; ctx.fillText('📝', x, y);
-          if (a.v) { ctx.font = `${fs}px "IBM Plex Sans Arabic", Tahoma, sans-serif`; const lines = a.v.split('\n').slice(0, 12), bw = Math.min(Wc * 0.4, Math.max(...lines.map((l) => ctx.measureText(l).width)) + fs * 1.4), bh = lines.length * fs * 1.45 + fs, bx = Math.min(x + fs * 2.2, Wc - bw - 4);
-            ctx.fillStyle = a.c || '#FFE14D'; ctx.globalAlpha = 0.92; ctx.fillRect(bx, y, bw, bh); ctx.globalAlpha = 1; ctx.fillStyle = '#14213D'; ctx.direction = 'rtl'; ctx.textAlign = 'right'; lines.forEach((l, i) => ctx.fillText(l, bx + bw - fs * 0.7, y + fs * 0.5 + i * fs * 1.45)); }
-        } else if (a.t === 'text' || a.t === 'stk') {
-          const fs = a.s * Wc; ctx.font = `${a.b ? '700 ' : ''}${fs}px "IBM Plex Sans Arabic", Tahoma, sans-serif`;
-          if (a.t === 'text' && a.bg) { const lines = a.v.split('\n'), w = Math.max(...lines.map((l) => ctx.measureText(l).width)) + fs * 0.4; ctx.save(); ctx.fillStyle = a.bg; ctx.globalAlpha = 0.85; ctx.fillRect(a.x * Wc, a.y * Hc, w, lines.length * fs * 1.35 + fs * 0.2); ctx.restore(); } ctx.textBaseline = 'top'; ctx.textAlign = 'left';
-          (a.t === 'stk' ? [a.e] : a.v.split('\n')).forEach((ln, i) => { ctx.direction = /[؀-ۿ]/.test(ln) ? 'rtl' : 'ltr'; const w = ctx.measureText(ln).width; ctx.direction === 'rtl' ? (ctx.textAlign = 'right', ctx.fillText(ln, a.x * Wc + fs * 0.15 + w, a.y * Hc + fs * 0.1 + i * fs * 1.35)) : (ctx.textAlign = 'left', ctx.fillText(ln, a.x * Wc + fs * 0.15, a.y * Hc + fs * 0.1 + i * fs * 1.35)); });
-        } else {
-          const x = a.x * Wc, y = a.y * Hc, w = a.w * Wc, hh = a.h * Hc, b = await SP.idb.get(a.t === 'img' ? a.k : a.th);
-          if (b) { try { const bm = await createImageBitmap(b); ctx.drawImage(bm, x, y, w, hh); } catch (e) { /* صورة غير مدعومة */ } } else { ctx.fillStyle = '#111'; ctx.fillRect(x, y, w, hh); }
-          if (a.t === 'vid') { const rr = Math.min(w, hh) * 0.14; ctx.fillStyle = 'rgba(0,0,0,.55)'; ctx.beginPath(); ctx.arc(x + w / 2, y + hh / 2, rr, 0, Math.PI * 2); ctx.fill(); ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.moveTo(x + w / 2 - rr * 0.35, y + hh / 2 - rr * 0.5); ctx.lineTo(x + w / 2 + rr * 0.55, y + hh / 2); ctx.lineTo(x + w / 2 - rr * 0.35, y + hh / 2 + rr * 0.5); ctx.fill(); }
-        }
-        ctx.restore();
-      }
-      return new Promise((res) => c.toBlob((b) => b.arrayBuffer().then(res), 'image/png'));
-    }
     async function exportPdf() {
       if (!window.PDFLib) return SP.toast('مكتبة إنشاء PDF لم تُحمَّل. تأكد من اتصال الإنترنت.', 'err');
       SP.toast('جارٍ تجهيز ملف PDF…');
@@ -435,6 +403,56 @@
     root._api = { insertMedia, exportPdf, overlayPng, pages: () => pageEls, setTool };
     return root;
   }
+
+  async function overlayPng(pg, Wc, Hc) {
+    const c = h('canvas', {}); c.width = Wc; c.height = Hc; const ctx = c.getContext('2d');
+    for (const a of pg.a) {
+      ctx.save(); ctx.strokeStyle = ctx.fillStyle = a.c || '#000'; ctx.lineWidth = Math.max(1, (a.w || 0) * Wc); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+      if (a.t === 'pen' || a.t === 'hl') {
+        if (a.t === 'hl') { ctx.globalAlpha = 0.45; ctx.globalCompositeOperation = 'multiply'; ctx.lineCap = 'butt'; }
+        ctx.beginPath(); a.p.forEach((q, i) => (i ? ctx.lineTo(q[0] * Wc, q[1] * Hc) : ctx.moveTo(q[0] * Wc, q[1] * Hc))); if (a.p.length === 1) ctx.lineTo(a.p[0][0] * Wc + 0.1, a.p[0][1] * Hc); ctx.stroke();
+      } else if (['mark', 'rect', 'oval', 'arrow'].includes(a.t)) {
+        const x1 = a.x1 * Wc, y1 = a.y1 * Hc, x2 = a.x2 * Wc, y2 = a.y2 * Hc;
+        if (a.t === 'mark') { ctx.globalAlpha = 0.4; ctx.globalCompositeOperation = 'multiply'; ctx.fillRect(Math.min(x1, x2), Math.min(y1, y2), Math.abs(x2 - x1), Math.abs(y2 - y1)); }
+        else if (a.t === 'rect') ctx.strokeRect(Math.min(x1, x2), Math.min(y1, y2), Math.abs(x2 - x1), Math.abs(y2 - y1));
+        else if (a.t === 'oval') { ctx.beginPath(); ctx.ellipse((x1 + x2) / 2, (y1 + y2) / 2, Math.abs(x2 - x1) / 2, Math.abs(y2 - y1) / 2, 0, 0, Math.PI * 2); ctx.stroke(); }
+        else { const ang = Math.atan2(y2 - y1, x2 - x1), L = Math.max(10, a.w * Wc * 4); ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.moveTo(x2 - L * Math.cos(ang - 0.45), y2 - L * Math.sin(ang - 0.45)); ctx.lineTo(x2, y2); ctx.lineTo(x2 - L * Math.cos(ang + 0.45), y2 - L * Math.sin(ang + 0.45)); ctx.stroke(); }
+      } else if (a.t === 'thl') {
+        a.r.forEach(([x, y, w, hh]) => { if (a.st === 'hl') { ctx.globalAlpha = 0.45; ctx.globalCompositeOperation = 'multiply'; ctx.fillRect(x * Wc, y * Hc, w * Wc, hh * Hc); } else { ctx.lineWidth = Math.max(1.5, hh * Hc * 0.09); const yy = (a.st === 'ul' ? y + hh * 0.96 : y + hh * 0.55) * Hc; ctx.beginPath(); ctx.moveTo(x * Wc, yy); ctx.lineTo((x + w) * Wc, yy); ctx.stroke(); } });
+      } else if (a.t === 'note') {
+        const x = a.x * Wc, y = a.y * Hc, fs = Wc * 0.016; ctx.font = `${fs * 1.6}px sans-serif`; ctx.textBaseline = 'top'; ctx.fillText('📝', x, y);
+        if (a.v) { ctx.font = `${fs}px "IBM Plex Sans Arabic", Tahoma, sans-serif`; const lines = a.v.split('\n').slice(0, 12), bw = Math.min(Wc * 0.4, Math.max(...lines.map((l) => ctx.measureText(l).width)) + fs * 1.4), bh = lines.length * fs * 1.45 + fs, bx = Math.min(x + fs * 2.2, Wc - bw - 4);
+          ctx.fillStyle = a.c || '#FFE14D'; ctx.globalAlpha = 0.92; ctx.fillRect(bx, y, bw, bh); ctx.globalAlpha = 1; ctx.fillStyle = '#14213D'; ctx.direction = 'rtl'; ctx.textAlign = 'right'; lines.forEach((l, i) => ctx.fillText(l, bx + bw - fs * 0.7, y + fs * 0.5 + i * fs * 1.45)); }
+      } else if (a.t === 'text' || a.t === 'stk') {
+        const fs = a.s * Wc; ctx.font = `${a.b ? '700 ' : ''}${fs}px "IBM Plex Sans Arabic", Tahoma, sans-serif`;
+        if (a.t === 'text' && a.bg) { const lines = a.v.split('\n'), w = Math.max(...lines.map((l) => ctx.measureText(l).width)) + fs * 0.4; ctx.save(); ctx.fillStyle = a.bg; ctx.globalAlpha = 0.85; ctx.fillRect(a.x * Wc, a.y * Hc, w, lines.length * fs * 1.35 + fs * 0.2); ctx.restore(); } ctx.textBaseline = 'top'; ctx.textAlign = 'left';
+        (a.t === 'stk' ? [a.e] : a.v.split('\n')).forEach((ln, i) => { ctx.direction = /[؀-ۿ]/.test(ln) ? 'rtl' : 'ltr'; const w = ctx.measureText(ln).width; ctx.direction === 'rtl' ? (ctx.textAlign = 'right', ctx.fillText(ln, a.x * Wc + fs * 0.15 + w, a.y * Hc + fs * 0.1 + i * fs * 1.35)) : (ctx.textAlign = 'left', ctx.fillText(ln, a.x * Wc + fs * 0.15, a.y * Hc + fs * 0.1 + i * fs * 1.35)); });
+      } else {
+        const x = a.x * Wc, y = a.y * Hc, w = a.w * Wc, hh = a.h * Hc, b = await SP.idb.get(a.t === 'img' ? a.k : a.th);
+        if (b) { try { const bm = await createImageBitmap(b); ctx.drawImage(bm, x, y, w, hh); } catch (e) { /* صورة غير مدعومة */ } } else { ctx.fillStyle = '#111'; ctx.fillRect(x, y, w, hh); }
+        if (a.t === 'vid') { const rr = Math.min(w, hh) * 0.14; ctx.fillStyle = 'rgba(0,0,0,.55)'; ctx.beginPath(); ctx.arc(x + w / 2, y + hh / 2, rr, 0, Math.PI * 2); ctx.fill(); ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.moveTo(x + w / 2 - rr * 0.35, y + hh / 2 - rr * 0.5); ctx.lineTo(x + w / 2 + rr * 0.55, y + hh / 2); ctx.lineTo(x + w / 2 - rr * 0.35, y + hh / 2 + rr * 0.5); ctx.fill(); }
+      }
+      ctx.restore();
+    }
+    return new Promise((res) => c.toBlob((b) => b.arrayBuffer().then(res), 'image/png'));
+  }
+
+  /* دمج التعليقات مع الملف في PDF واحد (يُستخدم في التصدير وعند نشر المساعد للملف) */
+  SP.deskFlatten = async (d) => {
+    const { PDFDocument, rgb } = window.PDFLib; let out, bmp = null;
+    if (d.kind === 'pdf') out = await PDFDocument.load(await (await SP.idb.get(d.fileId)).arrayBuffer(), { ignoreEncryption: true }); else out = await PDFDocument.create();
+    if (d.kind === 'image') bmp = await createImageBitmap(await SP.idb.get(d.fileId));
+    for (let i = 0; i < d.pages.length; i++) {
+      let page;
+      if (d.kind === 'pdf') page = out.getPage(i);
+      else { const Wp = 595, Hp = Math.round(595 * (bmp ? bmp.height / bmp.width : A4)); page = out.addPage([Wp, Hp]);
+        if (bmp) { const c = h('canvas', {}); c.width = bmp.width; c.height = bmp.height; c.getContext('2d').drawImage(bmp, 0, 0); const png = await new Promise((r) => c.toBlob((b) => b.arrayBuffer().then(r), 'image/png')); page.drawImage(await out.embedPng(png), { x: 0, y: 0, width: Wp, height: Hp }); }
+        else { const gap = Hp / 32; for (let y = gap * 3; y < Hp - gap; y += gap) page.drawLine({ start: { x: 0, y: Hp - y }, end: { x: Wp, y: Hp - y }, thickness: 0.6, color: rgb(0.8, 0.85, 0.93) }); } }
+      if (d.pages[i].a.length) { const { width: Wp, height: Hp } = page.getSize(); page.drawImage(await out.embedPng(await overlayPng(d.pages[i], Math.round(Wp * 2), Math.round(Hp * 2))), { x: 0, y: 0, width: Wp, height: Hp }); }
+    }
+    return new Blob([await out.save()], { type: 'application/pdf' });
+  };
+  SP.deskAdd = (file) => addDoc(file);
 
   SP.reg('desk', '', 'ملفات للتعليق', (p) => {
     if (!p[0]) return listView();

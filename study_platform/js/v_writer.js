@@ -280,6 +280,13 @@
     const notesAppendix = () => { const cm = [...page.querySelectorAll('.cmt')]; return cm.length ? '<hr><h3>الملاحظات</h3><ol>' + cm.map((c) => `<li><b>${esc(c.textContent.slice(0, 60))}</b>: ${esc(c.dataset.note || '')}</li>`).join('') + '</ol>' : ''; };
     const exportHtml = () => SP.download(d.name + '.html', docHtml());
     const exportWord = () => SP.download(d.name + '.doc', new Blob(['﻿' + docHtml().replace('<html lang="ar" dir="rtl">', '<html lang="ar" dir="rtl" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word">')], { type: 'application/msword' }));
+    async function toPdf(keep) {
+      if (!SP.makePdf) return; SP.toast('جارٍ تجهيز PDF…');
+      try { const blob = await SP.makePdf(page.innerHTML, { title: d.name }), name = d.name + '.pdf';
+        if (!keep) return SP.download(name, blob);
+        const fid = SP.uid(); await SP.idb.put(fid, blob); S().files.push({ id: fid, ownerId: SP.state.me, name, mime: 'application/pdf', size: blob.size, tags: ['من مستنداتي'], color: '', star: false, stickers: [], kind: 'file', classId: '', added: Date.now(), desc: '' }); SP.save(); SP.toast('حُفظ «' + name + '» في الملفات 📁');
+      } catch (e) { SP.toast('تعذّر إنشاء PDF: ' + e.message, 'err'); }
+    }
     function printModal() {
       const size = h('select', { class: 'inp', id: 'pr-size' }, [['A4', 'A4'], ['A5', 'A5 (نصف صفحة)'], ['letter', 'Letter']].map(([v, l]) => h('option', { value: v }, l)));
       const notes = h('input', { type: 'checkbox', id: 'pr-notes' }), wm = h('select', { class: 'inp', id: 'pr-wm' }, [['', 'بدون'], ['مسودة', 'مسودة'], ['سري', 'سري'], ['نسخة الطالب', 'نسخة الطالب']].map(([v, l]) => h('option', { value: v }, l)));
@@ -311,7 +318,7 @@
     page.addEventListener('input', () => setTimeout(updInfo, 0));
     const bottom = h('div', { class: 'wfoot noprint', role: 'region', 'aria-label': 'الطباعة والتصدير' }, h('div', { class: 'row', style: { gap: '10px', flex: 1, minWidth: 0 } }, status, pinfo),
       h('div', { class: 'row', style: { gap: '6px' } }, SP.isTeacher() ? h('button', { class: 'btn ghost sm', onclick: sendToClass }, '📤 أرسل للصف') : null, h('button', { class: 'btn ghost sm', onclick: exportWord }, '⬇ Word'),
-        SP.more([['⬇ تنزيل HTML', exportHtml], ['⬇ تنزيل نص', () => SP.download(d.name + '.txt', page.innerText)], ['🏛 بيانات الترويسة', () => letterheadModal(false)]]),
+        SP.more([['📕 تنزيل PDF', () => toPdf(false)], ['📁 احفظ PDF في ملفاتي', () => toPdf(true)], ['⬇ تنزيل HTML', exportHtml], ['⬇ تنزيل نص', () => SP.download(d.name + '.txt', page.innerText)], ['🏛 بيانات الترويسة', () => letterheadModal(false)]]),
         h('button', { class: 'btn wprint', onclick: printModal }, '🖨 طباعة')));
     const hiddenTut = () => ((S().tutHide = S().tutHide || {})[SP.state.me]);
     const side = h('div', { class: 'wside' });

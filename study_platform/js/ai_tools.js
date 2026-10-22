@@ -64,7 +64,7 @@
   }
   const overview = (kind) => {
     const ks = kind ? [kind] : KINDS, out = {};
-    ks.forEach((k) => { if (!mine[k]) return; out[k] = mine[k]().slice(0, 60).map((x) => ({ id: x.id, title: str(title(k, x), 80), ...(k === 'task' ? { done: x.done, due: x.due } : {}), ...(k === 'note' && x.pinned ? { pinned: true } : {}), ...(k === 'deck' ? { cards: x.cards.length } : {}), ...(k === 'quiz' ? { questions: x.questions.length } : {}), ...(k === 'flow' && SP.flowProgress ? { progress: SP.flowProgress(x) + '%' } : {}) })); });
+    ks.forEach((k) => { if (!mine[k]) return; out[k] = mine[k]().slice(0, 60).map((x) => ({ id: x.id, title: str(title(k, x), 80), ...(k === 'task' ? { done: x.done, due: x.due } : {}), ...(k === 'note' && x.pinned ? { pinned: true } : {}), ...(k === 'deck' ? { cards: x.cards.length } : {}), ...(k === 'file' ? { type: (x.mime || '').split('/').pop(), editable_pdf: x.src != null } : {}), ...(k === 'quiz' ? { questions: x.questions.length } : {}), ...(k === 'flow' && SP.flowProgress ? { progress: SP.flowProgress(x) + '%' } : {}) })); });
     return out;
   };
   async function search(query) {
@@ -88,6 +88,26 @@
     const options = (x.options || []).map((o) => str(o, 200)).slice(0, 6); if (options.length < 2) fail('سؤال الاختيار يحتاج خيارين على الأقل');
     const a = Number.isInteger(x.answer) ? x.answer : options.indexOf(String(x.answer)); return { id: SP.uid(), type, q: str(x.q, 500), options, answer: a >= 0 && a < options.length ? a : 0 };
   };
+
+  /* ---------- مساعدات PDF ---------- */
+  const pdfHtml = (src) => { const tbl = (block) => { const rows = block.trim().split('\n').filter((l) => !/^\s*\|?\s*:?-{2,}/.test(l)).map((l) => l.replace(/^\s*\||\|\s*$/g, '').split('|').map((c) => c.trim())); return '<table>' + rows.map((r, i) => '<tr>' + r.map((c) => (i ? '<td>' : '<th>') + c.replace(/[<>&]/g, '') + (i ? '</td>' : '</th>')).join('') + '</tr>').join('') + '</table>'; };
+    return src.split(/\n{2,}/).map((b) => (/^\s*\|.*\|\s*$/m.test(b) && b.trim().split('\n').every((l) => l.trim().startsWith('|')) ? tbl(b) : md(b))).join(''); };
+  const pageCount = async (blob) => { try { return (await window.PDFLib.PDFDocument.load(await blob.arrayBuffer(), { ignoreEncryption: true })).getPageCount(); } catch (e) { return 1; } };
+  async function deskFor(id) {
+    let d = (S().docs || []).find((y) => y.id === id && y.ownerId === me()); if (d) return d;
+    const f = mine.file().find((y) => y.id === id); if (!f) fail('لم أجد الملف. استخدم list_my_work.');
+    if (!/pdf|image/.test(f.mime || '')) fail('يمكن الكتابة على ملفات PDF والصور فقط');
+    d = f.deskId && (S().docs || []).find((y) => y.id === f.deskId && y.ownerId === me()); if (d) return d;
+    const b = await SP.idb.get(f.id); if (!b) fail('الملف غير موجود في هذا المتصفح');
+    d = await SP.deskAdd(new File([b], f.name, { type: f.mime || b.type })); if (!d) fail('تعذّر فتح الملف'); turn.snap.idb[d.fileId] = null; if (f.ownerId === me()) f.deskId = d.id; return d;
+  }
+  async function fileBlob(id) {
+    const d = (S().docs || []).find((y) => y.id === id && y.ownerId === me());
+    if (d) return { blob: await SP.deskFlatten(d), name: d.name + '.pdf' };
+    const f = get('file', id), dd = f.deskId && (S().docs || []).find((y) => y.id === f.deskId);
+    if (dd && dd.pages.some((p) => p.a.length)) return { blob: await SP.deskFlatten(dd), name: f.name.replace(/\.[^.]+$/, '') + '.pdf' };
+    const b = await SP.idb.get(f.id); if (!b) fail('الملف غير موجود'); return { blob: b, name: f.name };
+  }
 
   /* ---------- الأدوات ---------- */
   const T = (name, description, properties, required, execute) => ({ name, description, inputSchema: { type: 'object', properties, required }, execute: async (a) => { try { const r = await execute(a || {}); const js = typeof r === 'string' ? r : JSON.stringify(r); return new Blob([js]).size > 30000 ? js.slice(0, 13000) + ' …(اقتُطع لطوله، اطلب جزءاً محدداً)' : r; } catch (e) { return 'خطأ: ' + (e.message || e); } } });
@@ -164,6 +184,37 @@
       if (x.type === 'homework') Object.assign(it, { due: /^\d{4}-\d{2}-\d{2}$/.test(String(x.due)) ? x.due : '', max: 10, desc: str(x.text, 4000) });
       (S().classItems = S().classItems || []).push(it); done(); log('📢', `نشرت في «${c.name}»: ${it.title}`, 'classes/' + c.id); return { ok: true, id: it.id }; }),
 
+    T('create_pdf', 'ينشئ ملف PDF جديداً (يدعم العربية) من نص Markdown: عناوين #/##، نقاط -، جداول |، و**عريض**. يُحفظ في «الملفات» ويُفتح في «ملفات للتعليق». اكتب محتوى كاملاً ومنظماً.', { title: S_, markdown: S_, open: B_ }, ['title', 'markdown'], async ({ title: t, markdown, open }) => {
+      const name = str(t, 100) || 'ملف'; await snapshot(); const src = str(markdown, 60000), blob = await SP.makePdf(pdfHtml(src), { title: name }), fid = SP.uid();
+      await SP.idb.put(fid, blob); turn.snap.idb[fid] = null;
+      const f = { id: fid, ownerId: me(), name: name + '.pdf', mime: 'application/pdf', size: blob.size, tags: ['من المساعد'], color: '', star: false, stickers: [], kind: 'file', classId: '', added: Date.now(), desc: '', src, title: name };
+      S().files.push(f); const d = SP.deskAdd ? await SP.deskAdd(new File([blob], f.name, { type: 'application/pdf' })) : null; if (d) { f.deskId = d.id; turn.snap.idb[d.fileId] = null; }
+      done(); log('📕', `أنشأت PDF «${f.name}» (${await pageCount(blob)} صفحة)`, d ? 'desk/' + d.id : 'files'); if (open && d) setTimeout(() => SP.go('desk/' + d.id), 300); return { ok: true, file_id: fid, annotated_id: d && d.id }; }),
+    T('edit_pdf', 'يعدّل محتوى PDF أنشأه المساعد ويعيد بناءه: mode=replace_all أو append أو prepend (content بصيغة Markdown) أو replace_text (find ← content). لملف PDF مرفوع من الخارج استخدم annotate_pdf.', { file_id: S_, mode: { type: 'string', enum: ['replace_all', 'append', 'prepend', 'replace_text'] }, content: S_, find: S_, rename: S_ }, ['file_id', 'mode'], async (x) => {
+      const f = get('file', x.file_id); if (f.ownerId !== me()) fail('هذا الملف ليس لك'); if (f.src == null) fail('هذا PDF مرفوع وليس له مصدر قابل للتعديل؛ استخدم annotate_pdf للكتابة عليه');
+      let src = f.src; const c = str(x.content, 60000);
+      if (x.mode === 'replace_all') src = c; else if (x.mode === 'append') src += '\n\n' + c; else if (x.mode === 'prepend') src = c + '\n\n' + src; else { if (!x.find || !src.includes(x.find)) fail('لم أجد النص المطلوب'); src = src.split(String(x.find)).join(c); }
+      if (x.rename) { f.title = str(x.rename, 100); f.name = f.title + '.pdf'; }
+      await snapshot(f.id); const blob = await SP.makePdf(pdfHtml(src), { title: f.title || f.name.replace(/\.pdf$/i, '') }); await SP.idb.put(f.id, blob); f.src = src; f.size = blob.size; f.added = Date.now();
+      const d = f.deskId && (S().docs || []).find((y) => y.id === f.deskId); const n = await pageCount(blob);
+      if (d) { await snapshot(d.fileId); await SP.idb.put(d.fileId, blob); while (d.pages.length < n) d.pages.push({ a: [] }); d.pages.length = n; d.name = f.name.replace(/\.pdf$/i, ''); d.updated = Date.now(); }
+      done(); log('✏️', `عدّلت PDF «${f.name}» (${n} صفحة)`, d ? 'desk/' + d.id : 'files'); return { ok: true, pages: n }; }),
+    T('annotate_pdf', 'يكتب على أي PDF (حتى المرفوع من الخارج) دون تغيير أصله: نص ظاهر على الصفحة (style=text) أو ملاحظة لاصقة (style=note). target_id معرّف ملف أو ملف معلّق عليه. page من 1. position: top أو middle أو bottom.', { target_id: S_, page: N_, text: S_, style: { type: 'string', enum: ['text', 'note'] }, position: { type: 'string', enum: ['top', 'middle', 'bottom'] }, color: S_ }, ['target_id', 'text'], async (x) => {
+      await snapshot(); const d = await deskFor(x.target_id), pi = Math.max(1, Math.round(+x.page || 1)) - 1; if (!d.pages[pi]) fail(`الملف فيه ${d.pages.length} صفحة فقط`);
+      const pg = d.pages[pi], base = { top: 0.05, middle: 0.47, bottom: 0.88 }[x.position] || 0.05, k = pg.a.filter((a) => a.ai && a.pos === (x.position || 'top')).length, y = Math.min(0.95, base + k * 0.045), c = /^#[0-9a-f]{6}$/i.test(String(x.color)) ? x.color : null;
+      pg.a.push(x.style === 'note' ? { id: SP.uid(), t: 'note', x: 0.9, y, c: c || '#FFE14D', v: str(x.text, 1000), open: false, ts: Date.now(), ai: true, pos: x.position || 'top' } : { id: SP.uid(), t: 'text', x: 0.06, y, s: 0.022, c: c || '#C62828', v: str(x.text, 600), b: true, ai: true, pos: x.position || 'top' });
+      d.updated = Date.now(); done(); log('🖍️', `كتبت على «${d.name}» ص${pi + 1}`, 'desk/' + d.id); return { ok: true, annotated_id: d.id }; }),
+    T('publish_file', 'ينشر ملفاً (مع تعليقاته مدموجة إن وُجدت): للأستاذ في صفه (class_id) كشرح مع مرفق، أو يرسله لأشخاص بالاسم (to). يسأل المستخدم للتأكيد قبل النشر.', { target_id: S_, class_id: S_, to: { type: 'array', items: S_ }, message: S_ }, ['target_id'], async (x) => {
+      const cls = x.class_id ? SP.classById(x.class_id) : null; if (x.class_id && (!cls || cls.teacherId !== me())) fail('لست أستاذ هذا الصف');
+      const people = (x.to || []).map((nm) => S().users.find((u) => u.id !== me() && (u.name === nm || u.name.includes(String(nm)) || String(nm).includes(u.name.replace(/^د\.\s*/, ''))))).filter(Boolean); if (!cls && !people.length) fail('حدد صفاً تدرّسه أو أسماء أشخاص موجودين');
+      const { blob, name } = await fileBlob(x.target_id), where = [cls && '«' + cls.name + '»', ...people.map((u) => u.name)].filter(Boolean).join('، ');
+      if (!(await ask(`المساعد يريد نشر «${name}» إلى: ${where}. موافق؟`))) return 'رفض المستخدم النشر';
+      await snapshot(); const msg = str(x.message, 600);
+      if (cls) { const fid = SP.uid(); await SP.idb.put(fid, blob); turn.snap.idb[fid] = null; S().files.push({ id: fid, ownerId: me(), name, mime: 'application/pdf', size: blob.size, tags: [], color: '', star: false, stickers: [], kind: 'handout', classId: cls.id, added: Date.now(), desc: msg });
+        (S().classItems = S().classItems || []).push({ id: SP.uid(), classId: cls.id, by: me(), type: 'explain', title: name.replace(/\.pdf$/i, ''), ts: Date.now(), images: [], fileId: fid, fname: name, fmime: 'application/pdf', text: msg || 'ملف جديد 📕' }); }
+      for (const u of people) { const fid = SP.uid(); await SP.idb.put(fid, blob); turn.snap.idb[fid] = null; S().files.push({ id: fid, ownerId: u.id, name, mime: 'application/pdf', size: blob.size, tags: ['مستلم'], color: '', star: false, stickers: [], kind: 'file', classId: '', added: Date.now(), desc: ('من ' + SP.me().name + (msg ? ': ' + msg : '')).slice(0, 500) });
+        (S().inbox = S().inbox || []).push({ id: SP.uid(), from: me(), to: u.id, fileId: fid, name, mime: 'application/pdf', note: msg, ts: Date.now(), read: false }); }
+      done(); SP.updateBell && SP.updateBell(); log('📤', `نشرت «${name}» إلى ${where}`, cls ? 'classes/' + cls.id : ''); return { ok: true, sent_to: where }; }),
     T('delete_item', 'يحذف عنصراً (ملاحظة، مستند، مهمة، بطاقات، فويز، مجموعة، مسار). يسأل المستخدم للتأكيد قبل الحذف.', { kind: { type: 'string', enum: ['note', 'document', 'task', 'deck', 'quiz', 'collection', 'flow'] }, id: S_ }, ['kind', 'id'], async ({ kind, id }) => {
       const x = get(kind, id); if ((kind === 'deck' || kind === 'quiz') && !canEdit[kind](x)) fail('هذا ليس لك');
       if (!(await ask(`المساعد يريد حذف «${title(kind, x)}». موافق؟`))) return 'رفض المستخدم الحذف';
