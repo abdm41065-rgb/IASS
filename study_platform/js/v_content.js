@@ -6,20 +6,51 @@
   /* ---------- الملاحظات ---------- */
   const visibleNote = (n) => (n.classId ? SP.canSeeClass(n.classId) : n.ownerId === SP.state.me);
   const canEdit = (item, ownerKey = 'ownerId') => item[ownerKey] === SP.state.me || (item.classId && SP.isTeacher() && (SP.classById(item.classId) || {}).teacherId === SP.state.me);
+  /* صور الملاحظات: تُحفظ في IndexedDB بمفتاح nimg:<id> وتُصغَّر إن كانت كبيرة */
+  const imgSrc = (img, key) => { SP.idb.get(key).then((b) => { if (b) { const u = URL.createObjectURL(b); img.src = u; img.addEventListener('load', () => setTimeout(() => URL.revokeObjectURL(u), 1000), { once: true }); } }); return img; };
+  async function shrink(file) {
+    if (!/^image\/(png|jpe?g|webp)$/.test(file.type) || file.size < 400e3) return file;
+    try { const bm = await createImageBitmap(file), k = Math.min(1, 1600 / Math.max(bm.width, bm.height)); if (k === 1 && file.size < 1.5e6) return file;
+      const c = document.createElement('canvas'); c.width = Math.round(bm.width * k); c.height = Math.round(bm.height * k); c.getContext('2d').drawImage(bm, 0, 0, c.width, c.height);
+      return await new Promise((r) => c.toBlob((b) => r(b || file), 'image/jpeg', 0.85)); } catch (e) { return file; }
+  }
+  const lightbox = (keys, at = 0) => {
+    let i = at; const img = h('img', { class: 'lb-img', alt: '' }), count = h('small', { class: 'sub', style: { margin: 0 } });
+    const show = () => { imgSrc(img, keys[i]); count.textContent = keys.length > 1 ? `${i + 1} / ${keys.length}` : ''; };
+    const nav = keys.length > 1 ? h('div', { class: 'row', style: { justifyContent: 'center', marginTop: '10px' } }, h('button', { class: 'btn ghost sm', 'aria-label': 'السابقة', onclick: () => { i = (i - 1 + keys.length) % keys.length; show(); } }, '→'), count, h('button', { class: 'btn ghost sm', 'aria-label': 'التالية', onclick: () => { i = (i + 1) % keys.length; show(); } }, '←')) : null;
+    show(); SP.modal({ title: 'صورة الملاحظة', wide: true, body: h('div', {}, img, nav), actions: [{ label: 'إغلاق', onclick: (c) => c() }] });
+  };
   function noteEditor(note) {
-    const n = note || { id: SP.uid(), ownerId: SP.state.me, title: '', body: '', color: SP.COLORS[2], pinned: false, tags: [], classId: '', stickers: [], updated: Date.now() };
-    const title = h('input', { class: 'inp', style: { width: '100%' }, value: n.title, placeholder: 'العنوان' }), body = h('textarea', { class: 'inp', style: { minHeight: '180px' }, placeholder: 'اكتب ملاحظتك…' });
+    const n = note || { id: SP.uid(), ownerId: SP.state.me, title: '', body: '', color: SP.COLORS[2], pinned: false, tags: [], classId: '', stickers: [], images: [], updated: Date.now() };
+    const title = h('input', { class: 'inp', style: { width: '100%' }, value: n.title, placeholder: 'العنوان' }), body = h('textarea', { class: 'inp', style: { minHeight: '180px' }, placeholder: 'اكتب ملاحظتك… (يمكنك لصق صورة هنا مباشرة)' });
     body.value = n.body; const tags = SP.tagInput(n.tags), cls = SP.classSelect(n.classId, false), st = [...(n.stickers || [])]; let color = n.color, pinned = n.pinned;
     const pin = h('label', {}, h('input', { type: 'checkbox', checked: pinned, onchange: (e) => (pinned = e.target.checked) }), ' تثبيت');
-    SP.modal({ title: note ? 'تعديل الملاحظة' : 'ملاحظة جديدة', wide: true, body: h('div', {}, SP.field('العنوان', title), SP.field('المحتوى', body), SP.field('الوسوم', tags), SP.field('الصف (اختياري: ليراها زملاؤك)', cls), SP.field('اللون', SP.swatches(color, (c) => (color = c))), SP.field('ملصقات', SP.stickerPicker(st)), h('div', { style: { marginTop: '10px' } }, pin)),
-      actions: [{ label: 'إلغاء', onclick: (c) => c() }, { label: 'حفظ', primary: true, onclick: (c) => {
-        if (!title.value.trim() && !body.value.trim()) return SP.toast('الملاحظة فارغة', 'err');
-        Object.assign(n, { title: title.value.trim() || 'بدون عنوان', body: body.value, tags: SP.parseTags(tags.value), classId: cls.value, color, pinned, stickers: st, updated: Date.now() });
+    let imgs = [...(n.images || [])]; const added = [];
+    const thumbs = h('div', { class: 'ni-grid' });
+    const file = h('input', { type: 'file', accept: 'image/*', multiple: true, id: 'note-img', style: { display: 'none' }, onchange: (e) => { addImgs([...e.target.files]); e.target.value = ''; } });
+    const drawThumbs = () => thumbs.replaceChildren(...imgs.map((k, idx) => h('div', { class: 'ni-th' }, imgSrc(h('img', { alt: 'صورة ' + (idx + 1) }), k),
+      h('button', { class: 'ni-x', 'aria-label': 'إزالة الصورة', title: 'إزالة', onclick: () => { imgs = imgs.filter((x) => x !== k); drawThumbs(); } }, '✕'))),
+      h('button', { class: 'ni-add', type: 'button', onclick: () => file.click() }, h('span', { class: 'ni-plus' }, '📷'), imgs.length ? 'صورة أخرى' : 'أضف صوراً'));
+    async function addImgs(files) {
+      const pics = files.filter((f) => f.type.startsWith('image/')); if (!pics.length) return;
+      for (const f of pics) { const k = 'nimg:' + SP.uid(); await SP.idb.put(k, await shrink(f)); added.push(k); imgs.push(k); }
+      drawThumbs(); SP.toast(pics.length > 1 ? `أُضيفت ${pics.length} صور` : 'أُضيفت الصورة');
+    }
+    body.addEventListener('paste', (e) => { const fs = [...(e.clipboardData || {}).files || []].filter((f) => f.type.startsWith('image/')); if (fs.length) { e.preventDefault(); addImgs(fs); } });
+    const zone = h('div', { class: 'ni-zone' }, thumbs, file, h('small', { class: 'sub', style: { margin: '6px 0 0', display: 'block' } }, 'اسحب الصور إلى هنا، أو الصقها داخل النص، أو اختر من جهازك.'));
+    zone.addEventListener('dragover', (e) => { e.preventDefault(); zone.classList.add('over'); }); zone.addEventListener('dragleave', () => zone.classList.remove('over'));
+    zone.addEventListener('drop', (e) => { e.preventDefault(); zone.classList.remove('over'); addImgs([...e.dataTransfer.files]); });
+    drawThumbs();
+    SP.modal({ title: note ? 'تعديل الملاحظة' : 'ملاحظة جديدة', wide: true, body: h('div', {}, SP.field('العنوان', title), SP.field('المحتوى', body), SP.field('الصور', zone), SP.field('الوسوم', tags), SP.field('الصف (اختياري: ليراها زملاؤك)', cls), SP.field('اللون', SP.swatches(color, (c) => (color = c))), SP.field('ملصقات', SP.stickerPicker(st)), h('div', { style: { marginTop: '10px' } }, pin)),
+      actions: [{ label: 'إلغاء', onclick: (c) => { added.forEach((k) => SP.idb.del(k)); c(); } }, { label: 'حفظ', primary: true, onclick: (c) => {
+        if (!title.value.trim() && !body.value.trim() && !imgs.length) return SP.toast('الملاحظة فارغة', 'err');
+        (n.images || []).filter((k) => !imgs.includes(k)).forEach((k) => SP.idb.del(k)); added.filter((k) => !imgs.includes(k)).forEach((k) => SP.idb.del(k));
+        Object.assign(n, { title: title.value.trim() || (imgs.length && !body.value.trim() ? 'صورة' : 'بدون عنوان'), body: body.value, tags: SP.parseTags(tags.value), classId: cls.value, color, pinned, stickers: st, images: imgs, updated: Date.now() });
         if (!note) S().notes.push(n); SP.save(); c(); SP.refresh(); SP.emit('react', 'write');
       } }] });
   }
   function noteView(n) {
-    SP.modal({ title: n.title, wide: true, body: h('div', {}, h('p', { style: { whiteSpace: 'pre-wrap', marginTop: 0 } }, n.body), h('small', { class: 'sub' }, SP.date(n.updated) + ' · ' + SP.user(n.ownerId).name)), actions: [{ label: 'إغلاق', onclick: (c) => c() }] });
+    SP.modal({ title: n.title, wide: true, body: h('div', {}, (n.images || []).length ? h('div', { class: 'ni-grid view' }, n.images.map((k, i) => h('button', { class: 'ni-th', 'aria-label': 'كبّر الصورة', onclick: () => lightbox(n.images, i) }, imgSrc(h('img', { alt: '' }), k)))) : null, h('p', { style: { whiteSpace: 'pre-wrap', marginTop: 0 } }, n.body), h('small', { class: 'sub' }, SP.date(n.updated) + ' · ' + SP.user(n.ownerId).name)), actions: [{ label: 'إغلاق', onclick: (c) => c() }] });
   }
   SP.reg('notes', '📝', 'الملاحظات', () => {
     let q = '', tag = '', onlyPin = false;
@@ -33,8 +64,9 @@
         h('header', { class: 'nt-head' }, h('h3', { class: 'nt-title' }, n.title),
           h('div', { class: 'nt-acts' }, edit ? h('button', { class: 'nt-icon' + (n.pinned ? ' on' : ''), title: n.pinned ? 'إلغاء التثبيت' : 'تثبيت في الأعلى', 'aria-label': n.pinned ? 'إلغاء التثبيت' : 'تثبيت', 'aria-pressed': String(!!n.pinned), onclick: (e) => { e.stopPropagation(); togglePin(n); } }, '📌') : null,
             SP.more([edit ? ['✏️ تعديل', () => noteEditor(n)] : ['👁 عرض كاملة', () => noteView(n)], ['⬇️ تنزيل', () => SP.download((n.title || 'note') + '.txt', n.title + '\n\n' + n.body)], SP.flowItem ? SP.flowItem('note', n.id, n.title) : null,
-              edit ? ['🗑 حذف', async () => { if (await SP.confirm('حذف الملاحظة؟')) { S().notes = S().notes.filter((x) => x.id !== n.id); SP.save(); draw(); } }, true] : null]))),
-        h('p', { class: 'nt-body' }, n.body),
+              edit ? ['🗑 حذف', async () => { if (await SP.confirm('حذف الملاحظة؟')) { (n.images || []).forEach((k) => SP.idb.del(k)); S().notes = S().notes.filter((x) => x.id !== n.id); SP.save(); draw(); } }, true] : null]))),
+        (n.images || []).length ? h('div', { class: 'nt-cover', role: 'button', 'aria-label': 'عرض الصور', onclick: (e) => { e.stopPropagation(); lightbox(n.images); } }, imgSrc(h('img', { alt: '', loading: 'lazy' }), n.images[0]), n.images.length > 1 ? h('span', { class: 'nt-count' }, '📷 ' + n.images.length) : null) : null,
+        n.body ? h('p', { class: 'nt-body' }, n.body) : null,
         (n.stickers || []).length || n.tags.length || n.classId ? h('div', { class: 'nt-tags' }, (n.stickers || []).map((e) => h('span', { class: 'nt-stk' }, e)), n.classId ? h('span', { class: 'chip' }, SP.className(n.classId)) : null, n.tags.map((t) => h('span', { class: 'chip' }, '#' + t))) : null,
         h('footer', { class: 'nt-foot' }, h('small', {}, SP.date(n.updated) + (n.ownerId !== SP.state.me ? ' · ' + SP.user(n.ownerId).name : '')), SP.flowChip ? SP.flowChip('note', n.id) : null));
     };
