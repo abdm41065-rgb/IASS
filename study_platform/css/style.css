@@ -893,3 +893,8 @@ body.in-writer #sanad{display:none}
 @keyframes tutAway{to{opacity:0;transform:translateY(30px) scale(.9)}}
 @keyframes tutSheet{0%{opacity:1;transform:translateY(-30px)}100%{opacity:1;transform:translateY(34px) rotate(-4deg)}}
 @media(prefers-reduced-motion:reduce){.tut-stage{display:none}}
+.m-msg.act{background:var(--blue-tint);color:var(--ink);display:grid;gap:6px;border:1px solid color-mix(in srgb,var(--blue) 25%,transparent)}
+.m-msg.act small{color:var(--blue);font-weight:700}
+.m-act{display:flex;align-items:center;gap:8px;justify-content:space-between;font-size:.88rem}.m-act .chip{cursor:pointer;border:0;font:inherit;font-size:.78rem}
+.m-undo{justify-self:start;margin-top:2px}
+.m-act .chip{flex:none;white-space:nowrap;background:var(--card);color:var(--blue);padding:4px 10px}

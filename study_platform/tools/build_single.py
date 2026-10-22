@@ -7,7 +7,7 @@ css = (R / "css/style.css").read_text(encoding="utf-8")
 body = re.search(r"<body>(.*?)</body>", src, re.S).group(1)
 body = re.sub(r'<script src="(js|vendor)/[^"]+"></script>\s*', "", body)
 CDN = "".join(f'<script src="https://cdn.jsdelivr.net/npm/{x}"></script>\n' for x in ["pdfjs-dist@3.11.174/build/pdf.min.js", "pdfjs-dist@3.11.174/build/pdf.worker.min.js", "pdf-lib@1.17.1/dist/pdf-lib.min.js", "mammoth@1.6.0/mammoth.browser.min.js"])
-js = "\n".join((R / "js" / n).read_text(encoding="utf-8") for n in ["store", "ui", "v_home", "v_content", "v_learn", "v_share", "v_desk", "v_writer", "v_space", "v_lectures","v_flow", "v_chat", "sim_med", "v_ai", "main"] for n in [n + ".js"])
+js = "\n".join((R / "js" / n).read_text(encoding="utf-8") for n in ["store", "ui", "v_home", "v_content", "v_learn", "v_share", "v_desk", "v_writer", "v_space", "v_lectures","v_flow", "v_chat", "sim_med", "ai_tools", "v_ai", "main"] for n in [n + ".js"])
 js = (R / "vendor" / "pdf_fonts.js").read_text(encoding="utf-8") + "\n" + js
 js = js.replace("</script", "<\\/script")
 font = re.search(r'<link rel="stylesheet" href="https://fonts[^>]+>', src).group(0)

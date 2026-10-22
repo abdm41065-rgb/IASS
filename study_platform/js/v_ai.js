@@ -337,7 +337,7 @@
   const list = h('div', { class: 'm-list', 'aria-live': 'polite' }), input = h('textarea', { class: 'inp', id: 'sanad-input', rows: 1, placeholder: 'اكتب رسالتك…', 'aria-label': 'رسالة إلى المساعد' });
   const sendBtn = h('button', { class: 'btn', onclick: () => send() }, 'إرسال'), stopBtn = h('button', { class: 'btn ghost', hidden: true, onclick: () => ctl && ctl.abort() }, 'إيقاف');
   const face = h('span', { class: 'm-face' }), title = h('b', {}, mname());
-  const SUGG = ['ما مهامي اليوم؟', 'اختبرني بسؤال', 'لخّص آخر ملاحظاتي', 'كيف أنظّم وقتي للمذاكرة؟'];
+  const SUGG = ['ما مهامي اليوم؟', 'اعمل بطاقات من آخر ملاحظة', 'حسّن صياغة آخر مستند', 'رتّب لي خطة مذاكرة كمهام', 'اختبرني بسؤال'];
   const skillChip = h('button', { class: 'chip on', onclick: () => { const c = chats(); c.push({ role: 'bot', text: SP.mascotSkill() }); SP.save(); drawChat(); } });
   panel.append(h('header', {}, face, h('div', {}, title, h('div', { class: 'sub', style: { margin: 0, fontSize: '.8rem' } }, 'مساعدك في الدراسة')),
     h('button', { class: 'btn ghost sm', onclick: () => SP.customizeMascot() }, 'شكلي'), h('button', { class: 'btn ghost sm', 'aria-label': 'مسح المحادثة', onclick: () => { chats().length = 0; SP.save(); drawChat(); } }, 'مسح'), h('button', { class: 'btn ghost sm', 'aria-label': 'إغلاق', onclick: () => toggle(false) }, '✕')),
@@ -345,10 +345,12 @@
   document.body.append(panel);
   input.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } });
   const toggle = (on = !panelOpen) => { panelOpen = on; panel.hidden = !on; root.classList.toggle('open', on); bubble.hidden = true; if (on) { drawChat(); input.focus(); } else chatBtn.focus(); };
-  const msgEl = (m) => h('div', { class: 'm-msg ' + (m.role === 'user' ? 'me' : 'bot') }, m.text);
+  const msgEl = (m) => m.role === 'act' ? h('div', { class: 'm-msg act' }, h('small', {}, '⚙️ ما نفّذته'), m.acts.map((a) => h('div', { class: 'm-act' }, h('span', {}, a.icon + ' ' + a.text), a.route ? h('button', { class: 'chip', onclick: () => SP.go(a.route) }, 'افتح') : null)),
+      m.acts[0].undo && !m.undone && SP.aiCanUndo && SP.aiCanUndo(m.acts[0].undo) ? h('button', { class: 'btn ghost sm m-undo', onclick: async () => { if (await SP.aiUndo(m.acts[0].undo)) { const c = chats(); const mm = c.find((x) => x.role === 'act' && x.acts[0].undo === m.acts[0].undo); if (mm) mm.undone = true; c.push({ role: 'bot', text: 'رجّعت كل شي مثل ما كان ↩️' }); SP.save(); drawChat(); } } }, '↩️ تراجع عن هذه التغييرات') : m.undone ? h('small', { class: 'sub' }, 'تم التراجع') : null)
+    : h('div', { class: 'm-msg ' + (m.role === 'user' ? 'me' : 'bot') }, m.text);
   function drawChat() {
     const c = chats();
-    list.replaceChildren(...(c.length ? c.map(msgEl) : [h('div', { class: 'm-msg bot' }, `أهلاً ${SP.me().name}! أنا ${mname()}، مساعدك في الدراسة. اسألني عن دروسك، أو اطلب مني أختبرك، أو أذكّرك بمهامك.`)]));
+    list.replaceChildren(...(c.length ? c.map(msgEl) : [h('div', { class: 'm-msg bot' }, `أهلاً ${SP.me().name}! أنا ${mname()}، مساعدك في الدراسة. أقدر أوصل لكل أعمالك وأعدّل عليها: ملاحظاتك ومستنداتك وبطاقاتك وفويزاتك ومهامك ومجموعاتك ومساراتك. اطلب مثلاً «لخّص ملزمة القلب في ملاحظة» أو «أضف 5 بطاقات لمجموعة التشريح». وكل تعديل تقدر تتراجع عنه.`)]));
     list.scrollTop = list.scrollHeight;
   }
   const brief = () => {
@@ -380,18 +382,21 @@
     const bot = h('div', { class: 'm-msg bot typing' }, 'سند يكتب…'); list.append(bot); list.scrollTop = list.scrollHeight;
     const sample = await SP.aiSample(); root.dataset.mood = 'thinking';
     if (!sample) { setTimeout(() => { const a = offline(q); c.push({ role: 'bot', text: a }); SP.save(); drawChat(); SP.react('happy'); }, 500); return; }
-    ctl = new AbortController(); sendBtn.hidden = true; stopBtn.hidden = false;
-    const RULES = `أنت «${mname()}»، ${KINDS[cfg().kind] || 'بومة'}: ${persona().voice}. وأنت مساعد دراسة داخل منصة دراسة عربية. تكلّم بالعربية بلهجة ودودة وواضحة، بجمل قصيرة، واستخدم إيموجي واحداً أو اثنين في كل رد بشكل طبيعي. ساعد في شرح الدروس، اختبار المستخدم بأسئلة، تنظيم الوقت، والتحفيز. لا تخترع معلومات عن ملفات لم تقرأها. ابدأ ردك دائماً بوسم المزاج بين قوسين مربعين واحد فقط من: [happy] [celebrate] [encourage] [thinking] [wave] ثم الرد. بيانات المستخدم الآن: ${JSON.stringify(brief())}`;
-    const turns = [{ role: 'user', content: RULES }, ...c.slice(-16).map((m) => ({ role: m.role === 'user' ? 'user' : 'assistant', content: m.text }))];
+    ctl = new AbortController(); sendBtn.hidden = true; stopBtn.hidden = false; SP.aiBeginTurn && SP.aiBeginTurn();
+    const RULES = `أنت «${mname()}»، ${KINDS[cfg().kind] || 'بومة'}: ${persona().voice}. وأنت مساعد دراسة داخل منصة دراسة عربية. تكلّم بالعربية بلهجة ودودة وواضحة، بجمل قصيرة، واستخدم إيموجي واحداً أو اثنين في كل رد بشكل طبيعي. ساعد في شرح الدروس، اختبار المستخدم بأسئلة، تنظيم الوقت، والتحفيز. لا تخترع معلومات عن ملفات لم تقرأها. عندك أدوات للوصول إلى كل أعمال المستخدم (ملاحظات، مستندات، ملفات، بطاقات، فويزات، مهام، مجموعات، مسارات، صفوف) وتعديلها: استخدم list_my_work أو search_my_work لتجد العنصر، واقرأه بـ read_item قبل أي تعديل، ثم نفّذ ما طلبه المستخدم بالضبط بلا تعديلات لم يطلبها. لا تحذف إلا إذا طلب الحذف صراحة. بعد التنفيذ اذكر باختصار ما غيّرته، والمستخدم يقدر يتراجع بزر «تراجع». إذا كان الطلب غامضاً (أي ملاحظة؟ أي مستند؟) اسأله أولاً. ابدأ ردك دائماً بوسم المزاج بين قوسين مربعين واحد فقط من: [happy] [celebrate] [encourage] [thinking] [wave] ثم الرد. بيانات المستخدم الآن: ${JSON.stringify(brief())}`;
+    const turns = [{ role: 'user', content: RULES }, ...c.slice(-16).map((m) => ({ role: m.role === 'user' ? 'user' : 'assistant', content: m.role === 'act' ? '(نفّذتُ: ' + m.acts.map((a) => a.text).join('، ') + ')' : m.text }))];
     const clean = (t) => t.replace(/^\s*\[(happy|celebrate|encourage|thinking|wave)\]\s*/i, '');
     try {
       const lim = await sample.limits().catch(() => null);
-      const { text: out } = await sample(turns, { signal: ctl.signal, modelTier: 'quick', ...(lim && lim.tools ? { tools: TOOLS() } : { cache: false }), onText: ({ text: t }) => { bot.classList.remove('typing'); bot.textContent = clean(t); list.scrollTop = list.scrollHeight; } });
+      const { text: out } = await sample(turns, { signal: ctl.signal, modelTier: 'quick', ...(lim && lim.tools ? { tools: SP.aiTools ? SP.aiTools() : TOOLS() } : { cache: false }), onText: ({ text: t }) => { bot.classList.remove('typing'); bot.textContent = clean(t); list.scrollTop = list.scrollHeight; } });
       const mood = (out.match(/^\s*\[(\w+)\]/) || [])[1]; c.push({ role: 'bot', text: clean(out) }); SP.save(); drawChat(); SP.react(MOODS[mood] ? mood : 'happy');
     } catch (e) {
       bot.classList.remove('typing'); bot.textContent = (e.text ? clean(e.text) + '\n\n' : '') + (e.code === 'cancelled' ? '(أُوقف الرد)' : aiErr(e));
       if (e.text) c.push({ role: 'bot', text: clean(e.text) }); SP.save();
-    } finally { ctl = null; sendBtn.hidden = false; stopBtn.hidden = true; }
+    } finally {
+      ctl = null; sendBtn.hidden = false; stopBtn.hidden = true;
+      const acts = SP.aiEndTurn ? SP.aiEndTurn() : []; if (acts.length) { c.push({ role: 'act', acts }); SP.save(); drawChat(); }
+    }
   }
   (SP.listeners.route = SP.listeners.route || []).push(() => { updateBell(); paint(); if (panelOpen) drawChat(); });
   updateBell(); paint();

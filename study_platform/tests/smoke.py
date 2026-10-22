@@ -477,6 +477,44 @@ with sync_playwright() as p:
     check(p3.evaluate("SP.state.classItems.length") == n_items + 1 and p3.evaluate("(()=>{const i=SP.state.classItems.at(-1);return i.type==='explain'&&i.by==='dA'&&!!i.fileId})()"), "teacher sends document to class chat")
     ctx3.close()
 
+    # ---- المساعد يصل لكل الأعمال ويعدّل عليها ----
+    ctx4 = b.new_context(viewport={"width": 1280, "height": 900})
+    ctx4.add_init_script("""
+      const fake = async (turns, o) => { const t = Object.fromEntries(o.tools.map(x => [x.name, x]));
+        window.__toolLog = [];
+        window.__toolLog.push(await t.read_item.execute({kind: 'note', id: 'n_plexus'}));
+        window.__toolLog.push(await t.update_note.execute({id: 'n_plexus', append: 'سطر أضافه المساعد'}));
+        window.__toolLog.push(await t.create_deck.execute({name: 'بطاقات المساعد', cards: [{q: 'C5–C6؟', a: 'شلل إرب'}, {q: 'C8–T1؟', a: 'كلومبكي'}]}));
+        return {text: '[happy] أضفت السطر وعملت بطاقتين'}; };
+      fake.limits = async () => ({tools: true, maxPromptBytes: 262144});
+      fake.json = async () => ({});
+      window.claude = {use: async (n) => n === 'sample' ? fake : null};
+    """)
+    p4 = ctx4.new_page(); p4.on("pageerror", lambda e: errors.append(str(e)))
+    p4.goto(URL); p4.wait_for_timeout(300); p4.evaluate("SP.loadMedSim()"); p4.wait_for_timeout(700)
+    tl = lambda js: p4.evaluate("(async()=>{const t=Object.fromEntries(SP.aiTools().map(x=>[x.name,x]));return " + js + "})()")
+    ov = tl("await t.list_my_work.execute({})")
+    check(any(n["id"] == "n_plexus" for n in ov["note"]) and len(ov["flow"]) == 1 and len(ov["class"]) == 4 and len(ov["deck"]) >= 4, "assistant lists all of the student's work")
+    check("C5" in tl("(await t.read_item.execute({kind:'note',id:'n_plexus'})).body") and "القلب" in tl("(await t.read_item.execute({kind:'file',id:'sim_heart'})).text"), "assistant reads notes and file contents")
+    kinds = {x["kind"] for x in tl("await t.search_my_work.execute({query:'الضفيرة'})")}
+    check({"note", "deck"} <= kinds, "assistant searches across all kinds: " + str(kinds))
+    did = tl("(await t.create_document.execute({name:'ملخص من المساعد', markdown:'## القلب\\n- النتاج القلبي = معدل × حجم'})).id")
+    tl("await t.edit_document.execute({id:'" + did + "', mode:'replace_text', find:'معدل', content:'معدل القلب'})")
+    check("معدل القلب" in tl("(await t.read_item.execute({kind:'document',id:'" + did + "'})).text"), "assistant creates and edits a document")
+    check("خطأ" in tl("await t.post_to_class.execute({class_id:'an', type:'notice', title:'x'})"), "student cannot post to a class through the assistant")
+    check(tl("(await t.edit_flow.execute({id:'fl_ospe', step_id:'fn_d', status:'done'})).ok") and p4.evaluate("SP.state.flows[0].nodes.find(n=>n.id==='fn_d').status") == "done", "assistant updates a flow step")
+    p4.evaluate("() => { window.__del = (async()=>{const t=Object.fromEntries(SP.aiTools().map(x=>[x.name,x]));return t.delete_item.execute({kind:'task',id:SP.state.tasks.find(x=>x.userId==='st').id})})(); }")
+    p4.wait_for_selector(".md"); check("المساعد يريد حذف" in p4.inner_text(".md"), "deleting asks the user first"); p4.click(".md button:text-is('إلغاء')")
+    check(p4.evaluate("window.__del") == "رفض المستخدم الحذف", "declined delete leaves work untouched")
+    p4.evaluate("location.hash='#/notes'"); p4.wait_for_timeout(200)
+    p4.click("#sanad .m-chat"); p4.fill("#sanad-input", "أضف سطر لملاحظة الضفيرة واعمل بطاقات"); p4.press("#sanad-input", "Enter"); p4.wait_for_selector(".m-msg.act", timeout=8000)
+    check("سطر أضافه المساعد" in p4.evaluate("SP.state.notes.find(n=>n.id==='n_plexus').body") and p4.evaluate("SP.state.decks.some(d=>d.name==='بطاقات المساعد')"), "assistant edits work from a chat request")
+    check(p4.locator(".m-msg.act .m-act").count() == 2 and "أضفت السطر" in p4.inner_text(".m-list"), "chat shows what the assistant changed")
+    p4.click(".m-undo"); p4.wait_for_timeout(300)
+    check("سطر أضافه المساعد" not in p4.evaluate("SP.state.notes.find(n=>n.id==='n_plexus').body") and not p4.evaluate("SP.state.decks.some(d=>d.name==='بطاقات المساعد')") and "رجّعت" in p4.inner_text(".m-list"), "undo restores the work and keeps the chat")
+    ctx4.close()
+
+
     # ---------- محاكاة Claude (مسار المساعد الذكي) ----------
     ctx2 = b.new_context(viewport={"width": 1280, "height": 900})
     ctx2.add_init_script("""
