@@ -61,7 +61,7 @@
       return h('a', { class: 'sn' + (k === key ? ' on' : ''), href: '#/' + k, 'aria-current': k === key ? 'page' : null }, h('span', { class: 'sn-ic' }, icon(SUB_ICON[k] || k)), h('span', { class: 'sn-l' }, SP.views[k].label), n ? h('span', { class: 'sn-n' }, n) : null); })) : null;
     document.title = v.label + ' · منصة الدراسة';
     try { main.replaceChildren(...[sub, v.render(parts.slice(1))].filter(Boolean)); } catch (e) { console.error(e); main.replaceChildren(SP.empty('حدث خطأ غير متوقع في هذه الصفحة.')); }
-    document.body.classList.remove('nav-open'); document.body.classList.toggle('in-chat', !!document.querySelector('#main .tg-compose, #main .tg-locked')); window.scrollTo(0, 0); SP.motion && SP.motion(main); SP.emit('route');
+    document.body.classList.remove('nav-open'); document.body.classList.toggle('in-chat', !!document.querySelector('#main .tg-compose, #main .tg-locked')); document.body.classList.toggle('in-writer', !!document.querySelector('#main .wfoot')); window.scrollTo(0, 0); SP.motion && SP.motion(main); SP.emit('route');
   };
   window.addEventListener('hashchange', SP.route);
   document.getElementById('who').addEventListener('change', (e) => { SP.state.me = e.target.value; SP.save(); SP.route(); });

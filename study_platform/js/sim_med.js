@@ -166,7 +166,9 @@
     const flows = [{ id: 'fl_ospe', ownerId: 'st', name: 'تحضير OSPE التشريح', created: T(-3), updated: T(0, 6), view: { x: 0, y: 0, z: 0.8 }, fit: true, nodes: flowNodes, edges: flowEdges }];
 
     return {
-      v: 1, me: 'st', dark: null, fontSize: 16, sim: 'med', flows, users, classes, notes,
+      v: 1, me: 'st', dark: null, fontSize: 16, sim: 'med', flows,
+      letterhead: { dA: { uni: 'جامعة بغداد', college: 'كلية الطب', dept: 'فرع التشريح', course: 'التشريح', stage: 'المرحلة الثانية', name: 'د. سارة الجبوري', title: 'مدرّسة مادة التشريح' },
+        dP: { uni: 'جامعة بغداد', college: 'كلية الطب', dept: 'فرع الفسلجة', course: 'الفسلجة', stage: 'المرحلة الثانية', name: 'د. علي الربيعي', title: 'أستاذ مساعد' } }, users, classes, notes,
       files: [
         { id: 'sim_heart', ownerId: 'dP', name: 'ملزمة الفسلجة - القلب.txt', mime: 'text/plain', size: HEART.length * 2, tags: ['فسلجة', 'قلب'], color: '#B91C1C', star: true, stickers: ['❤️'], kind: 'handout', classId: 'ph', added: T(-3), desc: 'ملزمة الشهري. من زر ⋯ اختر «أسئلة من الملف» لتوليد اختبار منها.', pages: 12, readPages: 7 },
         { id: 'sim_glyco', ownerId: 'st', name: 'ملخص تحلل السكر.txt', mime: 'text/plain', size: GLYCO.length * 2, tags: ['كيمياء حياتية'], color: '#2E7D32', star: false, stickers: ['⭐'], kind: 'file', classId: '', added: T(-2), desc: 'ملخصي لكويز الغد', pages: 0, readPages: 0 },
