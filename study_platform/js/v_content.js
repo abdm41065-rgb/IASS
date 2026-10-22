@@ -18,27 +18,35 @@
         if (!note) S().notes.push(n); SP.save(); c(); SP.refresh(); SP.emit('react', 'write');
       } }] });
   }
+  function noteView(n) {
+    SP.modal({ title: n.title, wide: true, body: h('div', {}, h('p', { style: { whiteSpace: 'pre-wrap', marginTop: 0 } }, n.body), h('small', { class: 'sub' }, SP.date(n.updated) + ' · ' + SP.user(n.ownerId).name)), actions: [{ label: 'إغلاق', onclick: (c) => c() }] });
+  }
   SP.reg('notes', '📝', 'الملاحظات', () => {
     let q = '', tag = '', onlyPin = false;
-    const root = h('div', {}), grid = h('div', { class: 'grid' }), bar = h('div', {});
+    const root = h('div', {}), grid = h('div', { class: 'grid notes-grid' }), bar = h('div', { class: 'nt-filters', role: 'toolbar', 'aria-label': 'تصفية الملاحظات' });
     const all = () => S().notes.filter(visibleNote);
+    const chip = (label, on, fn) => h('button', { class: 'nt-chip' + (on ? ' on' : ''), 'aria-pressed': String(on), onclick: fn }, label);
+    const togglePin = (n) => { n.pinned = !n.pinned; n.updated = Date.now(); SP.save(); draw(); SP.toast(n.pinned ? 'ثُبّتت في الأعلى 📌' : 'أُلغي التثبيت'); };
+    const card = (n) => {
+      const edit = canEdit(n), open = () => (edit ? noteEditor(n) : noteView(n));
+      return h('article', { class: 'note nt-card' + (n.pinned ? ' pinned' : ''), style: { '--nc': n.color || 'var(--blue)' }, tabindex: '0', role: 'button', 'aria-label': (edit ? 'تعديل: ' : 'عرض: ') + n.title, onclick: open, onkeydown: (e) => { if (e.key === 'Enter' && e.target === e.currentTarget) open(); } },
+        h('header', { class: 'nt-head' }, h('h3', { class: 'nt-title' }, n.title),
+          h('div', { class: 'nt-acts' }, edit ? h('button', { class: 'nt-icon' + (n.pinned ? ' on' : ''), title: n.pinned ? 'إلغاء التثبيت' : 'تثبيت في الأعلى', 'aria-label': n.pinned ? 'إلغاء التثبيت' : 'تثبيت', 'aria-pressed': String(!!n.pinned), onclick: (e) => { e.stopPropagation(); togglePin(n); } }, '📌') : null,
+            SP.more([edit ? ['✏️ تعديل', () => noteEditor(n)] : ['👁 عرض كاملة', () => noteView(n)], ['⬇️ تنزيل', () => SP.download((n.title || 'note') + '.txt', n.title + '\n\n' + n.body)], SP.flowItem ? SP.flowItem('note', n.id, n.title) : null,
+              edit ? ['🗑 حذف', async () => { if (await SP.confirm('حذف الملاحظة؟')) { S().notes = S().notes.filter((x) => x.id !== n.id); SP.save(); draw(); } }, true] : null]))),
+        h('p', { class: 'nt-body' }, n.body),
+        (n.stickers || []).length || n.tags.length || n.classId ? h('div', { class: 'nt-tags' }, (n.stickers || []).map((e) => h('span', { class: 'nt-stk' }, e)), n.classId ? h('span', { class: 'chip' }, SP.className(n.classId)) : null, n.tags.map((t) => h('span', { class: 'chip' }, '#' + t))) : null,
+        h('footer', { class: 'nt-foot' }, h('small', {}, SP.date(n.updated) + (n.ownerId !== SP.state.me ? ' · ' + SP.user(n.ownerId).name : '')), SP.flowChip ? SP.flowChip('note', n.id) : null));
+    };
     const draw = () => {
       const tags = [...new Set(all().flatMap((n) => n.tags))];
-      bar.replaceChildren(SP.filterBar(tags, tag, (t) => { tag = t; draw(); }));
+      bar.replaceChildren(chip('الكل', !tag && !onlyPin, () => { tag = ''; onlyPin = false; draw(); }), chip('📌 المثبّتة', onlyPin, () => { onlyPin = !onlyPin; draw(); }), ...tags.map((t) => chip('#' + t, t === tag, () => { tag = t === tag ? '' : t; draw(); })));
       const list = all().filter((n) => (!tag || n.tags.includes(tag)) && (!onlyPin || n.pinned) && (n.title + n.body + n.tags.join(' ')).toLowerCase().includes(q)).sort((a, b) => b.pinned - a.pinned || b.updated - a.updated);
-      grid.replaceChildren(...(list.length ? list.map((n) => h('div', { class: 'note', style: { borderInlineStartColor: n.color } },
-        h('div', { class: 'row sp' }, h('b', {}, (n.pinned ? '📌 ' : '') + n.title), n.classId ? h('span', { class: 'chip' }, SP.className(n.classId)) : null),
-        h('p', {}, n.body.length > 220 ? n.body.slice(0, 220) + '…' : n.body),
-        h('div', {}, (n.stickers || []).map((e) => h('span', { style: { fontSize: '1.3rem' } }, e)), n.tags.map((t) => h('span', { class: 'chip' }, '#' + t))),
-        h('div', { class: 'row', style: { marginTop: '8px' } }, h('small', { class: 'sub', style: { margin: 0 } }, SP.date(n.updated) + (n.ownerId !== SP.state.me ? ' · ' + SP.user(n.ownerId).name : '')),
-          SP.flowChip ? SP.flowChip('note', n.id) : null,
-          canEdit(n) ? h('button', { class: 'btn ghost sm', onclick: () => noteEditor(n) }, 'تعديل') : null,
-          SP.more([['⬇️ تنزيل', () => SP.download((n.title || 'note') + '.txt', n.title + '\n\n' + n.body)], SP.flowItem ? SP.flowItem('note', n.id, n.title) : null,
-            canEdit(n) ? ['🗑 حذف', async () => { if (await SP.confirm('حذف الملاحظة؟')) { S().notes = S().notes.filter((x) => x.id !== n.id); SP.save(); draw(); } }, true] : null])))) : [SP.empty('لا توجد ملاحظات مطابقة')]));
+      grid.replaceChildren(...(list.length ? list.map(card) : [SP.empty('لا توجد ملاحظات مطابقة')]));
     };
-    root.append(SP.page('الملاحظات', 'دوّن أفكارك ولوّنها ووسمها ودبّسها.', h('div', { class: 'row' },
-      h('button', { class: 'btn', onclick: () => noteEditor() }, 'ملاحظة جديدة'), h('input', { class: 'inp', placeholder: 'بحث في الملاحظات…', oninput: (e) => { q = e.target.value.toLowerCase(); draw(); } }),
-      h('label', {}, h('input', { type: 'checkbox', onchange: (e) => { onlyPin = e.target.checked; draw(); } }), ' المثبّتة فقط')), h('div', { style: { margin: '10px 0' } }, bar), grid)); draw(); return root;
+    root.append(SP.page('الملاحظات', 'دوّن أفكارك ولوّنها ووسمها ودبّسها. انقر أي ملاحظة لتعديلها.',
+      h('div', { class: 'nt-bar' }, h('label', { class: 'nt-search' }, h('span', { 'aria-hidden': 'true' }, '🔍'), h('input', { type: 'search', placeholder: 'ابحث في ملاحظاتك…', 'aria-label': 'بحث في الملاحظات', oninput: (e) => { q = e.target.value.toLowerCase(); draw(); } })),
+        h('button', { class: 'btn nt-new', onclick: () => noteEditor() }, '＋ ملاحظة جديدة')), bar, grid)); draw(); return root;
   });
 
   /* ---------- الملفات والملازم ---------- */

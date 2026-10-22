@@ -110,14 +110,23 @@
     b.append(w); setTimeout(() => w.remove(), 600);
   });
 
-  /* قائمة «⋯»: تجمع الأزرار الثانوية في زر واحد */
+  /* قائمة «⋯»: تجمع الأزرار الثانوية في زر واحد (على الهاتف تظهر كورقة من أسفل الشاشة) */
+  let closeOpen = null;
+  SP.closeMenus = () => closeOpen && closeOpen();
   SP.more = (items, label = 'خيارات أخرى') => {
     const flat = (a) => a.flatMap((x) => (!x ? [] : typeof x[0] === 'string' ? [x] : flat(x))); items = flat(items); if (!items.length) return null;
-    const menu = h('div', { class: 'more-menu', role: 'menu' }, items.map(([l, fn, bad]) => h('button', { class: 'more-item' + (bad ? ' bad' : ''), role: 'menuitem', onclick: (e) => { e.stopPropagation(); wrap.classList.remove('open'); fn(e); } }, l)));
-    const btn = h('button', { class: 'btn ghost sm more-btn', 'aria-label': label, 'aria-haspopup': 'menu', title: label, onclick: (e) => {
-      e.stopPropagation(); const open = !wrap.classList.contains('open'); document.querySelectorAll('.more.open').forEach((m) => m.classList.remove('open')); wrap.classList.toggle('open', open); btn.setAttribute('aria-expanded', String(open));
+    const close = () => { wrap.classList.remove('open'); btn.setAttribute('aria-expanded', 'false'); if (menu.parentNode !== wrap) { back.remove(); menu.classList.remove('sheet'); wrap.append(menu); } if (closeOpen === close) closeOpen = null; };
+    const menu = h('div', { class: 'more-menu', role: 'menu' }, items.map(([l, fn, bad]) => h('button', { class: 'more-item' + (bad ? ' bad' : ''), role: 'menuitem', onclick: (e) => { e.stopPropagation(); close(); fn(e); } }, l)));
+    const back = h('div', { class: 'more-back', onclick: (e) => { e.stopPropagation(); close(); } });
+    const btn = h('button', { class: 'btn ghost sm more-btn', 'aria-label': label, 'aria-haspopup': 'menu', 'aria-expanded': 'false', title: label, onclick: (e) => {
+      e.stopPropagation(); const was = wrap.classList.contains('open'); SP.closeMenus(); if (was) return;
+      wrap.classList.add('open'); btn.setAttribute('aria-expanded', 'true'); closeOpen = close;
+      if (matchMedia('(max-width: 640px)').matches) { menu.classList.add('sheet'); document.body.append(back, menu); }
+      (menu.querySelector('.more-item') || btn).focus({ preventScroll: true });
     } }, '⋯');
+    menu.addEventListener('keydown', (e) => { if (e.key === 'Escape') { close(); btn.focus(); } });
     const wrap = h('span', { class: 'more' }, btn, menu); return wrap;
   };
-  document.addEventListener('click', (e) => { if (!e.target.closest || !e.target.closest('.more')) document.querySelectorAll('.more.open').forEach((m) => m.classList.remove('open')); });
+  document.addEventListener('click', (e) => { if (!e.target.closest || !e.target.closest('.more, .more-menu')) SP.closeMenus(); });
+  (SP.listeners.route = SP.listeners.route || []).push(() => SP.closeMenus());
 })();

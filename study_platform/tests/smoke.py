@@ -55,6 +55,10 @@ with sync_playwright() as p:
     # ملاحظة + ملف + ملزمة
     pg.evaluate("location.hash='#/notes'"); pg.click("text=ملاحظة جديدة"); pg.fill(".md input >> nth=0", "درس الجبر"); pg.fill(".md textarea", "x + 2 = 5"); pg.click(".md button:text-is(\"حفظ\")")
     check(pg.evaluate("SP.state.notes.length") == 2, "note created")
+    nt = pg.locator("#main .nt-card", has_text="درس الجبر"); nt.locator(".nt-icon").click(); pg.wait_for_timeout(150)
+    check(pg.evaluate("SP.state.notes.find(n=>n.title==='درس الجبر').pinned") and pg.locator("#main .nt-card").first.inner_text().startswith("درس الجبر"), "note pinned from card icon, moves to top")
+    pg.locator("#main .nt-card", has_text="درس الجبر").locator(".nt-body").click(); check(pg.locator(".md h2", has_text="تعديل الملاحظة").count() == 1, "clicking a note opens its editor"); pg.click(".md button:text-is('إلغاء')")
+    pg.click(".nt-chip:has-text('المثبّتة')"); check(pg.locator("#main .nt-card").count() == pg.locator("#main .nt-card.pinned").count() >= 1, "pinned filter chip"); pg.click(".nt-chip:has-text('الكل')")
     tmp = Path(tempfile.mkdtemp()) / "hello.txt"; tmp.write_text("مرحبا")
     pg.evaluate("location.hash='#/files'"); pg.set_input_files("#main input[type=file]", str(tmp)); pg.wait_for_timeout(400)
     check(pg.evaluate("SP.state.files.length") == 1 and pg.locator("#main >> text=hello.txt").count() > 0, "file uploaded + shown")
