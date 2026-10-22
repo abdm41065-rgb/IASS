@@ -7,13 +7,10 @@
   /* ---------- الرئيسية ---------- */
   SP.reg('home', '🏠', 'الرئيسية', () => {
     const me = SP.me(), s = S(), uid = me.id, t = SP.today();
-    const myNotes = s.notes.filter((n) => n.ownerId === uid), myFiles = s.files.filter((f) => f.ownerId === uid);
     const todayMin = SP.studyMin(uid, t), goal = s.goalMin || 60;
-    const stat = (n, l, go) => h('div', { class: 'card stat click', onclick: () => go && SP.go(go) }, h('b', {}, n), h('span', {}, l));
     const tasks = s.tasks.filter((x) => x.userId === uid && !x.done).sort((a, b) => (a.due || '9').localeCompare(b.due || '9')).slice(0, 5);
     SP.migrateNotices && SP.migrateNotices();
     const anns = (s.classItems || []).filter((i) => i.type === 'notice' && SP.canSeeClass(i.classId)).sort((a, b) => (!!b.important - !!a.important) || b.ts - a.ts).slice(0, 3);
-    const act = (ic, l, go) => h('button', { class: 'btn ghost', onclick: () => SP.go(go) }, l);
     const hr = new Date().getHours(), greet = hr < 12 ? 'صباح الخير' : hr < 18 ? 'نهارك سعيد' : 'مساء الخير';
     const last = (s.docs || []).filter((d) => d.ownerId === uid).sort((a, b) => b.updated - a.updated)[0];
     const next = tasks[0], pct = Math.min(100, Math.round((100 * todayMin) / goal));
@@ -29,14 +26,10 @@
     const simCard = !s.sim && !s.simHide ? h('div', { class: 'card sim-offer' }, h('div', {}, h('b', {}, 'جرّب المنصة كطالب طب 🩺'), h('p', { class: 'sub', style: { margin: '2px 0 0' } }, 'محاكاة كاملة: التشريح والفسلجة والكيمياء الحياتية والأنسجة، مع امتحانات وواجبات وبطاقات.')),
       h('div', { class: 'row' }, h('button', { class: 'btn', onclick: () => SP.offerMedSim() }, 'ابدأ المحاكاة'), h('button', { class: 'btn ghost', onclick: () => { s.simHide = true; SP.save(); SP.refresh(); } }, 'لاحقاً'))) : null;
     return h('div', {}, simCard, hero, SP.examStrip && SP.examStrip(), SP.flowHomeCard && SP.flowHomeCard(),
-      h('div', { class: 'grid s' },
-        stat(SP.myClasses().length, 'صفوفي', 'classes'), stat(myNotes.length, 'ملاحظاتي', 'notes'), stat(myFiles.length, 'ملفاتي', 'files'),
-        stat(s.results.filter((r) => r.userId === uid).length, 'فويزات حللتها', 'quizzes'), stat((s.docs || []).filter((d) => d.ownerId === uid).length, 'دروسي في دراسة', 'desk')),
-      h('h2', {}, 'إجراءات سريعة'),
-      h('div', { class: 'row' }, act('', 'افتح درساً', 'desk'), act('', 'ملاحظة جديدة', 'notes'), act('', 'رفع ملف', 'files'), act('', 'جلسة تركيز', 'study'), act('', 'راجع البطاقات', 'cards'), act('', 'الفويزات', 'quizzes'), act('', 'شارك معلومة', 'share')),
       h('div', { class: 'grid', style: { marginTop: '10px' } },
         h('div', {}, h('h2', {}, 'تبليغات الأساتذة'), anns.length ? anns.map((p) => h('div', { class: 'card click' + (p.important ? ' important' : ''), style: { marginBottom: '8px' }, onclick: () => SP.go('classes/' + p.classId + '/lec') }, h('div', { class: 'row sp' }, h('b', {}, (p.important ? '📌 ' : '📢 ') + p.title), h('span', { class: 'chip' }, SP.className(p.classId))), h('p', { style: { margin: '6px 0 0' } }, p.text.slice(0, 160)))) : SP.empty('لا توجد تبليغات')),
-        h('div', {}, h('h2', {}, 'مهام قادمة'), tasks.length ? tasks.map((x) => h('div', { class: 'card', style: { marginBottom: '8px' } }, x.text, ' ', h('span', { class: 'chip' }, x.due || 'بلا موعد'))) : SP.empty('لا مهام معلّقة'))));
+        h('div', {}, h('h2', {}, 'مهام قادمة'), tasks.length ? tasks.map((x) => h('div', { class: 'card', style: { marginBottom: '8px' } }, x.text, ' ', h('span', { class: 'chip' }, x.due || 'بلا موعد'))) : SP.empty('لا مهام معلّقة'))),
+      h('nav', { class: 'home-links', 'aria-label': 'روابط سريعة' }, [['calendar', '📅 التقويم'], ['tasks', '✅ المهام والجدول'], ['progress', '📈 تقدّمي'], ['study', '⏱️ جلسة تركيز']].map(([k, l]) => h('a', { href: '#/' + k }, l))));
   });
 
   /* ---------- الصفوف ---------- */

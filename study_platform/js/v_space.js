@@ -117,8 +117,7 @@
         h('button', { class: 'btn', onclick: () => pickModal(c, draw) }, 'أضف من الصفوف والملفات'),
         h('button', { class: 'btn ghost', onclick: () => { c.items.push({ id: SP.uid(), kind: 'heading', text: 'قسم جديد' }); touch(c); draw(); list.lastChild.querySelector('input').select(); } }, 'عنوان قسم'),
         h('button', { class: 'btn ghost', onclick: () => { c.items.push({ id: SP.uid(), kind: 'note', text: '', done: false }); touch(c); draw(); list.lastChild.querySelector('textarea').focus(); } }, 'ملاحظة'),
-        h('button', { class: 'btn ghost', onclick: () => shareCol(c) }, 'أرسل الترتيب لزملائي'), SP.flowBtn ? SP.flowBtn('col', c.id, c.name) : null,
-        !c.tray ? h('button', { class: 'btn ghost', onclick: async () => { if (await SP.confirm('حذف المجموعة «' + c.name + '»؟ (لا تُحذف الملفات نفسها)')) { S().cols = cols().filter((x) => x.id !== c.id); SP.save(); SP.go('space'); } } }, 'حذف المجموعة') : null),
+        SP.more([['📤 أرسل الترتيب لزملائي', () => shareCol(c)], SP.flowItem ? SP.flowItem('col', c.id, c.name) : null, !c.tray ? ['🗑 حذف المجموعة', async () => { if (await SP.confirm('حذف المجموعة «' + c.name + '»؟ (لا تُحذف الملفات نفسها)')) { S().cols = cols().filter((x) => x.id !== c.id); SP.save(); SP.go('space'); } } , true] : null])),
       list);
     draw(); return root;
   }

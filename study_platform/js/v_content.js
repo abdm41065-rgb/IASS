@@ -31,8 +31,10 @@
         h('p', {}, n.body.length > 220 ? n.body.slice(0, 220) + '…' : n.body),
         h('div', {}, (n.stickers || []).map((e) => h('span', { style: { fontSize: '1.3rem' } }, e)), n.tags.map((t) => h('span', { class: 'chip' }, '#' + t))),
         h('div', { class: 'row', style: { marginTop: '8px' } }, h('small', { class: 'sub', style: { margin: 0 } }, SP.date(n.updated) + (n.ownerId !== SP.state.me ? ' · ' + SP.user(n.ownerId).name : '')),
-          h('button', { class: 'btn ghost sm', onclick: () => SP.download((n.title || 'note') + '.txt', n.title + '\n\n' + n.body) }, 'تنزيل'), SP.flowBtn ? SP.flowBtn('note', n.id, n.title) : null,
-          canEdit(n) ? [h('button', { class: 'btn ghost sm', onclick: () => noteEditor(n) }, 'تعديل'), h('button', { class: 'btn ghost sm', onclick: async () => { if (await SP.confirm('حذف الملاحظة؟')) { S().notes = S().notes.filter((x) => x.id !== n.id); SP.save(); draw(); } } }, 'حذف')] : null))) : [SP.empty('لا توجد ملاحظات مطابقة')]));
+          SP.flowChip ? SP.flowChip('note', n.id) : null,
+          canEdit(n) ? h('button', { class: 'btn ghost sm', onclick: () => noteEditor(n) }, 'تعديل') : null,
+          SP.more([['⬇️ تنزيل', () => SP.download((n.title || 'note') + '.txt', n.title + '\n\n' + n.body)], SP.flowItem ? SP.flowItem('note', n.id, n.title) : null,
+            canEdit(n) ? ['🗑 حذف', async () => { if (await SP.confirm('حذف الملاحظة؟')) { S().notes = S().notes.filter((x) => x.id !== n.id); SP.save(); draw(); } }, true] : null])))) : [SP.empty('لا توجد ملاحظات مطابقة')]));
     };
     root.append(SP.page('الملاحظات', 'دوّن أفكارك ولوّنها ووسمها ودبّسها.', h('div', { class: 'row' },
       h('button', { class: 'btn', onclick: () => noteEditor() }, 'ملاحظة جديدة'), h('input', { class: 'inp', placeholder: 'بحث في الملاحظات…', oninput: (e) => { q = e.target.value.toLowerCase(); draw(); } }),
@@ -98,22 +100,22 @@
         h('b', { style: { wordBreak: 'break-all', cursor: 'pointer' }, onclick: () => preview(f) }, f.name), h('div', { class: 'sub', style: { margin: 0 } }, SP.size(f.size) + ' · ' + SP.date(f.added) + (f.classId ? ' · ' + SP.className(f.classId) : '') + (f.ownerId !== SP.state.me ? ' · ' + SP.user(f.ownerId).name : '')),
         f.desc ? h('p', {}, f.desc) : null, h('div', {}, f.tags.map((t) => h('span', { class: 'chip' }, '#' + t))),
         f.kind === 'handout' && f.pages ? h('div', {}, h('div', { class: 'bar' }, h('i', { style: { width: Math.min(100, (100 * f.readPages) / f.pages) + '%' } })), h('div', { class: 'row', style: { marginTop: '6px' } }, h('small', {}, 'قرأت'), h('input', { class: 'inp', type: 'number', min: 0, max: f.pages, value: f.readPages || 0, style: { width: '70px' }, onchange: (e) => { f.readPages = Math.min(f.pages, +e.target.value || 0); SP.save(); draw(); } }), h('small', {}, 'من ' + f.pages))) : null,
-        h('div', { class: 'row', style: { marginTop: '8px' } }, h('button', { class: 'btn ghost sm', onclick: () => preview(f) }, 'معاينة'), /pdf|image/.test(f.mime || '') ? h('button', { class: 'btn sm', onclick: () => SP.openInDesk(f) }, 'افتح في دراسة') : null,
-          SP.flowBtn ? SP.flowBtn('file', f.id, f.name) : null,
-          /pdf|image|text|html/.test(f.mime || '') || /\.(txt|md)$/i.test(f.name) ? h('button', { class: 'btn ghost sm', onclick: async () => SP.questionsFor({ name: f.name, mime: f.mime, blob: await SP.idb.get(f.id) }) }, 'أسئلة') : null,
-          h('button', { class: 'btn ghost sm', onclick: () => SP.sendFile(f) }, 'إرسال'),
-          canEdit(f) ? [h('button', { class: 'btn ghost sm', onclick: () => fileEditor(f, f.kind) }, 'تمييز'), h('button', { class: 'btn ghost sm', onclick: async () => { if (await SP.confirm('حذف الملف؟')) { await SP.idb.del(f.id); S().files = S().files.filter((x) => x.id !== f.id); SP.save(); draw(); } } }, 'حذف')] : null))) : [SP.empty('لا توجد ملفات. ارفع ملفاً أو اسحبه هنا.')]));
+        SP.flowChip ? SP.flowChip('file', f.id) : null,
+        h('div', { class: 'row', style: { marginTop: '8px' } }, /pdf|image/.test(f.mime || '') ? h('button', { class: 'btn sm', onclick: () => SP.openInDesk(f) }, 'افتح في دراسة') : h('button', { class: 'btn sm', onclick: () => preview(f) }, 'افتح'),
+          SP.more([/pdf|image/.test(f.mime || '') ? ['👁 معاينة', () => preview(f)] : null,
+            /pdf|image|text|html/.test(f.mime || '') || /\.(txt|md)$/i.test(f.name) ? ['❓ أسئلة من الملف', async () => SP.questionsFor({ name: f.name, mime: f.mime, blob: await SP.idb.get(f.id) })] : null,
+            ['📤 إرسال لزميل', () => SP.sendFile(f)], SP.flowItem ? SP.flowItem('file', f.id, f.name) : null,
+            canEdit(f) ? [['🎨 لون ووسوم', () => fileEditor(f, f.kind)], ['🗑 حذف', async () => { if (await SP.confirm('حذف الملف؟')) { await SP.idb.del(f.id); S().files = S().files.filter((x) => x.id !== f.id); SP.save(); draw(); } }, true]] : null])))) : [SP.empty('لا توجد ملفات. ارفع ملفاً أو اسحبه هنا.')]));
     };
     const input = h('input', { type: 'file', multiple: true, style: { display: 'none' }, onchange: (e) => addFiles([...e.target.files], kind || 'file', classId) });
-    const colorBtns = h('span', {}, h('span', { class: 'sw', style: { background: 'var(--line)' }, title: 'كل الألوان', onclick: () => { colorF = ''; draw(); } }), SP.COLORS.map((c) => h('span', { class: 'sw', style: { background: c, width: '18px', height: '18px' }, onclick: () => { colorF = c; draw(); } })));
     root.append(h('div', { class: 'row' }, h('button', { class: 'btn', onclick: () => input.click() }, kind === 'handout' ? 'رفع ملزمة' : 'رفع ملفات'), input,
-      kind === 'handout' ? h('button', { class: 'btn ghost', onclick: handoutFromNotes }, 'ملزمة من ملاحظاتي') : null,
-      h('input', { class: 'inp', placeholder: 'بحث…', oninput: (e) => { q = e.target.value.toLowerCase(); draw(); } }), colorBtns, h('label', {}, h('input', { type: 'checkbox', onchange: (e) => { onlyStar = e.target.checked; draw(); } }), ' المهمة فقط')),
+      kind === 'handout' ? h('button', { class: 'btn ghost', onclick: handoutFromNotes }, 'ملزمة من ملاحظاتي') : SP.more([['📚 ملزمة من ملاحظاتي', handoutFromNotes]]),
+      h('input', { class: 'inp', placeholder: 'بحث…', oninput: (e) => { q = e.target.value.toLowerCase(); draw(); } }), h('label', {}, h('input', { type: 'checkbox', onchange: (e) => { onlyStar = e.target.checked; draw(); } }), ' المهمة فقط')),
     h('div', { style: { margin: '10px 0' } }, bar), grid);
     root.addEventListener('dragover', (e) => e.preventDefault()); root.addEventListener('drop', (e) => { e.preventDefault(); if (e.dataTransfer.files.length) addFiles([...e.dataTransfer.files], kind || 'file', classId); });
     draw(); return root;
   };
-  SP.reg('files', '📁', 'الملفات', () => SP.page('الملفات', 'ارفع ملفاتك ومَيّزها بالألوان والوسوم والملصقات والنجوم. يمكنك سحب الملفات وإفلاتها هنا.', SP.fileGrid({ kind: 'file' })));
+  SP.reg('files', '📁', 'الملفات', () => SP.page('الملفات', 'ارفع ملفاتك ومَيّزها بالألوان والوسوم والملصقات والنجوم. يمكنك سحب الملفات وإفلاتها هنا.', SP.fileGrid({ upload: 'file' })));
   SP.reg('handouts', '📚', 'الملازم', () => SP.page('الملازم', 'ملازم PDF أو ملفات مجمّعة مع تتبّع تقدّم القراءة، أو أنشئ ملزمة من ملاحظاتك.', SP.fileGrid({ kind: 'handout' })));
 
   /* ---------- الملصقات ---------- */

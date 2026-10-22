@@ -83,7 +83,7 @@
         const marks = d.pages.reduce((n, p) => n + p.a.length, 0);
         return h('div', { class: 'card click doccard', onclick: () => SP.go('desk/' + d.id) }, h('div', { class: 'thumb' }, ic(d.kind === 'blank' ? I.book : I.file)),
           h('h3', {}, d.name), h('div', { class: 'row sp' }, h('span', { class: 'sub', style: { margin: 0 } }, `${label[d.kind]} · ${d.pages.length} صفحة · ${marks} إضافة`),
-            h('span', { class: 'row', style: { gap: '4px' } }, SP.flowBtn ? SP.flowBtn('desk', d.id, d.name) : null, h('button', { class: 'btn ghost sm', onclick: async (e) => { e.stopPropagation(); if (await SP.confirm('حذف «' + d.name + '» مع كل ما كتبته عليه؟')) { if (d.fileId) SP.idb.del(d.fileId); d.pages.forEach((p) => p.a.forEach((a) => { a.k && SP.idb.del(a.k); a.th && SP.idb.del(a.th); })); S().docs = docs().filter((x) => x.id !== d.id); SP.save(); SP.refresh(); } } }, 'حذف'))));
+            h('span', { class: 'row', style: { gap: '4px' } }, SP.flowChip ? SP.flowChip('desk', d.id) : null, SP.more([SP.flowItem ? SP.flowItem('desk', d.id, d.name) : null, ['🗑 حذف', async () => { if (await SP.confirm('حذف «' + d.name + '» مع كل ما كتبته عليه؟')) { if (d.fileId) SP.idb.del(d.fileId); d.pages.forEach((p) => p.a.forEach((a) => { a.k && SP.idb.del(a.k); a.th && SP.idb.del(a.th); })); S().docs = docs().filter((x) => x.id !== d.id); SP.save(); SP.refresh(); } }, true]]))));
       }) : SP.empty('لا توجد دروس بعد. أضف ملف PDF أو صورة، أو ابدأ دفتراً فارغاً.')));
     root.addEventListener('dragover', (e) => e.preventDefault());
     root.addEventListener('drop', async (e) => { e.preventDefault(); let last = null; for (const f of e.dataTransfer.files) last = (await addDoc(f)) || last; if (last) SP.go('desk/' + last.id); });

@@ -1,11 +1,12 @@
 /* الموجّه والهيكل العام */
 (function () {
   const SP = window.SP, h = SP.h;
+  /* [المفتاح، الاسم، التبويبات الظاهرة، صفحات تابعة لا تظهر كتبويب (يُوصل إليها من داخل الصفحات)] */
   const HUBS = [
-    ['home', 'الرئيسية', ['home', 'calendar', 'tasks', 'progress']],
-    ['flow', 'دراسة', ['flow', 'space', 'desk', 'writer', 'quizzes', 'cards', 'study']],
-    ['notes', 'مكتبتي', ['notes', 'files', 'handouts', 'stickers']],
-    ['classes', 'الصفوف', ['classes', 'lectures', 'share', 'teachers', 'students']],
+    ['home', 'الرئيسية', ['home'], ['calendar', 'tasks', 'progress']],
+    ['flow', 'دراسة', ['flow', 'desk', 'quizzes', 'cards'], ['study']],
+    ['notes', 'مكتبتي', ['notes', 'files', 'writer', 'space'], ['handouts', 'stickers']],
+    ['classes', 'الصفوف', ['classes'], ['lectures', 'share', 'teachers', 'students']],
     ['settings', 'الإعدادات', ['settings']],
   ];
   const ICON_FOR = { home: 'home', flow: 'flow', space: 'desk', desk: 'desk', notes: 'files', classes: 'classes', settings: 'settings' };
@@ -39,7 +40,7 @@
   SP.route = () => {
     SP.cleanups.splice(0).forEach((f) => f());
     const parts = location.hash.replace(/^#\/?/, '').split('/').filter(Boolean), key = SP.views[parts[0]] ? parts[0] : 'home', v = SP.views[key];
-    const hub = HUBS.find((x) => x[2].includes(key));
+    const hub = HUBS.find((x) => x[2].includes(key) || (x[3] || []).includes(key));
     const un = SP.chatUnread ? SP.chatUnread() : 0;
     navEl.replaceChildren(...HUBS.map(([k, label]) => h('a', { href: '#/' + k, class: hub && hub[0] === k ? 'on' : '', 'aria-current': hub && hub[0] === k ? 'page' : null }, icon(ICON_FOR[k]), label, k === 'classes' && un ? h('span', { class: 'nav-badge', 'aria-label': un + ' رسالة غير مقروءة' }, un) : null)));
     const sub = hub && hub[2].length > 1 ? h('nav', { class: 'tabs subnav', 'aria-label': 'أقسام ' + hub[1] }, hub[2].map((k) => h('a', { class: 'tab' + (k === key ? ' on' : ''), href: '#/' + k, 'aria-current': k === key ? 'page' : null }, SP.views[k].label))) : null;

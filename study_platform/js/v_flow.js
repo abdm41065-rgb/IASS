@@ -90,10 +90,10 @@
   };
 
   /* زر «أضف لمسار» وشارة «في مسار» على عناصر المكتبة */
-  SP.flowBtn = (kind, ref, title) => {
+  SP.flowItem = (kind, ref, title) => ['🧭 أضف لمسار دراسة', () => SP.addToFlow(kind, ref, title)];
+  SP.flowChip = (kind, ref) => {
     const used = SP.flowsUsing(kind, ref);
-    return [h('button', { class: 'btn ghost sm fl-add', title: 'أضف هذا المصدر إلى مسار دراسة', onclick: (e) => { e.stopPropagation(); SP.addToFlow(kind, ref, title); } }, '🧭 أضف لمسار'),
-      used.length ? h('button', { class: 'fl-in-chip', title: 'افتح المسار', onclick: (e) => { e.stopPropagation(); SP.go('flow/' + used[0].id); } }, '🧭 في مسار: ' + used[0].name + (used.length > 1 ? ' +' + (used.length - 1) : '')) : null];
+    return used.length ? h('button', { class: 'fl-in-chip', title: 'افتح المسار', onclick: (e) => { e.stopPropagation(); SP.go('flow/' + used[0].id); } }, '🧭 في مسار: ' + used[0].name + (used.length > 1 ? ' +' + (used.length - 1) : '')) : null;
   };
 
   /* بطاقة المسار النشط في الرئيسية */
@@ -119,7 +119,7 @@
     const list = mine().sort((a, b) => b.updated - a.updated);
     const shares = (S().inbox || []).filter((m) => m.to === SP.state.me && m.type === 'flow' && !m.imported);
     return SP.page('مسارات الدراسة', 'ابنِ طريقتك في الدراسة كمسار مرئي: اربط ملفات مكتبتك بخطوات القراءة والتلخيص والبطاقات والفويزات، والمسار يتتبع تقدّمك ويضيء خطوتك التالية.',
-      h('div', { class: 'row' }, h('button', { class: 'btn', onclick: () => newFlow() }, 'مسار جديد'), h('button', { class: 'btn ghost', onclick: () => SP.go('notes') }, 'افتح مكتبتي')),
+      h('div', { class: 'row' }, h('button', { class: 'btn', onclick: () => newFlow() }, 'مسار جديد')),
       shares.length ? h('div', { class: 'card share-in' }, h('b', {}, '📨 مسارات أرسلها لك زملاؤك'), shares.map((m) => h('div', { class: 'row sp', style: { marginTop: '8px' } }, h('span', {}, `«${m.flow.name}» من ${SP.user(m.from).name}`), h('button', { class: 'btn sm', onclick: () => SP.importFlow(m) }, 'أضف إلى دراستي')))) : null,
       h('div', { class: 'grid', style: { marginTop: '14px' } }, list.length ? list.map((f) => { const p = progress(f), nx = f.nodes.find((n) => isNext(f, n));
         return h('div', { class: 'card click fl-card', onclick: () => SP.go('flow/' + f.id) }, preview(f), h('h3', {}, f.name),
@@ -228,7 +228,7 @@
     function drawPalette() {
       const tabs = h('div', { class: 'fl-ptabs' }, [['steps', 'الخطوات'], ['lib', 'مكتبتي']].map(([k, l]) => h('button', { class: k === palTab ? 'on' : '', onclick: () => { palTab = k; drawPalette(); } }, l)));
       let body;
-      if (palTab === 'steps') body = CATS.map(([c, l]) => h('div', { class: 'fl-pgroup' }, h('small', {}, l), Object.entries(NT).filter(([, v]) => v.cat === c).map(([t, v]) => palItem(t, v.label))));
+      if (palTab === 'steps') body = CATS.filter(([c]) => c !== 'lib').map(([c, l]) => h('div', { class: 'fl-pgroup' }, h('small', {}, l), Object.entries(NT).filter(([, v]) => v.cat === c).map(([t, v]) => palItem(t, v.label))));
       else {
         const q = h('input', { class: 'inp', type: 'search', placeholder: 'ابحث في مكتبتي', value: palQ, 'aria-label': 'بحث في مكتبتي', oninput: (e) => { palQ = e.target.value; drawLib(); } }), libBox = h('div', {});
         const drawLib = () => libBox.replaceChildren(...[['file', 'src_file', 'الملفات'], ['note', 'src_note', 'الملاحظات'], ['wdoc', 'src_doc', 'المستندات'], ['desk', 'src_desk', 'ملفات بتعليقاتي'], ['item', 'src_post', 'منشورات الأساتذة'], ['col', 'src_col', 'مجموعاتي'], ['deck', 'cards', 'البطاقات'], ['quiz', 'quiz', 'الفويزات']].map(([k, t, l]) => {
@@ -298,9 +298,9 @@
     const focusNode = (n) => { const r = canvas.getBoundingClientRect(), b = box(n); f.view.x = r.width / 2 - (b.x + b.w / 2) * f.view.z; f.view.y = r.height / 2 - (b.y + b.hh / 2) * f.view.z; if (!reduced) { world.classList.add('glide'); setTimeout(() => world.classList.remove('glide'), 420); } applyView(); save(); };
     const name = h('input', { class: 'inp wtitle', id: 'fl-flowname', value: f.name, 'aria-label': 'اسم المسار', onchange: (e) => { f.name = e.target.value.trim() || f.name; save(); } });
     const top = h('div', { class: 'fl-top' }, h('div', { class: 'row', style: { flex: 1, minWidth: 0 } }, h('button', { class: 'btn ghost sm', onclick: () => SP.go('flow') }, 'رجوع'), name), metaBox,
-      h('div', { class: 'row fl-tools' }, h('button', { class: 'btn ghost sm', 'aria-label': 'تصغير', onclick: () => { const r = canvas.getBoundingClientRect(); zoomAt(0.85, r.left + r.width / 2, r.top + r.height / 2); } }, '−'), zoomLbl,
-        h('button', { class: 'btn ghost sm', 'aria-label': 'تكبير', onclick: () => { const r = canvas.getBoundingClientRect(); zoomAt(1.15, r.left + r.width / 2, r.top + r.height / 2); } }, '+'), h('button', { class: 'btn ghost sm', onclick: () => fit(true) }, 'ملاءمة'),
-        h('button', { class: 'btn ghost sm', onclick: arrange }, 'ترتيب تلقائي'), h('button', { class: 'btn sm', onclick: () => shareFlow(f) }, 'شارك المسار')));
+      h('div', { class: 'row fl-tools' }, zoomLbl, h('button', { class: 'btn ghost sm', onclick: () => fit(true) }, 'ملاءمة'), h('button', { class: 'btn sm', onclick: () => shareFlow(f) }, 'شارك المسار'),
+        SP.more([['➕ تكبير', () => { const r = canvas.getBoundingClientRect(); zoomAt(1.15, r.left + r.width / 2, r.top + r.height / 2); }], ['➖ تصغير', () => { const r = canvas.getBoundingClientRect(); zoomAt(0.85, r.left + r.width / 2, r.top + r.height / 2); }],
+          ['✨ ترتيب تلقائي', arrange], ['🗑 حذف المسار', async () => { if (await SP.confirm('حذف المسار «' + f.name + '»؟ (لا تُحذف ملفاتك)')) { S().flows = flows().filter((x) => x.id !== f.id); SP.save(); SP.go('flow'); } }, true]])));
     canvas.addEventListener('keydown', (e) => {
       if (/INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) return;
       if ((e.key === 'Delete' || e.key === 'Backspace') && (sel || selEdge)) { e.preventDefault(); if (sel) del(sel); else { f.edges = f.edges.filter((x) => x.id !== selEdge); selEdge = null; save(); drawEdges(); refreshMeta(); } }

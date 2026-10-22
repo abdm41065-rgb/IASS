@@ -168,7 +168,7 @@
     return {
       v: 1, me: 'st', dark: null, fontSize: 16, sim: 'med', flows, users, classes, notes,
       files: [
-        { id: 'sim_heart', ownerId: 'dP', name: 'ملزمة الفسلجة - القلب.txt', mime: 'text/plain', size: HEART.length * 2, tags: ['فسلجة', 'قلب'], color: '#B91C1C', star: true, stickers: ['❤️'], kind: 'handout', classId: 'ph', added: T(-3), desc: 'ملزمة الشهري. جرّب زر «أسئلة» لتوليد اختبار منها.', pages: 12, readPages: 7 },
+        { id: 'sim_heart', ownerId: 'dP', name: 'ملزمة الفسلجة - القلب.txt', mime: 'text/plain', size: HEART.length * 2, tags: ['فسلجة', 'قلب'], color: '#B91C1C', star: true, stickers: ['❤️'], kind: 'handout', classId: 'ph', added: T(-3), desc: 'ملزمة الشهري. من زر ⋯ اختر «أسئلة من الملف» لتوليد اختبار منها.', pages: 12, readPages: 7 },
         { id: 'sim_glyco', ownerId: 'st', name: 'ملخص تحلل السكر.txt', mime: 'text/plain', size: GLYCO.length * 2, tags: ['كيمياء حياتية'], color: '#2E7D32', star: false, stickers: ['⭐'], kind: 'file', classId: '', added: T(-2), desc: 'ملخصي لكويز الغد', pages: 0, readPages: 0 },
       ],
       boards: { st: [{ id: id('b'), kind: 'note', text: 'OSPE بعد 4 أيام!', color: '#F2C23066', x: 40, y: 30, rot: -4 }, { id: id('b'), kind: 'emoji', text: '🫀', x: 260, y: 60, rot: 6 }, { id: id('b'), kind: 'emoji', text: '🧠', x: 360, y: 180, rot: -8 }, { id: id('b'), kind: 'note', text: 'PFK-1 = الإنزيم المحدد', color: '#9BE58B66', x: 120, y: 220, rot: 3 }] },

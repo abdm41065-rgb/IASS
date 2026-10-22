@@ -109,4 +109,15 @@
     w.className = 'ripple'; w.style.cssText = `width:${d}px;height:${d}px;left:${e.clientX - r.left - d / 2}px;top:${e.clientY - r.top - d / 2}px`;
     b.append(w); setTimeout(() => w.remove(), 600);
   });
+
+  /* قائمة «⋯»: تجمع الأزرار الثانوية في زر واحد */
+  SP.more = (items, label = 'خيارات أخرى') => {
+    const flat = (a) => a.flatMap((x) => (!x ? [] : typeof x[0] === 'string' ? [x] : flat(x))); items = flat(items); if (!items.length) return null;
+    const menu = h('div', { class: 'more-menu', role: 'menu' }, items.map(([l, fn, bad]) => h('button', { class: 'more-item' + (bad ? ' bad' : ''), role: 'menuitem', onclick: (e) => { e.stopPropagation(); wrap.classList.remove('open'); fn(e); } }, l)));
+    const btn = h('button', { class: 'btn ghost sm more-btn', 'aria-label': label, 'aria-haspopup': 'menu', title: label, onclick: (e) => {
+      e.stopPropagation(); const open = !wrap.classList.contains('open'); document.querySelectorAll('.more.open').forEach((m) => m.classList.remove('open')); wrap.classList.toggle('open', open); btn.setAttribute('aria-expanded', String(open));
+    } }, '⋯');
+    const wrap = h('span', { class: 'more' }, btn, menu); return wrap;
+  };
+  document.addEventListener('click', (e) => { if (!e.target.closest || !e.target.closest('.more')) document.querySelectorAll('.more.open').forEach((m) => m.classList.remove('open')); });
 })();
