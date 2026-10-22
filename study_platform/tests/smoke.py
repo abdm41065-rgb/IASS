@@ -489,8 +489,10 @@ with sync_playwright() as p:
         window.__toolLog.push(await t.update_note.execute({id: 'n_plexus', append: 'سطر أضافه المساعد'}));
         window.__toolLog.push(await t.create_deck.execute({name: 'بطاقات المساعد', cards: [{q: 'C5–C6؟', a: 'شلل إرب'}, {q: 'C8–T1؟', a: 'كلومبكي'}]}));
         return {text: '[happy] أضفت السطر وعملت بطاقتين'}; };
-      fake.limits = async () => ({tools: true, maxPromptBytes: 262144});
-      fake.json = async () => ({});
+      fake.limits = async () => (window.__noTools ? {maxPromptBytes: 262144} : {tools: {maxCount: 64}, maxPromptBytes: 262144});
+      fake.json = async (turns, o) => { window.__jsonCalls = (window.__jsonCalls || 0) + 1; const last = turns.at(-1).content;
+        if (last.startsWith('نتائج الأوامر')) return {reply: 'كتبت لك ملف PDF 📕', actions: [{tool: 'create_pdf', args: {title: 'ملف الأوامر', markdown: '# القلب\\n- الدورة القلبية'}}]};
+        return {reply: 'أقرأ أولاً', actions: [{tool: 'search_my_work', args: {query: 'القلب'}}]}; };
       window.claude = {use: async (n) => n === 'sample' ? fake : null};
     """)
     p4 = ctx4.new_page(); p4.on("pageerror", lambda e: errors.append(str(e)))
@@ -546,6 +548,11 @@ with sync_playwright() as p:
     p4.click(".m-mic"); p4.wait_for_function("window.__spoken.length > 0", timeout=5000)
     check(p4.locator(".m-msg.me").count() == n_msgs + 1 and "ما مهامي اليوم" in p4.locator(".m-msg.me").last.inner_text(), "spoken question becomes a sent message")
     check("أهلاً بك" in " ".join(p4.evaluate("window.__spoken")) and "🙂" not in "".join(p4.evaluate("window.__spoken")), "reply read aloud (emoji stripped)")
+    p4.evaluate("() => { window.__noTools = true; window.__failTools = false; }"); vc = p4.locator(".m-msg.act").count()
+    p4.fill("#sanad-input", "اكتبلي pdf عن القلب"); p4.press("#sanad-input", "Enter"); p4.wait_for_function(f"document.querySelectorAll('.m-msg.act').length > {vc}", timeout=8000)
+    check(p4.evaluate("SP.state.files.some(f=>f.name==='ملف الأوامر.pdf')") and p4.evaluate("window.__jsonCalls") == 2 and "كتبت لك ملف PDF" in p4.inner_text(".m-list"), "without page tools the assistant plans in JSON, reads, then creates the PDF")
+    p4.fill("#sanad-input", "/فحص"); p4.press("#sanad-input", "Enter"); p4.wait_for_timeout(300)
+    check("أدوات الصفحة: غير متاحة" in p4.inner_text(".m-list") and "json" in p4.inner_text(".m-list"), "diagnostic command reports assistant mode")
     ctx4.close()
 
 

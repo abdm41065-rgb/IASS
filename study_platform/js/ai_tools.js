@@ -25,6 +25,7 @@
   /* ---------- السجل والتراجع ---------- */
   let turn = null; const undo = [];
   SP.aiBeginTurn = () => { turn = { acts: [], snap: null }; };
+  SP.aiTurnCount = () => (turn ? turn.acts.length : 0);
   SP.aiEndTurn = () => { const t = turn; turn = null; if (t && t.snap) { undo.push(t.snap); while (undo.length > 10) undo.shift(); } return t ? t.acts : []; };
   const snapshot = async (idbKey) => {
     if (!turn) SP.aiBeginTurn();

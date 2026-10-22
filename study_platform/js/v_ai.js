@@ -426,6 +426,8 @@
   }
   async function send(text) {
     const q = String(text != null ? text : input.value).trim(); if (!q || ctl) return;
+    if (/^\/(فحص|diag)/.test(q)) { input.value = ''; const c0 = chats(); c0.push({ role: 'user', text: q }); const sm = await SP.aiSample(), lim = sm ? await sm.limits().catch((e) => ({ err: e && e.code })) : null;
+      c0.push({ role: 'bot', text: `🩺 فحص المساعد\n• الاتصال بـ Claude: ${sm ? 'متاح' : 'غير متاح (افتح المنصة داخل Claude)'}\n• أدوات الصفحة: ${lim && lim.tools ? 'متاحة (' + lim.tools.maxCount + ')' : 'غير متاحة → يعمل بوضع الأوامر'}\n• آخر وضع: ${(SP._aiDiag || {}).mode || '—'}\n• آخر خطأ: ${(SP._aiDiag || {}).error || 'لا يوجد'}` }); SP.save(); drawChat(); return; }
     input.value = ''; const c = chats(); c.push({ role: 'user', text: q }); while (c.length > 40) c.shift(); SP.save(); drawChat();
     const bot = h('div', { class: 'm-msg bot typing' }, 'سند يكتب…'); list.append(bot); list.scrollTop = list.scrollHeight;
     const sample = await SP.aiSample(); root.dataset.mood = 'thinking';
@@ -445,9 +447,39 @@
       if (tools) tools = tools.map((t) => ({ ...t, execute: (a, ctx) => { progress(LABEL[t.name] || '⚙️ أعمل…'); return t.execute(a, ctx); } }));
       bot.textContent = task && tools ? `${mname()} يفكر ويشتغل على طلبك… (قد يأخذ دقيقة)` : `${mname()} يكتب…`;
       const call = (withTools) => sample(turns, { signal: ctl.signal, modelTier: task && withTools ? 'default' : 'quick', ...(withTools ? { tools } : { cache: false }), onText: ({ text: t }) => { bot.classList.remove('typing'); delete bot.dataset.tool; bot.textContent = clean(t); list.scrollTop = list.scrollHeight; } });
+      /* وضع الأوامر: عندما لا تتوفر أدوات الصفحة، يكتب Claude خطة JSON وننفّذها هنا (حتى 3 جولات للقراءة ثم التنفيذ) */
+      const jsonMode = async () => {
+        const all = SP.aiTools ? SP.aiTools() : [], byName = Object.fromEntries(all.map((t) => [t.name, t])), READS = ['list_my_work', 'search_my_work', 'read_item'];
+        const spec = all.map((t) => `- ${t.name}: ${t.description} args=${JSON.stringify(t.inputSchema.properties)}`).join('\n');
+        const idx = JSON.stringify(await byName.list_my_work.execute({})).slice(0, 14000);
+        const conv = [...turns]; let reply = '', round = 0;
+        conv[0] = { role: 'user', content: RULES + `\n\nأنت تعمل في «وضع الأوامر»: لا تستدعِ أدوات مباشرة، بل أجب دائماً بكائن JSON واحد فقط بهذا الشكل:\n{"reply": "ردك للمستخدم بالعربية", "actions": [{"tool": "اسم_الأداة", "args": {…}}]}\nإذا احتجت قراءة عنصر قبل تعديله ضع read_item أو search_my_work في actions وستصلك النتائج في رسالة تالية، ثم أرسل أوامر التنفيذ. اترك actions فارغة إذا كان الطلب مجرد سؤال.\nالأدوات:\n${spec}\n\nفهرس أعمال المستخدم (المعرّفات): ${idx}` };
+        while (round++ < 3) {
+          bot.textContent = round === 1 ? `${mname()} يخطط لطلبك… (قد يأخذ دقيقة)` : `${mname()} يكمل العمل…`;
+          const plan = await sample.json(conv, { signal: ctl.signal, modelTier: task ? 'default' : 'quick', cache: false });
+          reply = String((plan && plan.reply) || reply || ''); const acts = Array.isArray(plan && plan.actions) ? plan.actions.slice(0, 8) : [];
+          if (!acts.length) break;
+          const results = [];
+          for (const a of acts) { const t = byName[a && a.tool]; if (!t) { results.push({ tool: a && a.tool, result: 'أداة غير معروفة' }); continue; } progress(LABEL[t.name] || '⚙️ أعمل…'); bot.dataset.tool = '1'; results.push({ tool: t.name, result: await t.execute(a.args || {}) }); }
+          if (!acts.some((a) => READS.includes(a && a.tool)) || round >= 3) break;
+          conv.push({ role: 'assistant', content: JSON.stringify(plan) }, { role: 'user', content: 'نتائج الأوامر:\n' + JSON.stringify(results).slice(0, 40000) + '\nأكمل الآن: أرسل JSON بأوامر التنفيذ المطلوبة (أو actions فارغة) مع رد مختصر.' });
+        }
+        return reply || 'تم ✅';
+      };
+      SP._aiDiag = { sample: true, tools: !!tools, maxTools: lim && lim.tools ? lim.tools.maxCount : 0, task, mode: '', error: '' };
       let out;
-      try { out = (await call(!!tools)).text; }
-      catch (e) { if (tools && ['invalid_request', 'tools_unavailable', 'transform_error', 'prompt_too_large'].includes(e.code) && !e.text) { console.warn('assistant tools failed, answering without them:', e.code, e.message); out = (await call(false)).text; } else throw e; }
+      try {
+        if (tools) { SP._aiDiag.mode = 'tools'; out = (await call(true)).text;
+          /* طلب عمل انتهى بوعد بلا تنفيذ؟ نعيده مرة واحدة بوضع الأوامر */
+          if (task && SP.aiTurnCount && !SP.aiTurnCount() && /سأ|سوف|راح |حاضر|جاري|أبدأ|ابدأ|الآن أكتب|لحظة/.test(out) && !/[؟?]\s*$/.test(clean(out))) { SP._aiDiag.mode = 'tools→json'; out = await jsonMode(); } }
+        else if (task && SP.aiTools) { SP._aiDiag.mode = 'json'; out = await jsonMode(); }
+        else { SP._aiDiag.mode = 'chat'; out = (await call(false)).text; }
+      } catch (e) {
+        SP._aiDiag.error = (e && (e.code || '')) + ' ' + (e && e.message || '');
+        if (e.code === 'cancelled' || e.text || !SP.aiTools) throw e;
+        console.warn('assistant mode failed, trying command mode:', e.code, e.message);
+        if (SP._aiDiag.mode !== 'json' && task) { SP._aiDiag.mode = 'json(fallback)'; out = await jsonMode(); } else { SP._aiDiag.mode += '→chat'; out = (await call(false)).text; }
+      }
       const mood = (out.match(/\[(\w+)\]/) || [])[1]; c.push({ role: 'bot', text: clean(out) || 'تم ✅' }); SP.save(); drawChat(); SP.react(MOODS[mood] ? mood : 'happy'); afterReply(clean(out));
     } catch (e) {
       bot.classList.remove('typing'); const msg = (e.text ? clean(e.text) + '\n\n' : '') + (e.code === 'cancelled' ? '(أُوقف الرد)' : aiErr(e));
