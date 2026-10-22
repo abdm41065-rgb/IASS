@@ -51,8 +51,8 @@
     const x = get(kind, id);
     switch (kind) {
       case 'note': return { id, title: x.title, body: x.body, tags: x.tags, pinned: x.pinned, images: (x.images || []).length };
-      case 'document': { const html = await SP.idb.get('wdoc:' + id); return { id, name: x.name, words: x.words, text: htmlText(html).slice(0, 20000) }; }
-      case 'file': { const b = await SP.idb.get(id); return { id, name: x.name, kind: x.kind, class: x.classId ? SP.className(x.classId) : '', text: b && SP.fileText ? (await SP.fileText(b, x.mime, x.name)).slice(0, 20000) : '(لا يمكن قراءة نص هذا الملف)' }; }
+      case 'document': { const html = await SP.idb.get('wdoc:' + id); return { id, name: x.name, words: x.words, text: htmlText(html).slice(0, 12000) }; }
+      case 'file': { const b = await SP.idb.get(id); return { id, name: x.name, kind: x.kind, class: x.classId ? SP.className(x.classId) : '', text: b && SP.fileText ? (await SP.fileText(b, x.mime, x.name)).slice(0, 12000) : '(لا يمكن قراءة نص هذا الملف)' }; }
       case 'deck': return { id, name: x.name, cards: x.cards.map((c) => ({ id: c.id, q: c.q, a: c.a, box: c.box || 1 })) };
       case 'quiz': return { id, title: x.title, class: x.classId ? SP.className(x.classId) : '', questions: x.questions.map((q) => ({ type: q.type, q: q.q, options: q.options, answer: q.answer })), myBest: (SP.bestResults(id).find((r) => r.userId === me()) || {}).score };
       case 'task': return x;
@@ -90,7 +90,7 @@
   };
 
   /* ---------- الأدوات ---------- */
-  const T = (name, description, properties, required, execute) => ({ name, description, inputSchema: { type: 'object', properties, required }, execute: async (a) => { try { return await execute(a || {}); } catch (e) { return 'خطأ: ' + (e.message || e); } } });
+  const T = (name, description, properties, required, execute) => ({ name, description, inputSchema: { type: 'object', properties, required }, execute: async (a) => { try { const r = await execute(a || {}); const js = typeof r === 'string' ? r : JSON.stringify(r); return new Blob([js]).size > 30000 ? js.slice(0, 13000) + ' …(اقتُطع لطوله، اطلب جزءاً محدداً)' : r; } catch (e) { return 'خطأ: ' + (e.message || e); } } });
   const S_ = { type: 'string' }, N_ = { type: 'number' }, B_ = { type: 'boolean' }, KIND = { type: 'string', enum: KINDS };
 
   SP.aiTools = () => [

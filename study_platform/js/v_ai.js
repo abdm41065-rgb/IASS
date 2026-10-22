@@ -383,16 +383,27 @@
     const sample = await SP.aiSample(); root.dataset.mood = 'thinking';
     if (!sample) { setTimeout(() => { const a = offline(q); c.push({ role: 'bot', text: a }); SP.save(); drawChat(); SP.react('happy'); }, 500); return; }
     ctl = new AbortController(); sendBtn.hidden = true; stopBtn.hidden = false; SP.aiBeginTurn && SP.aiBeginTurn();
-    const RULES = `أنت «${mname()}»، ${KINDS[cfg().kind] || 'بومة'}: ${persona().voice}. وأنت مساعد دراسة داخل منصة دراسة عربية. تكلّم بالعربية بلهجة ودودة وواضحة، بجمل قصيرة، واستخدم إيموجي واحداً أو اثنين في كل رد بشكل طبيعي. ساعد في شرح الدروس، اختبار المستخدم بأسئلة، تنظيم الوقت، والتحفيز. لا تخترع معلومات عن ملفات لم تقرأها. عندك أدوات للوصول إلى كل أعمال المستخدم (ملاحظات، مستندات، ملفات، بطاقات، فويزات، مهام، مجموعات، مسارات، صفوف) وتعديلها: استخدم list_my_work أو search_my_work لتجد العنصر، واقرأه بـ read_item قبل أي تعديل، ثم نفّذ ما طلبه المستخدم بالضبط بلا تعديلات لم يطلبها. لا تحذف إلا إذا طلب الحذف صراحة. بعد التنفيذ اذكر باختصار ما غيّرته، والمستخدم يقدر يتراجع بزر «تراجع». إذا كان الطلب غامضاً (أي ملاحظة؟ أي مستند؟) اسأله أولاً. ابدأ ردك دائماً بوسم المزاج بين قوسين مربعين واحد فقط من: [happy] [celebrate] [encourage] [thinking] [wave] ثم الرد. بيانات المستخدم الآن: ${JSON.stringify(brief())}`;
+    const RULES = `أنت «${mname()}»، ${KINDS[cfg().kind] || 'بومة'}: ${persona().voice}. وأنت مساعد دراسة داخل منصة دراسة عربية. تكلّم بالعربية بلهجة ودودة وواضحة، بجمل قصيرة، واستخدم إيموجي واحداً أو اثنين في كل رد بشكل طبيعي. ساعد في شرح الدروس، اختبار المستخدم بأسئلة، تنظيم الوقت، والتحفيز. لا تخترع معلومات عن ملفات لم تقرأها. عندك أدوات للوصول إلى كل أعمال المستخدم (ملاحظات، مستندات، ملفات، بطاقات، فويزات، مهام، مجموعات، مسارات، صفوف) وتعديلها: استخدم list_my_work أو search_my_work لتجد العنصر، واقرأه بـ read_item قبل أي تعديل، ثم نفّذ ما طلبه المستخدم بالضبط بلا تعديلات لم يطلبها. لا تحذف إلا إذا طلب الحذف صراحة. عندما يطلب كتابة ملف أو مستند أو ملخص أو بطاقات أو أسئلة: نفّذ فوراً بالأداة المناسبة (مثل create_document بمحتوى كامل ومفصّل ومنظم بعناوين ونقاط) ولا تكتفِ بالترحيب أو الوعد. شخصيتك تظهر في جملة قصيرة فقط ولا تؤخر العمل. بعد التنفيذ اذكر باختصار ما غيّرته، والمستخدم يقدر يتراجع بزر «تراجع». إذا كان الطلب غامضاً (أي ملاحظة؟ أي مستند؟) اسأله أولاً. ابدأ ردك دائماً بوسم المزاج بين قوسين مربعين واحد فقط من: [happy] [celebrate] [encourage] [thinking] [wave] ثم الرد. بيانات المستخدم الآن: ${JSON.stringify(brief())}`;
     const turns = [{ role: 'user', content: RULES }, ...c.slice(-16).map((m) => ({ role: m.role === 'user' ? 'user' : 'assistant', content: m.role === 'act' ? '(نفّذتُ: ' + m.acts.map((a) => a.text).join('، ') + ')' : m.text }))];
-    const clean = (t) => t.replace(/^\s*\[(happy|celebrate|encourage|thinking|wave)\]\s*/i, '');
+    const clean = (t) => t.replace(/\[(happy|celebrate|encourage|thinking|wave)\]\s*/gi, '').trim();
+    /* طلب عمل (اكتب، عدّل، أنشئ…) يذهب لنموذج أقوى يستخدم الأدوات؛ الدردشة العادية سريعة */
+    const task = /اكتب|أكتب|سوّ|سوي|اعمل|أعمل|انشئ|أنشئ|عدّل|عدل|غيّر|غير |احذف|امسح|أضف|اضف|ضيف|رتّب|رتب|لخّص|لخص|حسّن|حسن|صحّح|صحح|ملف|مستند|ملاحظ|بطاق|فويز|اختبار|مهم|مجموع|مسار|انشر|تبليغ|واجب|امتحان/.test(q);
+    const progress = (label) => { if (bot.classList.contains('typing') || bot.dataset.tool) { bot.dataset.tool = '1'; bot.textContent = label; list.scrollTop = list.scrollHeight; } };
+    const LABEL = { list_my_work: '📂 أتصفّح أعمالك…', search_my_work: '🔎 أبحث في أعمالك…', read_item: '📖 أقرأ…', create_note: '📝 أكتب الملاحظة…', update_note: '✏️ أعدّل الملاحظة…', create_document: '📄 أكتب المستند…', edit_document: '✏️ أعدّل المستند…', add_task: '✅ أضيف المهمة…', update_task: '✏️ أعدّل المهمة…', create_deck: '🃏 أصنع البطاقات…', edit_deck: '🃏 أعدّل البطاقات…', create_quiz: '❓ أكتب الفويز…', edit_quiz: '❓ أعدّل الفويز…', edit_collection: '🗂️ أرتّب المجموعة…', edit_flow: '🧭 أعدّل المسار…', post_to_class: '📢 أنشر في الصف…', delete_item: '🗑 أنتظر موافقتك…' };
     try {
       const lim = await sample.limits().catch(() => null);
-      const { text: out } = await sample(turns, { signal: ctl.signal, modelTier: 'quick', ...(lim && lim.tools ? { tools: SP.aiTools ? SP.aiTools() : TOOLS() } : { cache: false }), onText: ({ text: t }) => { bot.classList.remove('typing'); bot.textContent = clean(t); list.scrollTop = list.scrollHeight; } });
-      const mood = (out.match(/^\s*\[(\w+)\]/) || [])[1]; c.push({ role: 'bot', text: clean(out) }); SP.save(); drawChat(); SP.react(MOODS[mood] ? mood : 'happy');
+      let tools = lim && lim.tools && SP.aiTools ? SP.aiTools() : null;
+      if (tools && lim.tools.maxCount && tools.length > lim.tools.maxCount) tools = tools.slice(0, lim.tools.maxCount);
+      if (tools) tools = tools.map((t) => ({ ...t, execute: (a, ctx) => { progress(LABEL[t.name] || '⚙️ أعمل…'); return t.execute(a, ctx); } }));
+      bot.textContent = task && tools ? `${mname()} يفكر ويشتغل على طلبك… (قد يأخذ دقيقة)` : `${mname()} يكتب…`;
+      const call = (withTools) => sample(turns, { signal: ctl.signal, modelTier: task && withTools ? 'default' : 'quick', ...(withTools ? { tools } : { cache: false }), onText: ({ text: t }) => { bot.classList.remove('typing'); delete bot.dataset.tool; bot.textContent = clean(t); list.scrollTop = list.scrollHeight; } });
+      let out;
+      try { out = (await call(!!tools)).text; }
+      catch (e) { if (tools && ['invalid_request', 'tools_unavailable', 'transform_error', 'prompt_too_large'].includes(e.code) && !e.text) { console.warn('assistant tools failed, answering without them:', e.code, e.message); out = (await call(false)).text; } else throw e; }
+      const mood = (out.match(/\[(\w+)\]/) || [])[1]; c.push({ role: 'bot', text: clean(out) || 'تم ✅' }); SP.save(); drawChat(); SP.react(MOODS[mood] ? mood : 'happy');
     } catch (e) {
-      bot.classList.remove('typing'); bot.textContent = (e.text ? clean(e.text) + '\n\n' : '') + (e.code === 'cancelled' ? '(أُوقف الرد)' : aiErr(e));
-      if (e.text) c.push({ role: 'bot', text: clean(e.text) }); SP.save();
+      bot.classList.remove('typing'); const msg = (e.text ? clean(e.text) + '\n\n' : '') + (e.code === 'cancelled' ? '(أُوقف الرد)' : aiErr(e));
+      c.push({ role: 'bot', text: msg }); SP.save(); drawChat();
     } finally {
       ctl = null; sendBtn.hidden = false; stopBtn.hidden = true;
       const acts = SP.aiEndTurn ? SP.aiEndTurn() : []; if (acts.length) { c.push({ role: 'act', acts }); SP.save(); drawChat(); }

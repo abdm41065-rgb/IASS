@@ -480,7 +480,10 @@ with sync_playwright() as p:
     # ---- المساعد يصل لكل الأعمال ويعدّل عليها ----
     ctx4 = b.new_context(viewport={"width": 1280, "height": 900})
     ctx4.add_init_script("""
-      const fake = async (turns, o) => { const t = Object.fromEntries(o.tools.map(x => [x.name, x]));
+      const fake = async (turns, o) => { window.__tiers = (window.__tiers || []).concat(o.modelTier);
+        if (window.__failTools && o.tools) throw {code: 'invalid_request', message: 'too many tools'};
+        if (!o.tools) return {text: '[wave] أهلاً بك، كيف أساعدك؟'};
+        const t = Object.fromEntries(o.tools.map(x => [x.name, x]));
         window.__toolLog = [];
         window.__toolLog.push(await t.read_item.execute({kind: 'note', id: 'n_plexus'}));
         window.__toolLog.push(await t.update_note.execute({id: 'n_plexus', append: 'سطر أضافه المساعد'}));
@@ -512,6 +515,9 @@ with sync_playwright() as p:
     check(p4.locator(".m-msg.act .m-act").count() == 2 and "أضفت السطر" in p4.inner_text(".m-list"), "chat shows what the assistant changed")
     p4.click(".m-undo"); p4.wait_for_timeout(300)
     check("سطر أضافه المساعد" not in p4.evaluate("SP.state.notes.find(n=>n.id==='n_plexus').body") and not p4.evaluate("SP.state.decks.some(d=>d.name==='بطاقات المساعد')") and "رجّعت" in p4.inner_text(".m-list"), "undo restores the work and keeps the chat")
+    check(p4.evaluate("window.__tiers[0]") == "default", "work requests use the stronger model tier")
+    p4.evaluate("window.__failTools = true"); p4.fill("#sanad-input", "مرحبا"); p4.press("#sanad-input", "Enter"); p4.wait_for_timeout(500)
+    check("أهلاً بك" in p4.inner_text(".m-list") and p4.evaluate("window.__tiers.at(-1)") == "quick", "assistant still replies when tools are refused")
     ctx4.close()
 
 
