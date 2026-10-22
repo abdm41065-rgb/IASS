@@ -65,7 +65,7 @@
   }
   const overview = (kind) => {
     const ks = kind ? [kind] : KINDS, out = {};
-    ks.forEach((k) => { if (!mine[k]) return; out[k] = mine[k]().slice(0, 60).map((x) => ({ id: x.id, title: str(title(k, x), 80), ...(k === 'task' ? { done: x.done, due: x.due } : {}), ...(k === 'note' && x.pinned ? { pinned: true } : {}), ...(k === 'deck' ? { cards: x.cards.length } : {}), ...(k === 'file' ? { type: (x.mime || '').split('/').pop(), editable_pdf: x.src != null } : {}), ...(k === 'quiz' ? { questions: x.questions.length } : {}), ...(k === 'flow' && SP.flowProgress ? { progress: SP.flowProgress(x) + '%' } : {}) })); });
+    ks.forEach((k) => { if (!mine[k]) return; out[k] = mine[k]().slice(0, 60).map((x) => ({ id: x.id, title: str(title(k, x), 80), ...(k === 'task' ? { done: x.done, due: x.due } : {}), ...(k === 'note' && x.pinned ? { pinned: true } : {}), ...(k === 'deck' ? { cards: x.cards.length } : {}), ...(k === 'class' ? { mode: chatOf(x).students ? 'مجموعة' : 'قناة', i_can_post: canPost(x), i_am_teacher: x.teacherId === me() } : {}), ...(k === 'file' ? { type: (x.mime || '').split('/').pop(), editable_pdf: x.src != null } : {}), ...(k === 'quiz' ? { questions: x.questions.length } : {}), ...(k === 'flow' && SP.flowProgress ? { progress: SP.flowProgress(x) + '%' } : {}) })); });
     return out;
   };
   async function search(query) {
@@ -108,6 +108,32 @@
     const f = get('file', id), dd = f.deskId && (S().docs || []).find((y) => y.id === f.deskId);
     if (dd && dd.pages.some((p) => p.a.length)) return { blob: await SP.deskFlatten(dd), name: f.name.replace(/\.[^.]+$/, '') + '.pdf' };
     const b = await SP.idb.get(f.id); if (!b) fail('الملف غير موجود'); return { blob: b, name: f.name };
+  }
+
+  /* النشر في القنوات (محادثات الصفوف) أو للأشخاص */
+  const chatOf = (c) => Object.assign({ students: true }, c.chat || {});
+  const canPost = (c) => c.teacherId === me() || (c.memberIds.includes(me()) && chatOf(c).students);
+  const findClass = (q) => { const k = String(q).trim(); return SP.myClasses().find((c) => c.id === k || c.name === k) || SP.myClasses().find((c) => c.name.includes(k) || k.includes(c.name) || (c.subject || '').includes(k)); };
+  async function publish(blob, name, x) {
+    const want = [...(x.channels || []), ...(x.class_id ? [x.class_id] : [])].map(String), all = want.some((w) => /^(all|الكل|كل)/i.test(w.trim()));
+    const chans = all ? SP.myClasses().filter(canPost) : want.map(findClass).filter(Boolean);
+    const blocked = (all ? [] : chans.filter((c) => !canPost(c))), ok = chans.filter(canPost);
+    const missing = all ? [] : want.filter((w) => !findClass(w));
+    const people = (x.to || []).map((nm) => S().users.find((u) => u.id !== me() && (u.name === nm || u.name.includes(String(nm)) || String(nm).includes(u.name.replace(/^د\.\s*/, ''))))).filter(Boolean);
+    if (!ok.length && !people.length) fail([missing.length && 'لم أجد هذه الصفوف: ' + missing.join('، '), blocked.length && 'هذه قنوات ينشر فيها الأستاذ فقط: ' + blocked.map((c) => c.name).join('، '), !want.length && !people.length && 'حدد القنوات أو الأشخاص'].filter(Boolean).join('. ') || 'لا يوجد مكان يمكن النشر فيه');
+    const where = [...ok.map((c) => '📣 ' + c.name), ...people.map((u) => u.name)].join('، ');
+    if (!(await ask(`المساعد يريد نشر «${name}» في: ${where}. موافق؟`))) return 'رفض المستخدم النشر';
+    await snapshot(); const msg = str(x.message, 600), mime = blob.type || 'application/pdf';
+    for (const c of ok) {
+      const fid = SP.uid(); await SP.idb.put(fid, blob); turn.snap.idb[fid] = null;
+      if (c.teacherId === me()) { S().files.push({ id: fid, ownerId: me(), name, mime, size: blob.size, tags: [], color: '', star: false, stickers: [], kind: 'handout', classId: c.id, added: Date.now(), desc: msg });
+        (S().classItems = S().classItems || []).push({ id: SP.uid(), classId: c.id, by: me(), type: 'explain', title: name.replace(/\.pdf$/i, ''), ts: Date.now(), images: [], fileId: fid, fname: name, fmime: mime, text: msg || 'ملف جديد 📕' }); }
+      else (S().classItems = S().classItems || []).push({ id: SP.uid(), classId: c.id, by: me(), type: 'msg', title: '', text: msg || '📕 ' + name, ts: Date.now(), fileId: fid, fname: name, fmime: mime });
+    }
+    for (const u of people) { const fid = SP.uid(); await SP.idb.put(fid, blob); turn.snap.idb[fid] = null; S().files.push({ id: fid, ownerId: u.id, name, mime, size: blob.size, tags: ['مستلم'], color: '', star: false, stickers: [], kind: 'file', classId: '', added: Date.now(), desc: ('من ' + SP.me().name + (msg ? ': ' + msg : '')).slice(0, 500) });
+      (S().inbox = S().inbox || []).push({ id: SP.uid(), from: me(), to: u.id, fileId: fid, name, mime, note: msg, ts: Date.now(), read: false }); }
+    done(); SP.updateBell && SP.updateBell(); log('📤', `نشرت «${name}» في ${where}`, ok.length === 1 ? 'classes/' + ok[0].id : '');
+    return { ok: true, published_to: where, skipped: [...blocked.map((c) => c.name + ' (قناة للأستاذ فقط)'), ...missing.map((m) => m + ' (غير موجود)')] };
   }
 
   /* ---------- الأدوات ---------- */
@@ -185,12 +211,12 @@
       if (x.type === 'homework') Object.assign(it, { due: /^\d{4}-\d{2}-\d{2}$/.test(String(x.due)) ? x.due : '', max: 10, desc: str(x.text, 4000) });
       (S().classItems = S().classItems || []).push(it); done(); log('📢', `نشرت في «${c.name}»: ${it.title}`, 'classes/' + c.id); return { ok: true, id: it.id }; }),
 
-    T('create_pdf', 'ينشئ ملف PDF جديداً (يدعم العربية) من نص Markdown: عناوين #/##، نقاط -، جداول |، و**عريض**. يُحفظ في «الملفات» ويُفتح في «ملفات للتعليق». اكتب محتوى كاملاً ومنظماً.', { title: S_, markdown: S_, open: B_ }, ['title', 'markdown'], async ({ title: t, markdown, open }) => {
+    T('create_pdf', 'ينشئ ملف PDF جديداً (يدعم العربية) من نص Markdown: عناوين #/##، نقاط -، جداول |، و**عريض**. يُحفظ في «الملفات» ويُفتح في «ملفات للتعليق». اكتب محتوى كاملاً ومنظماً. لنشره مباشرة في قنوات الصفوف مرّر channels (أسماء الصفوف أو "all") وmessage.', { title: S_, markdown: S_, open: B_, channels: { type: 'array', items: S_ }, message: S_ }, ['title', 'markdown'], async ({ title: t, markdown, open, channels, message }) => {
       const name = str(t, 100) || 'ملف'; await snapshot(); const src = str(markdown, 60000), blob = await SP.makePdf(pdfHtml(src), { title: name }), fid = SP.uid();
       await SP.idb.put(fid, blob); turn.snap.idb[fid] = null;
       const f = { id: fid, ownerId: me(), name: name + '.pdf', mime: 'application/pdf', size: blob.size, tags: ['من المساعد'], color: '', star: false, stickers: [], kind: 'file', classId: '', added: Date.now(), desc: '', src, title: name };
       S().files.push(f); const d = SP.deskAdd ? await SP.deskAdd(new File([blob], f.name, { type: 'application/pdf' })) : null; if (d) { f.deskId = d.id; turn.snap.idb[d.fileId] = null; }
-      done(); log('📕', `أنشأت PDF «${f.name}» (${await pageCount(blob)} صفحة)`, d ? 'desk/' + d.id : 'files'); if (open && d) setTimeout(() => SP.go('desk/' + d.id), 300); return { ok: true, file_id: fid, annotated_id: d && d.id }; }),
+      done(); log('📕', `أنشأت PDF «${f.name}» (${await pageCount(blob)} صفحة)`, d ? 'desk/' + d.id : 'files'); if (open && d && !(channels || []).length) setTimeout(() => SP.go('desk/' + d.id), 300); const pub = (channels || []).length ? await publish(blob, f.name, { channels, message }) : null; return { ok: true, file_id: fid, annotated_id: d && d.id, published: pub }; }),
     T('edit_pdf', 'يعدّل محتوى PDF أنشأه المساعد ويعيد بناءه: mode=replace_all أو append أو prepend (content بصيغة Markdown) أو replace_text (find ← content). لملف PDF مرفوع من الخارج استخدم annotate_pdf.', { file_id: S_, mode: { type: 'string', enum: ['replace_all', 'append', 'prepend', 'replace_text'] }, content: S_, find: S_, rename: S_ }, ['file_id', 'mode'], async (x) => {
       const f = get('file', x.file_id); if (f.ownerId !== me()) fail('هذا الملف ليس لك'); if (f.src == null) fail('هذا PDF مرفوع وليس له مصدر قابل للتعديل؛ استخدم annotate_pdf للكتابة عليه');
       let src = f.src; const c = str(x.content, 60000);
@@ -205,17 +231,8 @@
       const pg = d.pages[pi], base = { top: 0.05, middle: 0.47, bottom: 0.88 }[x.position] || 0.05, k = pg.a.filter((a) => a.ai && a.pos === (x.position || 'top')).length, y = Math.min(0.95, base + k * 0.045), c = /^#[0-9a-f]{6}$/i.test(String(x.color)) ? x.color : null;
       pg.a.push(x.style === 'note' ? { id: SP.uid(), t: 'note', x: 0.9, y, c: c || '#FFE14D', v: str(x.text, 1000), open: false, ts: Date.now(), ai: true, pos: x.position || 'top' } : { id: SP.uid(), t: 'text', x: 0.06, y, s: 0.022, c: c || '#C62828', v: str(x.text, 600), b: true, ai: true, pos: x.position || 'top' });
       d.updated = Date.now(); done(); log('🖍️', `كتبت على «${d.name}» ص${pi + 1}`, 'desk/' + d.id); return { ok: true, annotated_id: d.id }; }),
-    T('publish_file', 'ينشر ملفاً (مع تعليقاته مدموجة إن وُجدت): للأستاذ في صفه (class_id) كشرح مع مرفق، أو يرسله لأشخاص بالاسم (to). يسأل المستخدم للتأكيد قبل النشر.', { target_id: S_, class_id: S_, to: { type: 'array', items: S_ }, message: S_ }, ['target_id'], async (x) => {
-      const cls = x.class_id ? SP.classById(x.class_id) : null; if (x.class_id && (!cls || cls.teacherId !== me())) fail('لست أستاذ هذا الصف');
-      const people = (x.to || []).map((nm) => S().users.find((u) => u.id !== me() && (u.name === nm || u.name.includes(String(nm)) || String(nm).includes(u.name.replace(/^د\.\s*/, ''))))).filter(Boolean); if (!cls && !people.length) fail('حدد صفاً تدرّسه أو أسماء أشخاص موجودين');
-      const { blob, name } = await fileBlob(x.target_id), where = [cls && '«' + cls.name + '»', ...people.map((u) => u.name)].filter(Boolean).join('، ');
-      if (!(await ask(`المساعد يريد نشر «${name}» إلى: ${where}. موافق؟`))) return 'رفض المستخدم النشر';
-      await snapshot(); const msg = str(x.message, 600);
-      if (cls) { const fid = SP.uid(); await SP.idb.put(fid, blob); turn.snap.idb[fid] = null; S().files.push({ id: fid, ownerId: me(), name, mime: 'application/pdf', size: blob.size, tags: [], color: '', star: false, stickers: [], kind: 'handout', classId: cls.id, added: Date.now(), desc: msg });
-        (S().classItems = S().classItems || []).push({ id: SP.uid(), classId: cls.id, by: me(), type: 'explain', title: name.replace(/\.pdf$/i, ''), ts: Date.now(), images: [], fileId: fid, fname: name, fmime: 'application/pdf', text: msg || 'ملف جديد 📕' }); }
-      for (const u of people) { const fid = SP.uid(); await SP.idb.put(fid, blob); turn.snap.idb[fid] = null; S().files.push({ id: fid, ownerId: u.id, name, mime: 'application/pdf', size: blob.size, tags: ['مستلم'], color: '', star: false, stickers: [], kind: 'file', classId: '', added: Date.now(), desc: ('من ' + SP.me().name + (msg ? ': ' + msg : '')).slice(0, 500) });
-        (S().inbox = S().inbox || []).push({ id: SP.uid(), from: me(), to: u.id, fileId: fid, name, mime: 'application/pdf', note: msg, ts: Date.now(), read: false }); }
-      done(); SP.updateBell && SP.updateBell(); log('📤', `نشرت «${name}» إلى ${where}`, cls ? 'classes/' + cls.id : ''); return { ok: true, sent_to: where }; }),
+    T('publish_file', 'ينشر ملفاً (مع تعليقاته مدموجة) في قنوات/صفوف المحادثة (channels: أسماء الصفوف أو معرّفاتها، أو "all" لكل ما يمكنه النشر فيه)، و/أو يرسله لأشخاص بالاسم (to). الأستاذ ينشر في صفوفه كشرح مع مرفق؛ الطالب ينشر رسالة مع الملف في المجموعات المفتوحة فقط. يسأل للتأكيد.', { target_id: S_, channels: { type: 'array', items: S_ }, to: { type: 'array', items: S_ }, message: S_ }, ['target_id'], async (x) => {
+      const { blob, name } = await fileBlob(x.target_id); return publish(blob, name, x); }),
     T('delete_item', 'يحذف عنصراً (ملاحظة، مستند، مهمة، بطاقات، فويز، مجموعة، مسار). يسأل المستخدم للتأكيد قبل الحذف.', { kind: { type: 'string', enum: ['note', 'document', 'task', 'deck', 'quiz', 'collection', 'flow'] }, id: S_ }, ['kind', 'id'], async ({ kind, id }) => {
       const x = get(kind, id); if ((kind === 'deck' || kind === 'quiz') && !canEdit[kind](x)) fail('هذا ليس لك');
       if (!(await ask(`المساعد يريد حذف «${title(kind, x)}». موافق؟`))) return 'رفض المستخدم الحذف';

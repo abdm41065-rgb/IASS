@@ -44,7 +44,7 @@
     const me = m.by === SP.state.me, teacher = isTeacher(c), sender = SP.user(m.by), s = settings(c);
     const reply = m.replyTo && items().find((x) => x.id === m.replyTo);
     let content;
-    if (m.type === 'msg') content = h('div', { class: 'tg-text', dir: 'auto' }, m.text);
+    if (m.type === 'msg') content = h('div', {}, m.fileId && SP.fileCard ? SP.fileCard(m) : null, m.text ? h('div', { class: 'tg-text', dir: 'auto' }, m.text) : null);
     else if (m.type === 'poll') content = pollBody(c, m);
     else if (m.type === 'gallery' && !m.title) content = SP.ciBody(m);
     else content = h('div', {}, h('div', { class: 'tg-kind' }, LABEL[m.type] + (m.important ? ' · 📌 مهم' : '')), m.important ? h('div', { class: 'imp-flag' }, '📌 تبليغ مهم') : null, m.title ? h('b', { class: 'tg-title' }, m.title) : null, SP.ciBody(m));

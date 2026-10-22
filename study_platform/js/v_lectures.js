@@ -171,7 +171,7 @@
       if (m) { if (!ul) { ul = h('ul', {}); out.append(ul); } ul.append(h('li', {}, parts)); } else { ul = null; if (line.trim()) out.append(h('p', {}, parts)); } });
     return out; };
   const ciBody = (it) => it.type === 'notice' ? rich(it.text)
-      : it.type === 'explain' ? h('div', {}, rich(it.text), it.images && it.images.length ? gallery(it) : null, it.fileId ? h('button', { class: 'btn ghost sm', style: { marginTop: '8px' }, onclick: async () => { const b = await SP.idb.get(it.fileId); b ? SP.download(it.fname || 'مرفق', b) : SP.toast('الملف غير موجود', 'err'); } }, '📎 ' + (it.fname || 'المرفق')) : null)
+      : it.type === 'explain' ? h('div', {}, rich(it.text), it.images && it.images.length ? gallery(it) : null, it.fileId ? SP.fileCard(it) : null)
       : it.type === 'lecture' ? lectureBody(it) : it.type === 'gallery' ? h('div', {}, it.desc ? h('p', {}, it.desc) : null, gallery(it)) : it.type === 'exam' ? examBody(it) : homeworkBody(it);
   SP.ciBody = ciBody; SP.classComposer = (type, classId) => composer(type, classId); SP.CI_TYPES = TYPES;
   function card(it, showClass) {

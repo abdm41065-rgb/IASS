@@ -915,3 +915,6 @@ body.in-writer #sanad{display:none}
 .m-talk.on{background:var(--bad)!important;color:#fff!important}
 .m-spk{font-size:1rem}
 #sanad.talking .m-body,#sanad.talking svg{animation:nod .35s ease-in-out infinite}
+.tg-file{display:flex;align-items:center;gap:10px;background:var(--fill);border-radius:12px;padding:8px 10px;margin:4px 0 6px;min-width:220px}
+.tg-file-ic{font-size:1.8rem;line-height:1}
+.tg-file-n{flex:1;min-width:0;display:grid}.tg-file-n b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:.92rem}.tg-file-n small{color:var(--mute);font-size:.75rem}

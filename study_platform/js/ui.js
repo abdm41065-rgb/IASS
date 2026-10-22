@@ -129,4 +129,13 @@
   };
   document.addEventListener('click', (e) => { if (!e.target.closest || !e.target.closest('.more, .more-menu')) SP.closeMenus(); });
   (SP.listeners.route = SP.listeners.route || []).push(() => SP.closeMenus());
+
+  /* بطاقة ملف مرفق في المحادثة والمنشورات: افتح للتعليق أو نزّل */
+  SP.fileCard = (it) => {
+    const name = it.fname || 'المرفق', mime = it.fmime || '', pdf = /pdf/.test(mime) || /\.pdf$/i.test(name), img = /^image\//.test(mime);
+    const get = async () => { const b = await SP.idb.get(it.fileId); if (!b) SP.toast('الملف غير موجود في هذا المتصفح', 'err'); return b; };
+    return h('div', { class: 'tg-file' }, h('span', { class: 'tg-file-ic', 'aria-hidden': 'true' }, pdf ? '📕' : img ? '🖼️' : '📎'), h('div', { class: 'tg-file-n' }, h('b', { dir: 'auto' }, name), h('small', {}, pdf ? 'ملف PDF' : 'مرفق')),
+      (pdf || img) && SP.openInDesk ? h('button', { class: 'btn sm', onclick: async () => { if (await get()) SP.openInDesk({ id: it.fileId, name, mime: mime || (pdf ? 'application/pdf' : '') }); } }, 'افتح') : null,
+      h('button', { class: 'btn ghost sm', 'aria-label': 'تنزيل ' + name, onclick: async () => { const b = await get(); b && SP.download(name, b); } }, '⬇'));
+  };
 })();
