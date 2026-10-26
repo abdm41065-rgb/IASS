@@ -396,6 +396,13 @@ with sync_playwright() as p:
     # ---- مسارات الدراسة (منشئ المسارات) ----
     p3.evaluate("document.querySelectorAll('.ov').forEach(o=>o.remove())")
     p3.select_option("#who", "st"); p3.evaluate("location.hash='#/home'"); p3.wait_for_timeout(200)
+    p3.evaluate("location.hash='#/practice'"); p3.wait_for_timeout(300)
+    check(p3.locator("#main .subnav a").count() == 3 and p3.locator(".pr-sec").count() == 2 and p3.locator("#main button:has-text('فويز جديد')").count() == 1, "quizzes and cards live together in one practice page")
+    p3.click(".nt-chip:has-text('الفويزات')"); check(p3.locator(".pr-sec[aria-label='البطاقات']").is_hidden(), "practice filter shows quizzes only")
+    p3.evaluate("location.hash='#/quizzes'"); p3.wait_for_timeout(200); check(p3.locator(".pr-sec").count() == 2, "old quizzes link opens the combined page")
+    p3.evaluate("location.hash='#/desk/d_anat'"); p3.wait_for_timeout(900)
+    check(p3.evaluate("SP.state.docs.find(d=>d.id==='d_anat').pages[0].a.filter(a=>a.t==='text').every(a=>a.ruled && Math.abs(a.y*32-Math.round(a.y*32))<0.01)"), "notebook text sits on the ruled lines")
+    p3.evaluate("location.hash='#/home'"); p3.wait_for_timeout(200)
     check(p3.locator(".fl-home").count() == 1 and "تحضير OSPE" in p3.inner_text(".fl-home"), "flow: active flow card on home")
     p3.click("#nav >> text=دراسة"); p3.wait_for_timeout(300)
     check(p3.evaluate("location.hash") == "#/flow" and p3.locator(".fl-card").count() == 1, "flow: study hub opens the flows list")

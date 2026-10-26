@@ -1,6 +1,8 @@
 /* دراسة: افتح ملفات الدروس (PDF/صور) أو دفتراً فارغاً، وارسم، ظلّل، أشّر، اكتب، وأضف ملصقات وصوراً وفيديوهات */
 (function () {
   const SP = window.SP, h = SP.h, S = () => SP.state;
+  /* دفتر مسطّر: السطر k على ارتفاع k/32 من الصفحة (أول سطر عند 3/32) فنضع الكتابة فوق السطر مباشرة */
+  const RULE = 32, onLine = (y) => (Math.min(RULE - 1, Math.max(3, Math.round(y * RULE + 0.4))) - 1) / RULE;
   const A4 = 842 / 595, NS = 'http://www.w3.org/2000/svg';
   const PENS = ['#1F4E99', '#111827', '#C62828', '#2E7D32', '#7B3FA0', '#E07B00'];
   const MARKS = ['#FFE14D', '#7FD3FF', '#9BE58B', '#FF9EC4'];
@@ -93,6 +95,7 @@
   /* ---------- المحرّر ---------- */
   function editor(d) {
     const root = h('div', { class: 'ed t-' + (d.kind === 'pdf' ? 'texthl' : 'text') });
+    if (d.kind === 'blank') d.pages.forEach((p) => p.a.forEach((a) => { if (a.t === 'text' && !a.ruled) { a.ruled = true; a.y = r4(onLine(a.y + 0.5 / RULE)); } })); // كتابات الدفتر القديمة تُوضع على الأسطر
     let tool = d.kind === 'pdf' ? 'texthl' : 'text', color = PENS[0], mark = MARKS[0], width = 3, emoji = '⭐', zoom = 1, pdf = null, bmp = null, sizes = [], pageEls = [];
     let tsize = 18, tbold = false, tbg = '', hlStyle = 'hl', lastText = null, selected = null;
     const TSIZES = [[14, 'صغير'], [18, 'عادي'], [24, 'كبير'], [32, 'عنوان'], [44, 'ضخم']];
@@ -232,7 +235,8 @@
     function obj(el, a) {
       const { _W: W, _H: H } = el, o = h('div', { class: 'obj ' + a.t, 'data-id': a.id, style: { left: a.x * W + 'px', top: a.y * H + 'px' } });
       if (a.t === 'text') {
-        Object.assign(o.style, { fontSize: a.s * W + 'px', color: a.c, fontWeight: a.b ? '700' : '400', background: a.bg || 'transparent' }); o.setAttribute('dir', 'auto'); o.textContent = a.v; if (a.bg) o.classList.add('has-bg');
+        Object.assign(o.style, { fontSize: a.s * W + 'px', color: a.c, fontWeight: a.b ? '700' : '400', background: a.bg || 'transparent' });
+        if (a.ruled) { const g = H / RULE, n = Math.max(1, Math.ceil(a.s * W / (g * 0.72))); o.classList.add('ruled'); Object.assign(o.style, { fontSize: Math.min(a.s * W, n * g * 0.72) + 'px', lineHeight: n * g + 'px', paddingTop: g * 0.14 + 'px', paddingBottom: 0, top: a.y * H + 'px' }); } o.setAttribute('dir', 'auto'); o.textContent = a.v; if (a.bg) o.classList.add('has-bg');
         o.contentEditable = tool === 'text' ? 'true' : 'false';
         o.addEventListener('dblclick', () => { o.contentEditable = 'true'; o.focus(); });
         o.addEventListener('focus', () => { snap(); lastText = { a, el }; tsize = Math.round(a.s * 800); tbold = !!a.b; tbg = a.bg || ''; color = a.c; });
@@ -276,7 +280,7 @@
           if (a.t === 'text' || a.t === 'stk') { a.s = r4(clamp(start.s * (1 + dx * 4), 0.01, 0.4)); o.style.fontSize = a.s * W + 'px'; return; }
           const k = Math.max(0.05, start.w + dx) / start.w; a.w = r4(start.w * k); a.h = r4(start.h * k); o.style.width = a.w * W + 'px'; o.style.height = a.h * H + 'px';
         };
-        const up = () => { o.removeEventListener('pointermove', mv); o.removeEventListener('pointerup', up); if (moved) commit(); else hist.pop(); };
+        const up = () => { o.removeEventListener('pointermove', mv); o.removeEventListener('pointerup', up); if (moved && a.ruled && !resize) { a.y = r4(onLine(a.y + (1 / RULE) * 0.6)); o.style.top = a.y * H + 'px'; } if (moved) commit(); else hist.pop(); };
         o.addEventListener('pointermove', mv); o.addEventListener('pointerup', up);
       });
       return o;
@@ -292,7 +296,7 @@
         const [x, y] = P(e), W = el._W, H = el._H, pg = el._pg;
         if (tool === 'eraser') { const t = e.target.closest && e.target.closest('[data-id]'); if (t) { snap(); pg.a = pg.a.filter((a) => a.id !== t.getAttribute('data-id')); commit(); drawOverlay(el); } return; }
         if (tool === 'text') {
-          e.preventDefault(); snap(); const a = { id: SP.uid(), t: 'text', x, y: r4(y - 0.012), s: r4(tsize / 800), c: color, b: tbold, bg: tbg, v: '' }; pg.a.push(a); drawOverlay(el);
+          e.preventDefault(); snap(); const a = { id: SP.uid(), t: 'text', x, y: d.kind === 'blank' ? r4(onLine(y)) : r4(y - 0.012), s: r4(tsize / 800), c: color, b: tbold, bg: tbg, v: '', ...(d.kind === 'blank' ? { ruled: true } : {}) }; pg.a.push(a); drawOverlay(el);
           const o = el._layer.querySelector(`[data-id="${a.id}"]`); o.contentEditable = 'true'; hist.pop(); o.focus(); return;
         }
         if (tool === 'note') { e.preventDefault(); snap(); const a = { id: SP.uid(), t: 'note', x: r4(clamp(x - 0.015, 0, 0.95)), y: r4(clamp(y - 0.015, 0, 0.95)), c: mark, v: '', open: true, ts: Date.now() }; pg.a.push(a); commit(); drawOverlay(el); const ta = el._layer.querySelector(`[data-id="${a.id}"] textarea`); ta && ta.focus(); return; }
@@ -423,6 +427,11 @@
         const x = a.x * Wc, y = a.y * Hc, fs = Wc * 0.016; ctx.font = `${fs * 1.6}px sans-serif`; ctx.textBaseline = 'top'; ctx.fillText('📝', x, y);
         if (a.v) { ctx.font = `${fs}px "IBM Plex Sans Arabic", Tahoma, sans-serif`; const lines = a.v.split('\n').slice(0, 12), bw = Math.min(Wc * 0.4, Math.max(...lines.map((l) => ctx.measureText(l).width)) + fs * 1.4), bh = lines.length * fs * 1.45 + fs, bx = Math.min(x + fs * 2.2, Wc - bw - 4);
           ctx.fillStyle = a.c || '#FFE14D'; ctx.globalAlpha = 0.92; ctx.fillRect(bx, y, bw, bh); ctx.globalAlpha = 1; ctx.fillStyle = '#14213D'; ctx.direction = 'rtl'; ctx.textAlign = 'right'; lines.forEach((l, i) => ctx.fillText(l, bx + bw - fs * 0.7, y + fs * 0.5 + i * fs * 1.45)); }
+      } else if (a.t === 'text' && a.ruled) {
+        const g0 = Hc / RULE, n = Math.max(1, Math.ceil(a.s * Wc / (g0 * 0.72))), g = n * g0, fs = Math.min(a.s * Wc, g * 0.72); ctx.font = `${a.b ? '700 ' : ''}${fs}px "IBM Plex Sans Arabic", Tahoma, sans-serif`; ctx.textBaseline = 'alphabetic';
+        a.v.split('\n').forEach((ln, i) => { const rtl = /[؀-ۿ]/.test(ln); ctx.direction = rtl ? 'rtl' : 'ltr'; const w = ctx.measureText(ln).width, by = a.y * Hc + (i + 1) * g - g0 * 0.16;
+          if (a.bg) { ctx.save(); ctx.fillStyle = a.bg; ctx.globalAlpha = 0.85; ctx.fillRect(a.x * Wc, a.y * Hc + i * g, w + fs * 0.4, g); ctx.restore(); }
+          ctx.textAlign = rtl ? 'right' : 'left'; ctx.fillText(ln, rtl ? a.x * Wc + fs * 0.15 + w : a.x * Wc + fs * 0.15, by); });
       } else if (a.t === 'text' || a.t === 'stk') {
         const fs = a.s * Wc; ctx.font = `${a.b ? '700 ' : ''}${fs}px "IBM Plex Sans Arabic", Tahoma, sans-serif`;
         if (a.t === 'text' && a.bg) { const lines = a.v.split('\n'), w = Math.max(...lines.map((l) => ctx.measureText(l).width)) + fs * 0.4; ctx.save(); ctx.fillStyle = a.bg; ctx.globalAlpha = 0.85; ctx.fillRect(a.x * Wc, a.y * Hc, w, lines.length * fs * 1.35 + fs * 0.2); ctx.restore(); } ctx.textBaseline = 'top'; ctx.textAlign = 'left';

@@ -60,11 +60,10 @@
         h('div', { style: { textAlign: 'center', marginTop: '14px' } }, h('button', { class: 'btn ghost sm', onclick: () => SP.go('cards/' + d.id) }, 'إنهاء'))));
     }; draw();
   }
+  const deckGrid = () => { const list = S().decks.filter(visibleDeck), t = SP.today(); return h('div', { class: 'grid', style: { marginTop: '14px' } }, list.length ? list.map((d) => { const due = d.cards.filter((c) => (c.due || t) <= t).length; return h('div', { class: 'card click', onclick: () => SP.go('cards/' + d.id) }, h('h3', {}, d.name), h('p', { class: 'sub' }, d.cards.length + ' بطاقة · ' + (d.classId ? SP.className(d.classId) : 'شخصية')), h('span', { class: 'chip' + (due ? ' on' : '') }, due + ' للمراجعة')); }) : SP.empty('لا توجد مجموعات')); };
   SP.reg('cards', '🃏', 'البطاقات', (p) => {
     if (!p[0]) {
-      const list = S().decks.filter(visibleDeck), t = SP.today();
-      return SP.page('البطاقات التعليمية', 'احفظ بالتكرار المتباعد: البطاقة التي تعرفها تظهر لك لاحقاً بفترات أطول.', h('button', { class: 'btn', onclick: deckModal }, 'مجموعة جديدة'),
-        h('div', { class: 'grid', style: { marginTop: '14px' } }, list.length ? list.map((d) => { const due = d.cards.filter((c) => (c.due || t) <= t).length; return h('div', { class: 'card click', onclick: () => SP.go('cards/' + d.id) }, h('h3', {}, d.name), h('p', { class: 'sub' }, d.cards.length + ' بطاقة · ' + (d.classId ? SP.className(d.classId) : 'شخصية')), h('span', { class: 'chip' + (due ? ' on' : '') }, due + ' للمراجعة')); }) : SP.empty('لا توجد مجموعات')));
+      return SP.views.practice.render([]);
     }
     const d = S().decks.find((x) => x.id === p[0]); if (!d || !visibleDeck(d)) return SP.page('غير موجودة', '', h('button', { class: 'btn', onclick: () => SP.go('cards') }, 'رجوع'));
     const mine = d.ownerId === SP.state.me, root = h('div', {});
@@ -151,7 +150,18 @@
   }
   SP.reg('quizzes', '❓', 'الفويزات', (p) => {
     if (p[0] === 'take') { const q = S().quizzes.find((x) => x.id === p[1]); return q && visibleQuiz(q) ? takeQuiz(q) : SP.page('غير موجود', ''); }
-    return SP.page('الفويزات', 'أنشئ فويزات، رتّبها، وتنافس في لوحة الترتيب.', SP.quizList());
+    return SP.views.practice.render([]);
+  });
+
+  /* ---------- اختبر نفسك: الفويزات والبطاقات في مكان واحد ---------- */
+  SP.reg('practice', '🎯', 'اختبر نفسك', () => {
+    let show = 'all'; const decks = h('section', { class: 'pr-sec', 'aria-label': 'البطاقات' }, h('h2', {}, '🃏 بطاقات المراجعة'), deckGrid()), ql = SP.quizList(), quizzes = h('section', { class: 'pr-sec', 'aria-label': 'الفويزات' }, h('h2', {}, '❓ الفويزات'), ql);
+    const dup = ql.querySelector('.row > .btn'); if (dup && dup.textContent.includes('فويز جديد')) dup.remove();
+    const t = SP.today(), due = S().decks.filter(visibleDeck).flatMap((d) => d.ownerId === SP.state.me ? d.cards : []).filter((c) => (c.due || t) <= t).length;
+    const chips = h('div', { class: 'nt-filters', role: 'toolbar', 'aria-label': 'عرض' }), draw = () => { chips.replaceChildren(...[['all', 'الكل'], ['cards', '🃏 البطاقات'], ['quiz', '❓ الفويزات']].map(([k, l]) => h('button', { class: 'nt-chip' + (show === k ? ' on' : ''), 'aria-pressed': String(show === k), onclick: () => { show = k; draw(); } }, l))); decks.hidden = show === 'quiz'; quizzes.hidden = show === 'cards'; };
+    draw();
+    return SP.page('اختبر نفسك', due ? `عندك ${due} بطاقة للمراجعة اليوم. البطاقات والفويزات كلها هنا.` : 'البطاقات والفويزات كلها هنا: راجع بالبطاقات، ثم اختبر نفسك بفويز.',
+      h('div', { class: 'row' }, h('button', { class: 'btn', onclick: deckModal }, '＋ بطاقات جديدة'), h('button', { class: 'btn ghost', onclick: () => quizEditor() }, '＋ فويز جديد')), chips, decks, quizzes);
   });
 
   /* ---------- المهام والجدول ---------- */

@@ -4,7 +4,7 @@
   /* [المفتاح، الاسم، التبويبات الظاهرة، صفحات تابعة لا تظهر كتبويب (يُوصل إليها من داخل الصفحات)] */
   const HUBS = [
     ['home', 'الرئيسية', ['home'], ['calendar', 'tasks', 'progress']],
-    ['flow', 'دراسة', ['flow', 'desk', 'quizzes', 'cards'], ['study']],
+    ['flow', 'دراسة', ['flow', 'desk', 'practice'], ['quizzes', 'cards', 'study']],
     ['notes', 'مكتبتي', ['notes', 'files', 'writer', 'space'], ['handouts', 'stickers']],
     ['classes', 'الصفوف', ['classes'], ['lectures', 'share', 'teachers', 'students']],
     ['settings', 'الإعدادات', ['settings']],
@@ -45,9 +45,10 @@
     flow: () => (S().flows || []).filter((f) => f.ownerId === me()).length,
     desk: () => (S().docs || []).filter((d) => d.ownerId === me()).length,
     quizzes: () => S().quizzes.filter((q) => (q.classId ? SP.canSeeClass(q.classId) : q.by === me())).length,
+    practice: () => S().decks.filter((d) => d.ownerId === me() || (d.classId && SP.canSeeClass(d.classId))).length + S().quizzes.filter((q) => (q.classId ? SP.canSeeClass(q.classId) : q.by === me())).length,
     cards: () => S().decks.filter((d) => d.ownerId === me() || (d.classId && SP.canSeeClass(d.classId))).length,
   };
-  const SUB_ICON = { writer: 'doc', space: 'stack' };
+  const SUB_ICON = { writer: 'doc', space: 'stack', practice: 'quizzes' };
   const icon = (k) => { const s = document.createElement('span'); s.style.display = 'contents'; s.innerHTML = `<svg class="i" viewBox="0 0 24 24" aria-hidden="true">${P[k]}</svg>`; return s; };
   const navEl = document.getElementById('nav'), main = document.getElementById('main');
 
