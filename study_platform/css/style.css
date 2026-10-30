@@ -933,3 +933,45 @@ body.in-writer #sanad{display:none}
 .hub-steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-top:14px}
 .hub-step{background:var(--card);border-radius:14px;padding:10px 12px;display:grid;gap:2px;box-shadow:0 1px 3px rgba(20,33,61,.06)}
 .hub-step span{font-size:1.4rem}.hub-step small{color:var(--mute);font-size:.8rem}
+
+/* ===== دفتري ===== */
+.nb-shelf{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:22px;margin-top:18px}
+.nb-cover{position:relative;aspect-ratio:3/4;border-radius:6px 14px 14px 6px;background:linear-gradient(135deg,color-mix(in srgb,var(--cc,#1F4E99) 88%,#fff),var(--cc,#1F4E99));color:#fff;text-decoration:none;display:flex;align-items:flex-start;justify-content:center;padding-top:28%;box-shadow:0 2px 4px rgba(0,0,0,.12),0 14px 28px rgba(20,33,61,.18),inset -6px 0 0 rgba(0,0,0,.12);transition:transform .3s cubic-bezier(.3,1.4,.5,1),box-shadow .3s;transform-origin:right center;border:0;cursor:pointer;font:inherit}
+.nb-cover:hover{transform:perspective(800px) rotateY(-14deg) translateY(-4px);box-shadow:0 4px 8px rgba(0,0,0,.14),0 22px 40px rgba(20,33,61,.24),inset -6px 0 0 rgba(0,0,0,.12)}
+.nb-spine{position:absolute;top:0;bottom:0;right:0;width:14%;background:rgba(0,0,0,.18);border-radius:0 14px 14px 0}
+.nb-label{background:#fffdf6;color:#14213D;border-radius:6px;padding:8px 10px;width:68%;display:grid;gap:2px;text-align:center;box-shadow:0 1px 2px rgba(0,0,0,.15)}
+.nb-label b{font-size:.95rem;line-height:1.3}.nb-label small{color:#64748B;font-size:.75rem}
+.nb-rings{position:absolute;top:10%;bottom:10%;right:3%;display:flex;flex-direction:column;justify-content:space-between}.nb-rings i{width:10px;height:10px;border-radius:50%;background:#e5e7eb;box-shadow:inset 0 1px 2px rgba(0,0,0,.4)}
+.nb-new{background:transparent;border:2px dashed var(--line);color:var(--blue);box-shadow:none;flex-direction:column;align-items:center;justify-content:center;padding:0;gap:6px}
+.nb-new:hover{transform:translateY(-3px);border-color:var(--blue);box-shadow:none}.nb-plus{font-size:2.4rem;line-height:1}
+.nb-top{gap:10px;margin-bottom:10px}.nb-dot{width:14px;height:14px;border-radius:4px;flex:none}
+.nb-tools{position:sticky;top:calc(env(safe-area-inset-top,0px) + 58px);z-index:15;display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:8px 10px;margin-bottom:14px;box-shadow:0 6px 18px rgba(20,33,61,.06)}
+.nb-modes{display:flex;gap:4px;background:var(--fill);padding:3px;border-radius:12px}
+.nb-mode{border:0;background:transparent;font:inherit;font-weight:600;font-size:.9rem;padding:7px 12px;border-radius:9px;cursor:pointer;color:var(--ink);display:flex;gap:6px;align-items:center;transition:background .2s,color .2s}
+.nb-mode.on{background:var(--card);color:var(--blue);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.nb-opts{display:flex;gap:6px;align-items:center}.nb-font{height:34px;padding:2px 8px;width:auto}
+.nb-desk{display:flex;align-items:center;justify-content:center;gap:10px}
+.nb-turn{flex:none;width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:var(--card);color:var(--blue);font-size:1.8rem;line-height:1;cursor:pointer;box-shadow:0 2px 8px rgba(20,33,61,.08);transition:transform .2s}
+.nb-turn:hover{transform:scale(1.08)}
+.nb-stage{width:min(640px,100%);container-type:inline-size;perspective:1600px}
+.nb-page{position:relative;width:100%;aspect-ratio:600/848;background-color:#fffdf6;border-radius:4px 12px 12px 4px;box-shadow:0 1px 2px rgba(0,0,0,.08),0 18px 40px rgba(20,33,61,.14),inset 10px 0 18px -14px rgba(0,0,0,.25);color:#14213D;
+  background-image:repeating-linear-gradient(to bottom,transparent 0,transparent calc(var(--line) - 1.5px),#b9cbe6 calc(var(--line) - 1.5px),#b9cbe6 var(--line));background-size:100% calc(100% - var(--top) + var(--line) - 4.5cqw);background-position:0 calc(var(--top) - var(--line));background-repeat:no-repeat;overflow:hidden;transform-origin:right center}
+.nb-margin{position:absolute;top:0;bottom:0;right:11cqw;width:2px;background:#f1a7a7}
+.nb-head{position:absolute;top:4cqw;right:13cqw;left:5cqw;display:flex;justify-content:space-between;align-items:center;font-size:2.6cqw;color:#64748B}
+.nb-date{outline:0;min-width:80px}.nb-no{font-variant-numeric:tabular-nums}
+.nb-text{position:absolute;top:calc(var(--top) - var(--line));bottom:4.5cqw;right:13cqw;left:5cqw;font-size:3.2cqw;line-height:var(--line);outline:0;overflow:hidden;white-space:pre-wrap;word-break:break-word;padding-bottom:0;caret-color:#1F4E99}
+.nb-text *{margin:0;line-height:var(--line)}.nb-text ul,.nb-text ol{padding-inline-start:5cqw}
+.nb-text div:empty::before{content:"\200b"}
+.nb-text:empty::before{content:"اكتب هنا…";color:#94A3B8}
+.nb-ink{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.nb-ink .st{fill:none;stroke-linecap:round;stroke-linejoin:round}.nb-ink .st.hl{opacity:.38;mix-blend-mode:multiply;stroke-linecap:butt}
+.nb-page.m-pen .nb-ink,.nb-page.m-hl .nb-ink,.nb-page.m-erase .nb-ink{pointer-events:auto;touch-action:none;cursor:crosshair}
+.nb-page.m-erase .nb-ink{cursor:cell}
+.nb-page.flip-next{animation:nbFlipN .45s cubic-bezier(.3,.7,.2,1)}.nb-page.flip-prev{animation:nbFlipP .45s cubic-bezier(.3,.7,.2,1)}
+@keyframes nbFlipN{from{transform:rotateY(-70deg);opacity:.3}}@keyframes nbFlipP{from{transform:rotateY(60deg);opacity:.3}}
+.nb-foot{display:flex;justify-content:center;align-items:center;gap:12px;margin-top:12px;color:var(--mute);font-size:.88rem}
+.nb-print{display:none}
+@media(max-width:640px){.nb-turn{display:none}.nb-mode{padding:7px 9px;font-size:.84rem}}
+@media print{body.printing-nb>*:not(.nb-print){display:none!important}body.printing-nb .nb-print{display:block}.nb-ppage{width:100%;break-after:page;box-shadow:none;container-type:inline-size;--line:5.6667cqw;--top:15.3333cqw}}
+.nb-ppage{container-type:inline-size}
+@media(max-width:640px){.hub-steps{grid-template-columns:repeat(3,1fr);gap:6px}.hub-step{padding:8px 6px;text-align:center}.hub-step small{display:none}.hub-intro p{font-size:.85rem}}

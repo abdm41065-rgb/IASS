@@ -4,7 +4,7 @@
   /* [المفتاح، الاسم، التبويبات الظاهرة، صفحات تابعة لا تظهر كتبويب (يُوصل إليها من داخل الصفحات)] */
   const HUBS = [
     ['home', 'الرئيسية', ['home'], ['calendar', 'tasks', 'progress']],
-    ['flow', 'دراسة', ['flow', 'desk', 'practice'], ['quizzes', 'cards', 'study']],
+    ['notebook', 'دراسة', ['notebook', 'desk', 'practice'], ['flow', 'quizzes', 'cards', 'study']],
     ['notes', 'مكتبتي', ['notes', 'files', 'writer', 'space'], ['handouts', 'stickers']],
     ['classes', 'الصفوف', ['classes'], ['lectures', 'share', 'teachers', 'students']],
     ['settings', 'الإعدادات', ['settings']],
@@ -12,18 +12,19 @@
   /* شرح بسيط لكل قسم: سطر تحت اسمه في القائمة، وبطاقة تعريف في أعلى صفحاته تُخفى بنقرة */
   const ABOUT = {
     home: ['يومك بنظرة', '🏠', 'الرئيسية', 'ملخص يومك: امتحاناتك القادمة، مهامك، ومسارك الحالي.', []],
-    flow: ['ذاكر واكتب واختبر نفسك', '✏️', 'دراسة: مكان المذاكرة', 'هنا تذاكر: تكتب وتعلّق على دروسك، وتبني خطة مذاكرتك، وتختبر نفسك بالبطاقات والفويزات.', [['🧭', 'خطّط', 'رتّب خطوات مذاكرتك في مسار'], ['🖍️', 'اكتب وعلّق', 'لوّن واكتب على ملفاتك ودفاترك'], ['🎯', 'اختبر نفسك', 'بطاقات وفويزات في مكان واحد']]],
+    notebook: ['ذاكر واكتب واختبر نفسك', '✏️', 'دراسة: مكان المذاكرة', 'هنا تذاكر: تكتب في دفاترك مثل دفتر حقيقي، وتعلّق على ملفات دروسك، وتختبر نفسك بالبطاقات والفويزات.', [['📓', 'اكتب في دفترك', 'بالكيبورد على الأسطر أو بالقلم'], ['🖍️', 'علّق على ملفاتك', 'لوّن واكتب على PDF والصور'], ['🎯', 'اختبر نفسك', 'بطاقات وفويزات في مكان واحد']]],
     notes: ['احفظ ملفاتك ورتّبها وأرسلها', '📚', 'مكتبتي: مكان حفظ ملفاتك', 'هنا تحفظ كل ما يخص دراستك: الملاحظات والملفات والمستندات، وترتّبها بمجموعات، وترسلها لأي شخص.', [['💾', 'احفظ', 'ملاحظات، ملفات PDF، مستندات'], ['🗂️', 'رتّب', 'ألوان ووسوم ومجموعات'], ['📤', 'أرسل', 'شارك أي ملف مع زملائك']]],
     classes: ['أساتذتك وزملاؤك', '🏫', 'الصفوف', 'محادثة كل صف: شرح الأستاذ وتبليغاته ومواعيد الامتحانات ونقاش الزملاء.', []],
     settings: ['شكل التطبيق وحسابك', '⚙️', 'الإعدادات', '', []],
   };
-  const ICON_FOR = { home: 'home', flow: 'flow', space: 'desk', desk: 'desk', notes: 'files', classes: 'classes', settings: 'settings' };
+  const ICON_FOR = { home: 'home', notebook: 'notebook', flow: 'flow', space: 'desk', desk: 'desk', notes: 'files', classes: 'classes', settings: 'settings' };
   SP.applyTheme = () => { const r = document.documentElement; if (SP.state.dark == null) r.removeAttribute('data-theme'); else r.setAttribute('data-theme', SP.state.dark ? 'dark' : 'light'); document.documentElement.style.setProperty('--fs', (SP.state.fontSize || 16) + 'px'); };
   SP.isDark = () => (SP.state.dark == null ? matchMedia('(prefers-color-scheme: dark)').matches : SP.state.dark);
   SP.setTheme = (d) => { SP.state.dark = d; SP.save(); SP.applyTheme(); };
   SP.toggleTheme = () => SP.setTheme(!SP.isDark());
   SP.fillWho = () => { const w = document.getElementById('who'); w.replaceChildren(...SP.state.users.map((u) => h('option', { value: u.id, selected: u.id === SP.state.me }, u.name + (u.role === 'teacher' ? ' · معلم' : ' · طالب')))); };
   const P = {
+    notebook: '<path d="M6 3h12a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H6z"/><path d="M6 3v18M3 7h3M3 12h3M3 17h3M10 8h6M10 12h6"/>',
     flow: '<rect x="14" y="3" width="7" height="6" rx="1.5"/><rect x="3" y="15" width="7" height="6" rx="1.5"/><path d="M14 6H9a3 3 0 0 0-3 3v6"/><circle cx="18" cy="18" r="3"/><path d="M10 18h5"/>',
     doc: '<path d="M6 3h9l4 4v14H6z"/><path d="M15 3v4h4M9 12h7M9 16h5"/>',
     stack: '<path d="M12 3l9 5-9 5-9-5z"/><path d="M3 13l9 5 9-5"/>',
@@ -50,6 +51,7 @@
     files: () => S().files.filter((f) => (f.classId ? SP.canSeeClass(f.classId) : f.ownerId === me())).length,
     writer: () => (S().wdocs || []).filter((d) => d.ownerId === me()).length,
     space: () => (S().cols || []).filter((c) => c.ownerId === me()).length,
+    notebook: () => (S().nbooks || []).filter((b) => b.ownerId === me()).length,
     flow: () => (S().flows || []).filter((f) => f.ownerId === me()).length,
     desk: () => (S().docs || []).filter((d) => d.ownerId === me()).length,
     quizzes: () => S().quizzes.filter((q) => (q.classId ? SP.canSeeClass(q.classId) : q.by === me())).length,

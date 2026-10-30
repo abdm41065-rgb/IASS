@@ -166,7 +166,11 @@
     const flows = [{ id: 'fl_ospe', ownerId: 'st', name: 'تحضير OSPE التشريح', created: T(-3), updated: T(0, 6), view: { x: 0, y: 0, z: 0.8 }, fit: true, nodes: flowNodes, edges: flowEdges }];
 
     return {
-      v: 1, me: 'st', dark: null, fontSize: 16, sim: 'med', flows,
+      v: 1, me: 'st', dark: null, fontSize: 16, sim: 'med', flows, nbSeed: { st: true },
+      nbooks: [{ id: 'nb_an', ownerId: 'st', name: 'دفتر التشريح', color: '#1F4E99', font: 'hand', created: T(-6), updated: T(0, 7), pages: [
+        { id: 'nbp1', date: 'محاضرة ٣ · الطرف العلوي', updated: T(-2), html: '<div><b>الضفيرة العضدية (Brachial plexus)</b></div><div>الجذور: C5 · C6 · C7 · C8 · T1</div><div>جذور ← جذوع ← انقسامات ← حبال ← فروع</div><div><br></div><div>• شلل إرب: C5–C6 ← يد النادل</div><div>• شلل كلومبكي: C8–T1 ← اليد المخلبية</div><div><br></div><div>☐ أراجع الفروع النهائية قبل العملي</div>',
+          ink: [{ id: 'nbi1', k: 'hl', c: '#FFE14D', w: 16, p: [[150, 100], [470, 100]] }, { id: 'nbi2', k: 'pen', c: '#C62828', w: 2.6, p: [[110, 230], [130, 214], [160, 204], [200, 200], [240, 204]] }] },
+        { id: 'nbp2', date: 'محاضرة ٤', updated: T(-1), html: '<div><b>أعصاب اليد</b></div><div>العصب المتوسط: عضلات الإبهام (ما عدا المقرِّبة)</div><div>العصب الزندي: معظم عضلات اليد الصغيرة</div>', ink: [] }] }],
       letterhead: { dA: { uni: 'جامعة بغداد', college: 'كلية الطب', dept: 'فرع التشريح', course: 'التشريح', stage: 'المرحلة الثانية', name: 'د. سارة الجبوري', title: 'مدرّسة مادة التشريح' },
         dP: { uni: 'جامعة بغداد', college: 'كلية الطب', dept: 'فرع الفسلجة', course: 'الفسلجة', stage: 'المرحلة الثانية', name: 'د. علي الربيعي', title: 'أستاذ مساعد' } }, users, classes, notes,
       files: [
