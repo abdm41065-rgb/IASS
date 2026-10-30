@@ -9,6 +9,14 @@
     ['classes', 'الصفوف', ['classes'], ['lectures', 'share', 'teachers', 'students']],
     ['settings', 'الإعدادات', ['settings']],
   ];
+  /* شرح بسيط لكل قسم: سطر تحت اسمه في القائمة، وبطاقة تعريف في أعلى صفحاته تُخفى بنقرة */
+  const ABOUT = {
+    home: ['يومك بنظرة', '🏠', 'الرئيسية', 'ملخص يومك: امتحاناتك القادمة، مهامك، ومسارك الحالي.', []],
+    flow: ['ذاكر واكتب واختبر نفسك', '✏️', 'دراسة: مكان المذاكرة', 'هنا تذاكر: تكتب وتعلّق على دروسك، وتبني خطة مذاكرتك، وتختبر نفسك بالبطاقات والفويزات.', [['🧭', 'خطّط', 'رتّب خطوات مذاكرتك في مسار'], ['🖍️', 'اكتب وعلّق', 'لوّن واكتب على ملفاتك ودفاترك'], ['🎯', 'اختبر نفسك', 'بطاقات وفويزات في مكان واحد']]],
+    notes: ['احفظ ملفاتك ورتّبها وأرسلها', '📚', 'مكتبتي: مكان حفظ ملفاتك', 'هنا تحفظ كل ما يخص دراستك: الملاحظات والملفات والمستندات، وترتّبها بمجموعات، وترسلها لأي شخص.', [['💾', 'احفظ', 'ملاحظات، ملفات PDF، مستندات'], ['🗂️', 'رتّب', 'ألوان ووسوم ومجموعات'], ['📤', 'أرسل', 'شارك أي ملف مع زملائك']]],
+    classes: ['أساتذتك وزملاؤك', '🏫', 'الصفوف', 'محادثة كل صف: شرح الأستاذ وتبليغاته ومواعيد الامتحانات ونقاش الزملاء.', []],
+    settings: ['شكل التطبيق وحسابك', '⚙️', 'الإعدادات', '', []],
+  };
   const ICON_FOR = { home: 'home', flow: 'flow', space: 'desk', desk: 'desk', notes: 'files', classes: 'classes', settings: 'settings' };
   SP.applyTheme = () => { const r = document.documentElement; if (SP.state.dark == null) r.removeAttribute('data-theme'); else r.setAttribute('data-theme', SP.state.dark ? 'dark' : 'light'); document.documentElement.style.setProperty('--fs', (SP.state.fontSize || 16) + 'px'); };
   SP.isDark = () => (SP.state.dark == null ? matchMedia('(prefers-color-scheme: dark)').matches : SP.state.dark);
@@ -57,11 +65,15 @@
     const parts = location.hash.replace(/^#\/?/, '').split('/').filter(Boolean), key = SP.views[parts[0]] ? parts[0] : 'home', v = SP.views[key];
     const hub = HUBS.find((x) => x[2].includes(key) || (x[3] || []).includes(key));
     const un = SP.chatUnread ? SP.chatUnread() : 0;
-    navEl.replaceChildren(...HUBS.map(([k, label]) => h('a', { href: '#/' + k, class: hub && hub[0] === k ? 'on' : '', 'aria-current': hub && hub[0] === k ? 'page' : null }, icon(ICON_FOR[k]), label, k === 'classes' && un ? h('span', { class: 'nav-badge', 'aria-label': un + ' رسالة غير مقروءة' }, un) : null)));
+    navEl.replaceChildren(...HUBS.map(([k, label]) => h('a', { href: '#/' + k, class: hub && hub[0] === k ? 'on' : '', 'aria-current': hub && hub[0] === k ? 'page' : null }, icon(ICON_FOR[k]), h('span', { class: 'nav-l' }, h('span', {}, label), h('small', { class: 'nav-d' }, ABOUT[k][0])), k === 'classes' && un ? h('span', { class: 'nav-badge', 'aria-label': un + ' رسالة غير مقروءة' }, un) : null)));
     const sub = hub && hub[2].length > 1 ? h('nav', { class: 'subnav', 'aria-label': 'أقسام ' + hub[1] }, hub[2].map((k) => { const n = COUNT[k] ? COUNT[k]() : null;
       return h('a', { class: 'sn' + (k === key ? ' on' : ''), href: '#/' + k, 'aria-current': k === key ? 'page' : null }, h('span', { class: 'sn-ic' }, icon(SUB_ICON[k] || k)), h('span', { class: 'sn-l' }, SP.views[k].label), n ? h('span', { class: 'sn-n' }, n) : null); })) : null;
     document.title = v.label + ' · منصة الدراسة';
-    try { main.replaceChildren(...[sub, v.render(parts.slice(1))].filter(Boolean)); } catch (e) { console.error(e); main.replaceChildren(SP.empty('حدث خطأ غير متوقع في هذه الصفحة.')); }
+    const ab = hub && ABOUT[hub[0]], seen = (SP.state.aboutSeen = SP.state.aboutSeen || {})[SP.state.me] || [];
+    const intro = ab && ab[4].length && !seen.includes(hub[0]) && !parts[1] ? h('section', { class: 'hub-intro', 'aria-label': ab[2] }, h('div', { class: 'hub-intro-t' }, h('span', { class: 'hub-intro-ic', 'aria-hidden': 'true' }, ab[1]), h('div', {}, h('b', {}, ab[2]), h('p', {}, ab[3])),
+      h('button', { class: 'nt-icon hub-x', 'aria-label': 'إخفاء الشرح', title: 'فهمت، أخفِ الشرح', onclick: (e) => { (SP.state.aboutSeen[SP.state.me] = SP.state.aboutSeen[SP.state.me] || []).push(hub[0]); SP.save(); const s = e.target.closest('.hub-intro'); s.classList.add('bye'); setTimeout(() => s.remove(), 250); } }, '✕')),
+      h('div', { class: 'hub-steps' }, ab[4].map(([ic, t, d]) => h('div', { class: 'hub-step' }, h('span', { 'aria-hidden': 'true' }, ic), h('b', {}, t), h('small', {}, d))))) : null;
+    try { main.replaceChildren(...[sub, intro, v.render(parts.slice(1))].filter(Boolean)); } catch (e) { console.error(e); main.replaceChildren(SP.empty('حدث خطأ غير متوقع في هذه الصفحة.')); }
     document.body.classList.remove('nav-open'); document.body.classList.toggle('in-chat', !!document.querySelector('#main .tg-compose, #main .tg-locked')); document.body.classList.toggle('in-writer', !!document.querySelector('#main .wfoot')); window.scrollTo(0, 0); SP.motion && SP.motion(main); SP.emit('route');
   };
   window.addEventListener('hashchange', SP.route);

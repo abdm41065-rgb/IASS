@@ -920,3 +920,16 @@ body.in-writer #sanad{display:none}
 .tg-file-n{flex:1;min-width:0;display:grid}.tg-file-n b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:.92rem}.tg-file-n small{color:var(--mute);font-size:.75rem}
 .pr-sec{margin-top:6px}.pr-sec h2{margin:18px 0 10px}
 .obj.text.ruled{padding-inline:4px}
+
+/* شرح الأقسام */
+.nav-l{display:grid;line-height:1.25;min-width:0}.nav-d{font-size:.72rem;color:var(--mute);font-weight:400;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#nav a.on .nav-d{color:var(--on-blue);opacity:.8}
+.hub-intro{background:linear-gradient(135deg,var(--blue-tint),var(--card));border:1px solid var(--line);border-radius:18px;padding:16px 18px;margin:0 0 20px;transition:opacity .25s,transform .25s}
+.hub-intro.bye{opacity:0;transform:translateY(-8px)}
+.hub-intro-t{display:flex;gap:12px;align-items:flex-start}.hub-intro-t>div{flex:1}
+.hub-intro-ic{font-size:2rem;line-height:1}
+.hub-intro b{font-size:1.05rem}.hub-intro p{margin:4px 0 0;color:var(--mute);font-size:.93rem}
+.hub-x{opacity:.6;filter:none}
+.hub-steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-top:14px}
+.hub-step{background:var(--card);border-radius:14px;padding:10px 12px;display:grid;gap:2px;box-shadow:0 1px 3px rgba(20,33,61,.06)}
+.hub-step span{font-size:1.4rem}.hub-step small{color:var(--mute);font-size:.8rem}

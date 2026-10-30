@@ -30,7 +30,7 @@ with sync_playwright() as p:
         check(pg.locator("#main h1").count() >= 1 or pg.locator("#main .card").count() > 0 or pg.locator("#main .tg").count() == 1, f"route {r} renders")
     check(len(pg.locator("#nav a").all()) == 5, "sidebar has 5 sections")
     pg.evaluate("location.hash='#/files'"); pg.wait_for_timeout(60)
-    check(pg.locator(".subnav a").count() == 4 and pg.inner_text("#nav a.on").strip() == "مكتبتي", "hub sub-tabs for library")
+    check(pg.locator(".subnav a").count() == 4 and pg.inner_text("#nav a.on").strip().startswith("مكتبتي") and pg.locator(".hub-intro").count() == 1, "hub sub-tabs for library")
 
     # معلم ينشئ صفاً ويضيف فويزاً
     pg.select_option("#who", "t1"); pg.evaluate("location.hash='#/classes'")
